@@ -53,6 +53,6 @@ func NewCmd() *cobra.Command {
 		},
 	}
 
-	c.Flags().IntVarP(&req.count, "count", "c", 0, "Number of Kubernetes Node")
+	c.Flags().IntVarP(&req.count, "count", "c", 0, "Number of expected Kubernetes Node")
 	return c
 }

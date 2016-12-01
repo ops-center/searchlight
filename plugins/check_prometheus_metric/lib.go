@@ -136,11 +136,11 @@ func NewCmd() *cobra.Command {
 
 	c.Flags().StringVarP(&req.host, "prom_host", "H", os.Getenv(prometheusService), "URL of Prometheus host to query")
 	c.Flags().StringVarP(&req.query, "query", "q", "", "Prometheus query that returns a float or int")
-	c.Flags().Int64VarP(&req.warning, "warning", "w", 0, "Warning level value (must be zero or positive)")
-	c.Flags().Int64VarP(&req.critical, "critical", "c", 0, "Critical level value (must be zero or positive)")
 	c.Flags().StringVarP(&req.metric_name, "metric_name", "n", "", "A name for the metric being checked")
 	c.Flags().StringVarP(&req.method, "method", "m", "ge", `Comparison method, one of gt, ge, lt, le, eq, ne
 	(defaults to ge unless otherwise specified)`)
 	c.Flags().BoolVarP(&req.accept_nan, "accept_nan", "O", false, `Accept NaN as an "OK" result`)
+	c.Flags().Int64VarP(&req.warning, "warning", "w", 0, "Warning level value (must be zero or positive)")
+	c.Flags().Int64VarP(&req.critical, "critical", "c", 0, "Critical level value (must be zero or positive)")
 	return c
 }

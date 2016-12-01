@@ -160,7 +160,7 @@ func checkJsonPath(req *request) {
 		}
 	}
 
-	fmt.Fprintln(os.Stdout, util.State[0])
+	fmt.Fprintln(os.Stdout, util.State[0], "Response looks good")
 	os.Exit(0)
 }
 

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"strings"
+
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/spf13/cobra"
@@ -12,10 +14,8 @@ import (
 )
 
 type request struct {
-	namespace  string
-	objectType string
-	objectName string
-	count      int
+	host  string
+	count int
 }
 
 type objectInfo struct {
@@ -29,7 +29,7 @@ type serviceOutput struct {
 	Message string        `json:"message,omitempty"`
 }
 
-func checkPodExists(req *request, checkCount bool) {
+func checkPodExists(req *request, namespace, objectType, objectName string, checkCount bool) {
 	kubeClient, err := config.GetKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
@@ -37,8 +37,8 @@ func checkPodExists(req *request, checkCount bool) {
 	}
 
 	total_pod := 0
-	if req.objectType == config.TypePods {
-		pod, err := kubeClient.Pods(req.namespace).Get(req.objectName)
+	if objectType == config.TypePods {
+		pod, err := kubeClient.Pods(namespace).Get(objectName)
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)
@@ -48,16 +48,16 @@ func checkPodExists(req *request, checkCount bool) {
 		}
 	} else {
 		var labelSelector labels.Selector
-		if req.objectType == "" {
+		if objectType == "" {
 			labelSelector = labels.Everything()
 		} else {
-			if labelSelector, err = kubeClient.GetLabels(req.namespace, req.objectType, req.objectName); err != nil {
+			if labelSelector, err = kubeClient.GetLabels(namespace, objectType, objectName); err != nil {
 				fmt.Fprintln(os.Stdout, util.State[3], err)
 				os.Exit(3)
 			}
 		}
 
-		podList, err := kubeClient.Pods(req.namespace).List(kApi.ListOptions{
+		podList, err := kubeClient.Pods(namespace).List(kApi.ListOptions{
 			LabelSelector: labelSelector,
 		})
 		if err != nil {
@@ -95,16 +95,35 @@ func NewCmd() *cobra.Command {
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			if req.objectType != "" {
-				util.EnsureFlagsSet(cmd, "namespace", "object_name")
+			util.EnsureFlagsSet(cmd, "host")
+
+			parts := strings.Split(req.host, "@")
+			if len(parts) != 2 {
+				fmt.Fprintln(os.Stdout, util.State[3], "Invalid icinga host.name")
+				os.Exit(3)
 			}
+
+			name := parts[0]
+			namespace := parts[1]
+
+			parts = strings.Split(name, ":")
+			objectType := ""
+			objectName := ""
+			if len(parts) == 1 {
+				if parts[0] != "pod_exists" {
+					objectType = config.TypePods
+					objectName = parts[0]
+				}
+			} else if len(parts) == 2 {
+				objectType = parts[0]
+				objectName = parts[1]
+			}
+
 			checkCount := cmd.Flag("count").Changed
-			checkPodExists(&req, checkCount)
+			checkPodExists(&req, namespace, objectType, objectName, checkCount)
 		},
 	}
-	c.Flags().StringVarP(&req.namespace, "namespace", "n", "", "Kubernetes namespace")
-	c.Flags().StringVarP(&req.objectType, "object_type", "t", "", "Kubernetes Object Type")
-	c.Flags().StringVarP(&req.objectName, "object_name", "N", "", "Kubernetes Object Name")
+	c.Flags().StringVarP(&req.host, "host", "H", "", "Icinga host name")
 	c.Flags().IntVarP(&req.count, "count", "c", 0, "Number of Kubernetes Node")
 	return c
 }
