@@ -106,17 +106,20 @@ func NewCmd() *cobra.Command {
 			name := parts[0]
 			namespace := parts[1]
 
-			parts = strings.Split(name, ":")
 			objectType := ""
 			objectName := ""
-			if len(parts) == 1 {
-				if parts[0] != "pod_exists" {
+			if name != "pod_status" {
+				parts = strings.Split(name, "|")
+				if len(parts) == 1 {
 					objectType = config.TypePods
 					objectName = parts[0]
+				} else if len(parts) == 2 {
+					objectType = parts[0]
+					objectName = parts[1]
+				} else {
+					fmt.Fprintln(os.Stdout, util.State[3], "Invalid icinga host.name")
+					os.Exit(3)
 				}
-			} else if len(parts) == 2 {
-				objectType = parts[0]
-				objectName = parts[1]
 			}
 
 			checkCount := cmd.Flag("count").Changed
