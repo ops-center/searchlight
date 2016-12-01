@@ -312,7 +312,6 @@ func NewCmd() *cobra.Command {
 				util.EnsureFlagsSet(cmd, "name")
 				checkPodVolumeStat(&req)
 			}
-
 		},
 	}
 

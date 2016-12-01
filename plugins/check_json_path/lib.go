@@ -126,7 +126,7 @@ func checkResult(evalDataString, checkQuery string) bool {
 	return result.(bool)
 }
 
-func checkJsonPath(cmd *cobra.Command, req *request) {
+func checkJsonPath(req *request) {
 	jsonData := getData(req.secret, req.url)
 	jqData := &JQ{
 		J: jsonData,
@@ -175,7 +175,7 @@ func NewCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			util.EnsureFlagsSet(cmd, "url", "query")
 			util.EnsureAlterableFlagsSet(cmd, "warning", "critical")
-			checkJsonPath(cmd, &req)
+			checkJsonPath(&req)
 		},
 	}
 

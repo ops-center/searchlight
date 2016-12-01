@@ -22,7 +22,7 @@ type serviceOutput struct {
 	Message string        `json:"message,omitempty"`
 }
 
-func checkComponentStatus(cmd *cobra.Command) {
+func checkComponentStatus() {
 	kubeClient, err := config.GetKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
@@ -73,7 +73,7 @@ func NewCmd() *cobra.Command {
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			checkComponentStatus(cmd)
+			checkComponentStatus()
 		},
 	}
 	return c

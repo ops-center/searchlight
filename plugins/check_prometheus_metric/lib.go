@@ -58,7 +58,7 @@ func checkResult(method string, valueToCheck, result int64) bool {
 	return false
 }
 
-func checkPrometheusMetric(cmd *cobra.Command, req *request) {
+func checkPrometheusMetric(req *request) {
 	config := prometheus.Config{
 		Address: req.host,
 	}
@@ -129,9 +129,8 @@ func NewCmd() *cobra.Command {
 				fmt.Fprintln(os.Stdout, util.State[3], errors.New("No prometheus host found"))
 				os.Exit(3)
 			}
-
 			util.EnsureFlagsSet(cmd, "query", "warning", "critical")
-			checkPrometheusMetric(cmd, &req)
+			checkPrometheusMetric(&req)
 		},
 	}
 

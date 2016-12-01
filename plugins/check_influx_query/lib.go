@@ -198,7 +198,7 @@ func checkResult(checkQuery string, valueMap map[string]interface{}) bool {
 	return res.(bool)
 }
 
-func checkInfluxQuery(cmd *cobra.Command, req *request) {
+func checkInfluxQuery(req *request) {
 	authData := getInfluxDBSecretData(req.secret)
 	if req.host != "" {
 		authData.host = req.host
@@ -248,11 +248,10 @@ func NewCmd() *cobra.Command {
 				fmt.Fprintln(os.Stdout, util.State[3], errors.New("InfluxDB secret not provided"))
 				os.Exit(3)
 			}
-
 			util.EnsureAlterableFlagsSet(cmd, "A", "B", "C", "D", "E")
 			util.EnsureFlagsSet(cmd, "R")
 			util.EnsureAlterableFlagsSet(cmd, "warning", "critical")
-			checkInfluxQuery(cmd, &req)
+			checkInfluxQuery(&req)
 		},
 	}
 

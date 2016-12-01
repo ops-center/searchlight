@@ -30,7 +30,7 @@ type serviceOutput struct {
 	Message string        `json:"message,omitempty"`
 }
 
-func checkPodStatus(cmd *cobra.Command, req *request) {
+func checkPodStatus(req *request) {
 	kubeClient, err := config.GetKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
@@ -103,8 +103,7 @@ func NewCmd() *cobra.Command {
 			if req.objectType != "" {
 				util.EnsureFlagsSet(cmd, "namespace", "object_name")
 			}
-			checkPodStatus(cmd, &req)
-
+			checkPodStatus(&req)
 		},
 	}
 	c.Flags().StringVarP(&req.namespace, "namespace", "n", "", "Kubernetes namespace")

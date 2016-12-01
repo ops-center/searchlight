@@ -15,7 +15,7 @@ type request struct {
 	count int
 }
 
-func checkNodeStatus(cmd *cobra.Command, req *request) {
+func checkNodeStatus(req *request) {
 	kubeClient, err := config.GetKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
@@ -49,7 +49,7 @@ func NewCmd() *cobra.Command {
 
 		Run: func(cmd *cobra.Command, args []string) {
 			util.EnsureFlagsSet(cmd, "count")
-			checkNodeStatus(cmd, &req)
+			checkNodeStatus(&req)
 		},
 	}
 
