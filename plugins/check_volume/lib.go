@@ -124,10 +124,11 @@ const (
 )
 
 type request struct {
-	host     string
-	name     string
-	warning  float64
-	critical float64
+	host      string
+	name      string
+	warning   float64
+	critical  float64
+	node_stat bool
 }
 
 type usageStat struct {
@@ -181,32 +182,82 @@ func checkResult(field string, warning, critical, result float64) {
 	}
 }
 
-func checkVolume(cmd *cobra.Command, req *request) {
+func checkDiskStat(req *request, nodeIP, path string) {
+	usage, err := getUsage(nodeIP, path)
+	if err != nil {
+		fmt.Fprintln(os.Stdout, util.State[3], err)
+		os.Exit(3)
+	}
+
+	warning := req.warning
+	critical := req.critical
+	checkResult("Disk", warning, critical, usage.UsedPercent)
+	checkResult("Inodes", warning, critical, usage.InodesUsedPercent)
+
+	fmt.Fprintln(os.Stdout, util.State[0], "(Disk & Inodes)")
+	os.Exit(0)
+}
+
+func checkNodeDiskStat(req *request) {
+	host := req.host
+	parts := strings.Split(host, "@")
+	if len(parts) != 2 {
+		fmt.Fprintln(os.Stdout, util.State[3], "Invalid icinga host.name")
+		os.Exit(3)
+	}
+
+	kubeClient, err := config.GetKubeClient()
+	if err != nil {
+		fmt.Fprintln(os.Stdout, util.State[3], err)
+		os.Exit(3)
+	}
+
+	node_name := parts[0]
+	node, err := kubeClient.Nodes().Get(node_name)
+	if err != nil {
+		fmt.Fprintln(os.Stdout, util.State[3], err)
+		os.Exit(3)
+	}
+
+	if node == nil {
+		fmt.Fprintln(os.Stdout, util.State[3], "Node not found")
+		os.Exit(3)
+	}
+
+	hostIP := ""
+	for _, address := range node.Status.Addresses {
+		if address.Type == kApi.NodeInternalIP {
+			hostIP = address.Address
+		}
+	}
+
+	if hostIP == "" {
+		fmt.Fprintln(os.Stdout, util.State[3], "Node InternalIP not found")
+		os.Exit(3)
+	}
+	checkDiskStat(req, hostIP, "/")
+}
+func checkPodVolumeStat(req *request) {
 	host := req.host
 	name := req.name
 	parts := strings.Split(host, "@")
 	if len(parts) != 2 {
 		fmt.Fprintln(os.Stdout, util.State[3], "Invalid icinga host.name")
 		os.Exit(3)
-		return
+	}
+
+	kubeClient, err := config.GetKubeClient()
+	if err != nil {
+		fmt.Fprintln(os.Stdout, util.State[3], err)
+		os.Exit(3)
 	}
 
 	pod_name := parts[0]
 	namespace := parts[1]
-
-	client, err := config.GetKubeClient()
+	pod, err := kubeClient.Pods(namespace).Get(pod_name)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
-		return
-	}
-
-	pod, err := client.Pods(namespace).Get(pod_name)
-
-	if err != nil {
-		fmt.Fprintln(os.Stdout, util.State[3], err)
-		os.Exit(3)
-		return
 	}
 
 	var volumeSourcePluginName = ""
@@ -214,17 +265,16 @@ func checkVolume(cmd *cobra.Command, req *request) {
 	for _, volume := range pod.Spec.Volumes {
 		if volume.Name == name {
 			if volume.PersistentVolumeClaim != nil {
-				claim, err := client.PersistentVolumeClaims(namespace).Get(volume.PersistentVolumeClaim.ClaimName)
+				claim, err := kubeClient.PersistentVolumeClaims(namespace).Get(volume.PersistentVolumeClaim.ClaimName)
 				if err != nil {
 					fmt.Fprintln(os.Stdout, util.State[3], err)
 					os.Exit(3)
-					return
+
 				}
-				volume, err := client.PersistentVolumes().Get(claim.Spec.VolumeName)
+				volume, err := kubeClient.PersistentVolumes().Get(claim.Spec.VolumeName)
 				if err != nil {
 					fmt.Fprintln(os.Stdout, util.State[3], err)
 					os.Exit(3)
-					return
 				}
 				volumeSourcePluginName = getPersistentVolumePluginName(&volume.Spec.PersistentVolumeSource)
 				volumeSourceName = volume.Name
@@ -240,24 +290,10 @@ func checkVolume(cmd *cobra.Command, req *request) {
 	if volumeSourcePluginName == "" {
 		fmt.Fprintln(os.Stdout, util.State[3], errors.New("Invalid volume source"))
 		os.Exit(3)
-		return
 	}
 
 	path := fmt.Sprintf("/var/lib/kubelet/pods/%v/volumes/%v/%v", pod.UID, volumeSourcePluginName, volumeSourceName)
-	usage, err := getUsage(pod.Status.HostIP, path)
-	if err != nil {
-		fmt.Fprintln(os.Stdout, util.State[3], err)
-		os.Exit(3)
-		return
-	}
-
-	warning := req.warning
-	critical := req.critical
-	checkResult("Disk", warning, critical, usage.UsedPercent)
-	checkResult("Inodes", warning, critical, usage.InodesUsedPercent)
-
-	fmt.Fprintln(os.Stdout, util.State[0], "(Disk & Inodes)")
-	os.Exit(0)
+	checkDiskStat(req, pod.Status.HostIP, path)
 }
 
 func NewCmd() *cobra.Command {
@@ -269,11 +305,18 @@ func NewCmd() *cobra.Command {
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			util.EnsureFlagsSet(cmd, "host", "volume_name")
-			checkVolume(cmd, &req)
+			util.EnsureFlagsSet(cmd, "host")
+			if req.node_stat {
+				checkNodeDiskStat(&req)
+			} else {
+				util.EnsureFlagsSet(cmd, "name")
+				checkPodVolumeStat(&req)
+			}
+
 		},
 	}
 
+	c.Flags().BoolVar(&req.node_stat, "node_stat", false, "Checking Node disk size")
 	c.Flags().StringVarP(&req.host, "host", "H", "", "Icinga host name")
 	c.Flags().StringVarP(&req.name, "name", "N", "", "Volume name")
 	c.Flags().Float64VarP(&req.warning, "warning", "w", 75.0, "Warning level value (usage percentage)")
