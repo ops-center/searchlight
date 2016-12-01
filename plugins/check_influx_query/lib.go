@@ -18,8 +18,6 @@ import (
 )
 
 const (
-	influxDBService string = "INFLUXDB_K8S_SERVICE"
-	influxDBSecret  string = "INFLUXDB_K8S_SECRET"
 	admin           string = ".admin"
 
 	influxDBHost     string = "INFLUX_HOST"
@@ -204,7 +202,7 @@ func checkInfluxQuery(req *request) {
 		authData.host = req.host
 	}
 	if authData.host == "" {
-		fmt.Fprintln(os.Stdout, util.State[3], errors.New("No InfluxDB hHost found"))
+		fmt.Fprintln(os.Stdout, util.State[3], errors.New("No InfluxDB host found"))
 		os.Exit(3)
 	}
 	client := getInfluxDBClient(authData)
@@ -244,19 +242,15 @@ func NewCmd() *cobra.Command {
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			if req.secret == "" {
-				fmt.Fprintln(os.Stdout, util.State[3], errors.New("InfluxDB secret not provided"))
-				os.Exit(3)
-			}
+			util.EnsureFlagsSet(cmd, "secret", "R")
 			util.EnsureAlterableFlagsSet(cmd, "A", "B", "C", "D", "E")
-			util.EnsureFlagsSet(cmd, "R")
 			util.EnsureAlterableFlagsSet(cmd, "warning", "critical")
 			checkInfluxQuery(&req)
 		},
 	}
 
-	c.Flags().StringVarP(&req.host, "influx_host", "H", os.Getenv(influxDBService), "URL of InfluxDB host to query")
-	c.Flags().StringVarP(&req.secret, "secret", "s", os.Getenv(influxDBSecret), `Kubernetes secret name`)
+	c.Flags().StringVarP(&req.host, "influx_host", "H", "", "URL of InfluxDB host to query")
+	c.Flags().StringVarP(&req.secret, "secret", "s", "", `Kubernetes secret name`)
 	c.Flags().StringVar(&req.a, "A", "", "InfluxDB query A")
 	c.Flags().StringVar(&req.b, "B", "", "InfluxDB query B")
 	c.Flags().StringVar(&req.c, "C", "", "InfluxDB query C")
