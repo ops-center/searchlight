@@ -1,3 +1,14 @@
-*.idea
+**/bin
+**/build
 **/dist
+**/public
+*.DS_Store
+*.idea
+*.iml
+node_modules
+.vscode
 **/*.pyc
+kluster.json
+!hack/populate.sh
+**/bindata.go
+**/tuf.log
