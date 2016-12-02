@@ -331,7 +331,7 @@ def _upload_to_cloud(folder, f):
         return
 
     bucket = BUCKET_MATRIX.get(ENV, BUCKET_MATRIX['dev'])
-    dst = "{bucket}/binaries/{name}/{version}/{file}{ext}".format(
+    dst = "{bucket}/binaries/searchlight/{name}/{version}/{file}{ext}".format(
         bucket=bucket,
         name=name,
         version=BUILD_METADATA['version'],
@@ -360,7 +360,7 @@ def update_registry():
     for name in os.listdir(dist):
         if name not in BIN_MATRIX.keys():
             return
-        call("gsutil cp {2} {0}/binaries/{1}/latest.txt".format(bucket, name, lf))
+        call("gsutil cp {2} {0}/binaries/searchlight/{1}/latest.txt".format(bucket, name, lf))
         if BIN_MATRIX[name].get('release', False):
             call('gsutil acl ch -u AllUsers:R -r {0}/binaries/{1}/latest.txt'.format(bucket, name))
 
