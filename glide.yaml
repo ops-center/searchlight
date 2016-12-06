@@ -1,0 +1,40 @@
+package: github.com/appscode/searchlight
+import:
+- package: appscode
+  repo: git@diffusion.appscode.com:appscode/43/appscode.git
+  vcs: git
+  subpackages:
+  - pkg/util/fileutil
+  - pkg/util/versionutil
+- package: github.com/Knetic/govaluate
+  version: 2.2.0
+- package: github.com/appscode/api
+  subpackages:
+  - kubernetes/v1beta1
+- package: github.com/appscode/client
+- package: github.com/appscode/go-httpclient
+- package: github.com/appscode/log
+- package: github.com/influxdata/influxdb
+  version: v0.11.0
+  subpackages:
+  - client
+- package: github.com/prometheus/client_golang
+  version: v0.8.0
+  subpackages:
+  - api/prometheus
+- package: github.com/prometheus/common
+  subpackages:
+  - model
+- package: github.com/spf13/cobra
+- package: github.com/vaughan0/go-ini
+- package: k8s.io/kubernetes
+  version: 1.4.6-ac
+  repo: git@diffusion.appscode.com:appscode/50/kubernetes.git
+  vcs: git
+  subpackages:
+  - pkg/api
+  - pkg/client/restclient
+  - pkg/client/unversioned
+  - pkg/labels
+  - pkg/selection
+  - pkg/util/sets

@@ -151,6 +151,24 @@ BIN_MATRIX = {
             'linux': ['amd64']
         }
     },
+    'notifier': {
+        'type': 'go',
+        'go_version': True,
+        'distro': {
+            'linux': [
+                'amd64'
+            ]
+        }
+    },
+    'hello_icinga': {
+        'type': 'go',
+        'go_version': True,
+        'distro': {
+            'linux': [
+                'amd64'
+            ]
+        }
+    },
 }
 BUCKET_MATRIX = {
     'prod': 'gs://appscode-cdn',
@@ -229,9 +247,11 @@ def vet():
     call('go vet ./pkg/... ./cmd/... ./plugins/...')
 
 
+def gen_extpoints():
+    die(call('go generate cmd/notifier/main.go'))
+
 def gen():
-    # gen_assets()
-    # gen_extpoints()
+    gen_extpoints()
     return
 
 

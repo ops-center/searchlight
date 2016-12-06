@@ -134,7 +134,7 @@ func NewCmd() *cobra.Command {
 		},
 	}
 
-	c.Flags().StringVarP(&req.host, "prom_host", "H", os.Getenv(prometheusService), "URL of Prometheus host to query")
+	c.Flags().StringVarP(&req.host, "prom_host", "H", "", "URL of Prometheus host to query")
 	c.Flags().StringVarP(&req.query, "query", "q", "", "Prometheus query that returns a float or int")
 	c.Flags().StringVarP(&req.metric_name, "metric_name", "n", "", "A name for the metric being checked")
 	c.Flags().StringVarP(&req.method, "method", "m", "ge", `Comparison method, one of gt, ge, lt, le, eq, ne

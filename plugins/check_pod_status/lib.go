@@ -53,7 +53,7 @@ func checkPodStatus(namespace, objectType, objectName string) {
 		if objectType == "" {
 			labelSelector = labels.Everything()
 		} else {
-			if labelSelector, err = kubeClient.GetLabels(namespace, objectType, objectName); err != nil {
+			if labelSelector, err = util.GetLabels(kubeClient, namespace, objectType, objectName); err != nil {
 				fmt.Fprintln(os.Stdout, util.State[3], err)
 				os.Exit(3)
 			}

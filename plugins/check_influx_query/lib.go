@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	admin           string = ".admin"
+	admin string = ".admin"
 
 	influxDBHost     string = "INFLUX_HOST"
 	influxDBDatabase string = "INFLUX_DB"
