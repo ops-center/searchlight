@@ -15,7 +15,7 @@ import (
 
 func NewCmd() *cobra.Command {
 	c := &cobra.Command{
-		Use:     "appios",
+		Use:     "hyperalert",
 		Short:   "AppsCode Icinga2 plugin",
 		Example: "",
 		Run: func(cmd *cobra.Command, args []string) {
