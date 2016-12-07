@@ -1,27 +1,28 @@
 package check_json_path
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
-	"strings"
-
-	"bytes"
 	"os/exec"
 	"reflect"
+	"strings"
 
 	"github.com/appscode/go-httpclient"
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/spf13/cobra"
+	"k8s.io/kubernetes/pkg/client/restclient"
 )
 
 type request struct {
-	url      string
-	query    string
-	secret   string
-	warning  string
-	critical string
+	url             string
+	query           string
+	secret          string
+	inClusterConfig bool
+	warning         string
+	critical        string
 }
 
 type AuthInfo struct {
@@ -41,16 +42,16 @@ const (
 	auth = "auth"
 )
 
-func getData(secretName, urlPath string) string {
-	httpClient := httpclient.Default().WithBaseURL(urlPath)
-	if secretName != "" {
+func getData(req *request) string {
+	httpClient := httpclient.Default().WithBaseURL(req.url)
+	if req.secret != "" {
 		kubeClient, err := config.GetKubeClient()
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)
 		}
 
-		parts := strings.Split(secretName, ".")
+		parts := strings.Split(req.secret, ".")
 		name := parts[0]
 		namespace := "default"
 		if len(parts) > 1 {
@@ -75,6 +76,16 @@ func getData(secretName, urlPath string) string {
 		if secretData.CertificateAuthorityData != nil {
 			httpClient.WithTLSConfig(secretData.ClientCertificateData, secretData.CertificateAuthorityData)
 		}
+	}
+	if req.inClusterConfig {
+		config, err := restclient.InClusterConfig()
+		if err != nil {
+			fmt.Fprintln(os.Stdout, util.State[3], err)
+			os.Exit(3)
+		}
+
+		httpClient.WithBearerToken(config.BearerToken)
+		httpClient.WithInsecureSkipVerify()
 	}
 
 	var respJson interface{}
@@ -127,7 +138,7 @@ func checkResult(evalDataString, checkQuery string) bool {
 }
 
 func checkJsonPath(req *request) {
-	jsonData := getData(req.secret, req.url)
+	jsonData := getData(req)
 	jqData := &JQ{
 		J: jsonData,
 		Q: req.query,
@@ -182,6 +193,7 @@ func NewCmd() *cobra.Command {
 	c.Flags().StringVarP(&req.url, "url", "u", "", "URL to get data")
 	c.Flags().StringVarP(&req.query, "query", "q", "", `JQ query`)
 	c.Flags().StringVarP(&req.secret, "secret", "s", "", `Kubernetes secret name`)
+	c.Flags().BoolVar(&req.inClusterConfig, "in_cluster_config", false, `Use Kubernetes InCluserConfig`)
 	c.Flags().StringVarP(&req.warning, "warning", "w", "", `Warning JQ query which returns [true/false]`)
 	c.Flags().StringVarP(&req.critical, "critical", "c", "", `Critical JQ query which returns [true/false]`)
 	return c

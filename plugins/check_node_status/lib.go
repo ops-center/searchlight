@@ -3,6 +3,7 @@ package check_node_status
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
@@ -47,18 +48,25 @@ func checkNodeStatus(req *request) {
 
 func NewCmd() *cobra.Command {
 	var req request
-
+	var host string
 	c := &cobra.Command{
 		Use:     "node_status",
 		Short:   "Check Kubernetes Node",
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			util.EnsureFlagsSet(cmd, "name")
+			util.EnsureFlagsSet(cmd, "host")
+			parts := strings.Split(host, "@")
+			if len(parts) != 2 {
+				fmt.Fprintln(os.Stdout, util.State[3], "Invalid icinga host.name")
+				os.Exit(3)
+			}
+
+			req.name = parts[0]
 			checkNodeStatus(&req)
 		},
 	}
 
-	c.Flags().StringVarP(&req.name, "name", "n", "", "Kubernetes node name")
+	c.Flags().StringVarP(&host, "host", "H", "", "Icinga host name")
 	return c
 }
