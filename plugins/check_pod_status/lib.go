@@ -87,8 +87,8 @@ func checkPodStatus(namespace, objectType, objectName string) {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)
 		}
-		fmt.Fprintln(os.Stdout, util.State[0], string(outputByte))
-		os.Exit(0)
+		fmt.Fprintln(os.Stdout, util.State[2], string(outputByte))
+		os.Exit(2)
 	}
 }
 
