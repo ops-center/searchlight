@@ -13,7 +13,7 @@ import (
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/spf13/cobra"
-	"k8s.io/kubernetes/pkg/client/restclient"
+	rest "k8s.io/kubernetes/pkg/client/restclient"
 )
 
 type request struct {
@@ -45,7 +45,7 @@ const (
 func getData(req *request) string {
 	httpClient := httpclient.Default().WithBaseURL(req.url)
 	if req.secret != "" {
-		kubeClient, err := config.GetKubeClient()
+		kubeClient, err := config.NewKubeClient()
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)
@@ -58,7 +58,7 @@ func getData(req *request) string {
 			namespace = parts[1]
 		}
 
-		secret, err := kubeClient.Secrets(namespace).Get(name)
+		secret, err := kubeClient.Client.Core().Secrets(namespace).Get(name)
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)
@@ -78,7 +78,7 @@ func getData(req *request) string {
 		}
 	}
 	if req.inClusterConfig {
-		config, err := restclient.InClusterConfig()
+		config, err := rest.InClusterConfig()
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)

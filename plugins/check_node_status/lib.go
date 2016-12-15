@@ -8,7 +8,7 @@ import (
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/spf13/cobra"
-	kApi "k8s.io/kubernetes/pkg/api"
+	kapi "k8s.io/kubernetes/pkg/api"
 )
 
 type request struct {
@@ -16,13 +16,13 @@ type request struct {
 }
 
 func checkNodeStatus(req *request) {
-	kubeClient, err := config.GetKubeClient()
+	kubeClient, err := config.NewKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
 	}
 
-	node, err := kubeClient.Nodes().Get(req.name)
+	node, err := kubeClient.Client.Core().Nodes().Get(req.name)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
@@ -34,11 +34,9 @@ func checkNodeStatus(req *request) {
 	}
 
 	for _, condition := range node.Status.Conditions {
-		if condition.Type == kApi.NodeReady {
-			if condition.Status == kApi.ConditionFalse {
-				fmt.Fprintln(os.Stdout, util.State[2], "Node is not Ready")
-				os.Exit(2)
-			}
+		if condition.Type == kapi.NodeReady && condition.Status == kapi.ConditionFalse {
+			fmt.Fprintln(os.Stdout, util.State[2], "Node is not Ready")
+			os.Exit(2)
 		}
 	}
 

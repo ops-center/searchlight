@@ -16,6 +16,7 @@ import "github.com/grpc-ecosystem/grpc-gateway/runtime"
 func ExportSnapshotsCorsPatterns() []runtime.Pattern {
 	return []runtime.Pattern{
 		pattern_Snapshots_List_0,
+		pattern_Snapshots_Describe_0,
 		pattern_Snapshots_BackupSchedule_0,
 		pattern_Snapshots_BackupUnschedule_0,
 		pattern_Snapshots_Restore_0,

@@ -8,7 +8,7 @@ import (
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/spf13/cobra"
-	kApi "k8s.io/kubernetes/pkg/api"
+	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
 )
 
@@ -23,15 +23,18 @@ type serviceOutput struct {
 }
 
 func checkComponentStatus() {
-	kubeClient, err := config.GetKubeClient()
+	kubeClient, err := config.NewKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
 	}
 
-	components, err := kubeClient.ComponentStatuses().List(kApi.ListOptions{
-		LabelSelector: labels.Everything(),
-	})
+	components, err := kubeClient.Client.Core().
+		ComponentStatuses().List(
+		kapi.ListOptions{
+			LabelSelector: labels.Everything(),
+		},
+	)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
@@ -40,10 +43,13 @@ func checkComponentStatus() {
 	objectInfoList := make([]*objectInfo, 0)
 	for _, component := range components.Items {
 		for _, condition := range component.Conditions {
-			if condition.Type == kApi.ComponentHealthy {
-				if condition.Status == kApi.ConditionFalse {
-					objectInfoList = append(objectInfoList, &objectInfo{Name: component.Name, Status: "Unhealthy"})
-				}
+			if condition.Type == kapi.ComponentHealthy && condition.Status == kapi.ConditionFalse {
+				objectInfoList = append(objectInfoList,
+					&objectInfo{
+						Name:   component.Name,
+						Status: "Unhealthy",
+					},
+				)
 			}
 		}
 	}

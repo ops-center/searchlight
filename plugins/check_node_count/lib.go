@@ -7,7 +7,7 @@ import (
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/spf13/cobra"
-	kApi "k8s.io/kubernetes/pkg/api"
+	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
 )
 
@@ -16,15 +16,18 @@ type request struct {
 }
 
 func checkNodeStatus(req *request) {
-	kubeClient, err := config.GetKubeClient()
+	kubeClient, err := config.NewKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
 	}
 
-	nodeList, err := kubeClient.Nodes().List(kApi.ListOptions{
-		LabelSelector: labels.Everything(),
-	})
+	nodeList, err := kubeClient.Client.Core().
+		Nodes().List(
+		kapi.ListOptions{
+			LabelSelector: labels.Everything(),
+		},
+	)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)

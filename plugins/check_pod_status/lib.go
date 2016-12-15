@@ -1,17 +1,15 @@
 package check_pod_status
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
-
-	"encoding/json"
-
 	"strings"
 
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/spf13/cobra"
-	kApi "k8s.io/kubernetes/pkg/api"
+	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
 )
 
@@ -31,7 +29,7 @@ type serviceOutput struct {
 }
 
 func checkPodStatus(namespace, objectType, objectName string) {
-	kubeClient, err := config.GetKubeClient()
+	kubeClient, err := config.NewKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
@@ -39,36 +37,37 @@ func checkPodStatus(namespace, objectType, objectName string) {
 
 	objectInfoList := make([]*objectInfo, 0)
 	if objectType == config.TypePods {
-		pod, err := kubeClient.Pods(namespace).Get(objectName)
+		pod, err := kubeClient.Client.Core().Pods(namespace).Get(objectName)
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)
 		}
 
-		if !(pod.Status.Phase == kApi.PodSucceeded || pod.Status.Phase == kApi.PodRunning) {
+		if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {
 			objectInfoList = append(objectInfoList, &objectInfo{Name: pod.Name, Status: string(pod.Status.Phase), Namespace: pod.Namespace})
 		}
 	} else {
-		var labelSelector labels.Selector
-		if objectType == "" {
-			labelSelector = labels.Everything()
-		} else {
+		labelSelector := labels.Everything()
+		if objectType != "" {
 			if labelSelector, err = util.GetLabels(kubeClient, namespace, objectType, objectName); err != nil {
 				fmt.Fprintln(os.Stdout, util.State[3], err)
 				os.Exit(3)
 			}
 		}
 
-		podList, err := kubeClient.Pods(namespace).List(kApi.ListOptions{
-			LabelSelector: labelSelector,
-		})
+		podList, err := kubeClient.Client.Core().
+			Pods(namespace).List(
+			kapi.ListOptions{
+				LabelSelector: labelSelector,
+			},
+		)
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)
 		}
 
 		for _, pod := range podList.Items {
-			if !(pod.Status.Phase == kApi.PodSucceeded || pod.Status.Phase == kApi.PodRunning) {
+			if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {
 				objectInfoList = append(objectInfoList, &objectInfo{Name: pod.Name, Status: string(pod.Status.Phase), Namespace: pod.Namespace})
 			}
 		}

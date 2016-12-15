@@ -9,10 +9,10 @@ import (
 )
 
 func GetAlertInfo(namespace, alertName string) (*kube.Alert, error) {
-	kubeClient, err := config.GetKubeClient()
+	kubeClient, err := config.NewKubeClient()
 	if err != nil {
 		log.Errorln(err)
 		os.Exit(1)
 	}
-	return kubeClient.Alert(namespace).Get(alertName)
+	return kubeClient.AppscodeExtensionClient.Alert(namespace).Get(alertName)
 }

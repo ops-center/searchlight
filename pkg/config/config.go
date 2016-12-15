@@ -1,22 +1,26 @@
 package config
 
 import (
-	ext_client "appscode/pkg/clients/kube/client"
+	extclient "appscode/pkg/clients/kube/client"
+	_ "appscode/pkg/clients/kube/install"
 
-	kube_client "k8s.io/kubernetes/pkg/client/unversioned"
+	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	rest "k8s.io/kubernetes/pkg/client/restclient"
 )
 
 const (
 	TypeServices               = "services"
 	TypeReplicationcontrollers = "replicationcontrollers"
 	TypeDaemonsets             = "daemonsets"
-	TypePetsets                = "petsets"
+	TypeStatefulSet            = "statefulsets"
 	TypeReplicasets            = "replicasets"
 	TypeDeployments            = "deployments"
 	TypePods                   = "pods"
 )
 
 type KubeClient struct {
-	*kube_client.Client
-	*ext_client.AppsCodeExtensionsClient
+	Client                  clientset.Interface
+	AppscodeExtensionClient extclient.AppsCodeExtensionInterface
+
+	config *rest.Config
 }

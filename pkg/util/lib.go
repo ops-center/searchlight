@@ -5,62 +5,49 @@ import (
 
 	"github.com/appscode/searchlight/pkg/config"
 	"k8s.io/kubernetes/pkg/labels"
-	"k8s.io/kubernetes/pkg/selection"
-	"k8s.io/kubernetes/pkg/util/sets"
 )
 
 func GetLabels(client *config.KubeClient, namespace, objectType, objectName string) (labels.Selector, error) {
-	label := labels.NewSelector()
-	labelsMap := make(map[string]string, 0)
-	if objectType == config.TypeServices {
-		service, err := client.Services(namespace).Get(objectName)
+	var labelMap map[string]string
+	switch objectType {
+	case config.TypeServices:
+		service, err := client.Client.Core().Services(namespace).Get(objectName)
 		if err != nil {
 			return nil, err
 		}
-		labelsMap = service.Spec.Selector
-
-	} else if objectType == config.TypeReplicationcontrollers {
-		rc, err := client.ReplicationControllers(namespace).Get(objectName)
+		labelMap = service.Spec.Selector
+	case config.TypeReplicationcontrollers:
+		rc, err := client.Client.Core().ReplicationControllers(namespace).Get(objectName)
 		if err != nil {
 			return nil, err
 		}
-		labelsMap = rc.Spec.Selector
-	} else if objectType == config.TypeDaemonsets {
-		daemonSet, err := client.DaemonSets(namespace).Get(objectName)
+		labelMap = rc.Spec.Selector
+	case config.TypeDaemonsets:
+		daemonSet, err := client.Client.Extensions().DaemonSets(namespace).Get(objectName)
 		if err != nil {
 			return nil, err
 		}
-		labelsMap = daemonSet.Spec.Selector.MatchLabels
-	} else if objectType == config.TypeReplicasets {
-		replicaSet, err := client.ReplicaSets(namespace).Get(objectName)
+		labelMap = daemonSet.Spec.Selector.MatchLabels
+	case config.TypeReplicasets:
+		replicaSet, err := client.Client.Extensions().ReplicaSets(namespace).Get(objectName)
 		if err != nil {
 			return nil, err
 		}
-		labelsMap = replicaSet.Spec.Selector.MatchLabels
-	} else if objectType == config.TypePetsets {
-		petSet, err := client.PetSets(namespace).Get(objectName)
+		labelMap = replicaSet.Spec.Selector.MatchLabels
+	case config.TypeStatefulSet:
+		stateFulSet, err := client.Client.Apps().StatefulSets(namespace).Get(objectName)
 		if err != nil {
 			return nil, err
 		}
-		labelsMap = petSet.Spec.Selector.MatchLabels
-	} else if objectType == config.TypeDeployments {
-		deployment, err := client.Deployments(namespace).Get(objectName)
+		labelMap = stateFulSet.Spec.Selector.MatchLabels
+	case config.TypeDeployments:
+		deployment, err := client.Client.Extensions().Deployments(namespace).Get(objectName)
 		if err != nil {
 			return nil, err
 		}
-		labelsMap = deployment.Spec.Selector.MatchLabels
-	} else {
-		return label, errors.New("Invalid kubernetes object type")
+		labelMap = deployment.Spec.Selector.MatchLabels
+	default:
+		return nil, errors.New("Invalid kubernetes object type")
 	}
-
-	for key, value := range labelsMap {
-		s := sets.NewString(value)
-		ls, err := labels.NewRequirement(key, selection.Equals, s)
-		if err != nil {
-			return nil, err
-		}
-		label = label.Add(*ls)
-	}
-
-	return label, nil
+	return labels.SelectorFromSet(labelMap), nil
 }

@@ -1,19 +1,21 @@
 package config
 
 import (
-	ext_client "appscode/pkg/clients/kube/client"
+	extclient "appscode/pkg/clients/kube/client"
+	_ "appscode/pkg/clients/kube/install"
 
-	"k8s.io/kubernetes/pkg/client/restclient"
-	kClient "k8s.io/kubernetes/pkg/client/unversioned"
+	"github.com/appscode/errors"
+	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	rest "k8s.io/kubernetes/pkg/client/restclient"
 )
 
-func GetKubeClient() (*KubeClient, error) {
-	var clientConfig *restclient.Config
+func NewKubeClient() (*KubeClient, error) {
+	var config *rest.Config
 	var err error
 	// Set debugMode to "true" for testing from local
-	debugMode := false
+	debugMode := true
 	if !debugMode {
-		clientConfig, err = restclient.InClusterConfig()
+		config, err = rest.InClusterConfig()
 		if err != nil {
 			return nil, err
 		}
@@ -21,7 +23,7 @@ func GetKubeClient() (*KubeClient, error) {
 		host := ""
 		username := ""
 		password := ""
-		clientConfig = &restclient.Config{
+		config = &rest.Config{
 			Host:     host,
 			Insecure: true,
 			Username: username,
@@ -29,14 +31,19 @@ func GetKubeClient() (*KubeClient, error) {
 		}
 	}
 
-	client, err := kClient.New(clientConfig)
+	client, err := clientset.NewForConfig(config)
 	if err != nil {
-		return nil, err
-	}
-	acExtClient, err := ext_client.NewAppsCodeExtensions(clientConfig)
-	if err != nil {
-		return nil, err
+		return nil, errors.New().WithCause(err).Internal()
 	}
 
-	return &KubeClient{client, acExtClient}, nil
+	appscodeClient, err := extclient.NewACExtensionsForConfig(config)
+	if err != nil {
+		return nil, errors.New().WithCause(err).Internal()
+	}
+
+	return &KubeClient{
+		config:                  config,
+		Client:                  client,
+		AppscodeExtensionClient: appscodeClient,
+	}, nil
 }

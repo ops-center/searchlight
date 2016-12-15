@@ -9,7 +9,9 @@ import (
 	ci "github.com/appscode/api/ci/v1beta1"
 	db "github.com/appscode/api/db/v1beta1"
 	glusterfs "github.com/appscode/api/glusterfs/v1beta1"
-	kubernetes "github.com/appscode/api/kubernetes/v1beta1"
+	kubernetesV1beta1 "github.com/appscode/api/kubernetes/v1beta1"
+	kubernetesV1beta2 "github.com/appscode/api/kubernetes/v1beta2"
+
 	pv "github.com/appscode/api/pv/v1beta1"
 	"google.golang.org/grpc"
 )
@@ -23,23 +25,23 @@ type multiClientInterface interface {
 	Billing() *billingService
 	CA() *caService
 	CI() *ciService
-	GlusterFS() *glusterFSService
-	Kubernetes() *kubernetesService
-	PV() *pvService
 	DB() *dbService
+	GlusterFS() *glusterFSService
+	Kubernetes() *versionedKubernetesService
+	PV() *pvService
 }
 
 type multiClientServices struct {
-	artifactoryClient    *artifactoryService
-	authenticationClient *authenticationService
-	backupClient         *backupService
-	billingClient        *billingService
-	caClient             *caService
-	ciClient             *ciService
-	glusterfsClient      *glusterFSService
-	kubernetesClient     *kubernetesService
-	pvClient             *pvService
-	dbClient             *dbService
+	artifactoryClient         *artifactoryService
+	authenticationClient      *authenticationService
+	backupClient              *backupService
+	billingClient             *billingService
+	caClient                  *caService
+	ciClient                  *ciService
+	glusterfsClient           *glusterFSService
+	versionedKubernetesClient *versionedKubernetesService
+	pvClient                  *pvService
+	dbClient                  *dbService
 }
 
 func newMultiClientService(conn *grpc.ClientConn) multiClientInterface {
@@ -51,6 +53,7 @@ func newMultiClientService(conn *grpc.ClientConn) multiClientInterface {
 		authenticationClient: &authenticationService{
 			authenticationClient: auth.NewAuthenticationClient(conn),
 			conduitClient:        auth.NewConduitClient(conn),
+			projectClient:        auth.NewProjectsClient(conn),
 		},
 		backupClient: &backupService{
 			backupServerClient: backup.NewServersClient(conn),
@@ -58,9 +61,6 @@ func newMultiClientService(conn *grpc.ClientConn) multiClientInterface {
 		},
 		billingClient: &billingService{
 			paymentMethodClient: billing.NewPaymentMethodsClient(conn),
-			subscriptionClient:  billing.NewSubscriptionsClient(conn),
-			purchaseClient:      billing.NewPurchasesClient(conn),
-			chargeClient:        billing.NewChargesClient(conn),
 			quotaClient:         billing.NewQuotasClient(conn),
 		},
 		caClient: &caService{
@@ -76,17 +76,24 @@ func newMultiClientService(conn *grpc.ClientConn) multiClientInterface {
 			clusterClient: glusterfs.NewClustersClient(conn),
 			volumeClient:  glusterfs.NewVolumesClient(conn),
 		},
-		kubernetesClient: &kubernetesService{
-			kubernetesClient: kubernetes.NewClientsClient(conn),
-			clusterClient:    kubernetes.NewClustersClient(conn),
-			eventsClient:     kubernetes.NewEventsClient(conn),
-			metdataClient:    kubernetes.NewMetadataClient(conn),
-			incidentClient:   kubernetes.NewIncidentsClient(conn),
+		versionedKubernetesClient: &versionedKubernetesService{
+			v1beta1Service: &kubernetesV1beta1Service{
+				clientsClient:      kubernetesV1beta1.NewClientsClient(conn),
+				clusterClient:      kubernetesV1beta1.NewClustersClient(conn),
+				eventsClient:       kubernetesV1beta1.NewEventsClient(conn),
+				incidentClient:     kubernetesV1beta1.NewIncidentsClient(conn),
+				loadBalancerClient: kubernetesV1beta1.NewLoadBalancersClient(conn),
+				metdataClient:      kubernetesV1beta1.NewMetadataClient(conn),
+			},
+			v1beta2Service: &kubernetesV1beta2Service{
+				clientsClient: kubernetesV1beta2.NewClientsClient(conn),
+				diskClient:    kubernetesV1beta2.NewDisksClient(conn),
+			},
 		},
 		pvClient: &pvService{
-			disk: pv.NewDisksClient(conn),
-			pv:   pv.NewPersistentVolumesClient(conn),
-			pvc:  pv.NewPersistentVolumeClaimsClient(conn),
+			diskClient: pv.NewDisksClient(conn),
+			pvClient:   pv.NewPersistentVolumesClient(conn),
+			pvcClient:  pv.NewPersistentVolumeClaimsClient(conn),
 		},
 		dbClient: &dbService{
 			database: db.NewDatabasesClient(conn),
@@ -123,8 +130,8 @@ func (s *multiClientServices) GlusterFS() *glusterFSService {
 	return s.glusterfsClient
 }
 
-func (s *multiClientServices) Kubernetes() *kubernetesService {
-	return s.kubernetesClient
+func (s *multiClientServices) Kubernetes() *versionedKubernetesService {
+	return s.versionedKubernetesClient
 }
 
 func (s *multiClientServices) PV() *pvService {
@@ -153,6 +160,7 @@ func (a *artifactoryService) Versions() artifactory.VersionsClient {
 type authenticationService struct {
 	authenticationClient auth.AuthenticationClient
 	conduitClient        auth.ConduitClient
+	projectClient        auth.ProjectsClient
 }
 
 func (a *authenticationService) Authentication() auth.AuthenticationClient {
@@ -163,9 +171,13 @@ func (a *authenticationService) Conduit() auth.ConduitClient {
 	return a.conduitClient
 }
 
+func (a *authenticationService) Project() auth.ProjectsClient {
+	return a.projectClient
+}
+
 type backupService struct {
-	backupServerClient backup.ServersClient
 	backupClientClient backup.ClientsClient
+	backupServerClient backup.ServersClient
 }
 
 func (b *backupService) Server() backup.ServersClient {
@@ -178,18 +190,11 @@ func (b *backupService) Client() backup.ClientsClient {
 
 type billingService struct {
 	paymentMethodClient billing.PaymentMethodsClient
-	subscriptionClient  billing.SubscriptionsClient
-	purchaseClient      billing.PurchasesClient
-	chargeClient        billing.ChargesClient
 	quotaClient         billing.QuotasClient
 }
 
-func (b *billingService) Charge() billing.ChargesClient {
-	return b.chargeClient
-}
-
-func (b *billingService) Subscription() billing.SubscriptionsClient {
-	return b.subscriptionClient
+func (b *billingService) PaymentMethod() billing.PaymentMethodsClient {
+	return b.paymentMethodClient
 }
 
 func (b *billingService) Quota() billing.QuotasClient {
@@ -205,10 +210,10 @@ func (c *caService) CertificatesClient() ca.CertificatesClient {
 }
 
 type ciService struct {
+	agentClient  ci.AgentsClient
 	buildClient  ci.BuildsClient
 	jobClient    ci.JobsClient
 	masterClient ci.MasterClient
-	agentClient  ci.AgentsClient
 }
 
 func (c *ciService) Build() ci.BuildsClient {
@@ -240,50 +245,81 @@ func (g *glusterFSService) Volume() glusterfs.VolumesClient {
 	return g.volumeClient
 }
 
-type kubernetesService struct {
-	kubernetesClient kubernetes.ClientsClient
-	clusterClient    kubernetes.ClustersClient
-	eventsClient     kubernetes.EventsClient
-	metdataClient    kubernetes.MetadataClient
-	incidentClient   kubernetes.IncidentsClient
+type versionedKubernetesService struct {
+	v1beta1Service *kubernetesV1beta1Service
+	v1beta2Service *kubernetesV1beta2Service
 }
 
-func (k *kubernetesService) Client() kubernetes.ClientsClient {
-	return k.kubernetesClient
+func (v *versionedKubernetesService) V1beta1() *kubernetesV1beta1Service {
+	return v.v1beta1Service
 }
 
-func (k *kubernetesService) Cluster() kubernetes.ClustersClient {
+func (v *versionedKubernetesService) V1beta2() *kubernetesV1beta2Service {
+	return v.v1beta2Service
+}
+
+type kubernetesV1beta1Service struct {
+	clientsClient      kubernetesV1beta1.ClientsClient
+	clusterClient      kubernetesV1beta1.ClustersClient
+	eventsClient       kubernetesV1beta1.EventsClient
+	incidentClient     kubernetesV1beta1.IncidentsClient
+	loadBalancerClient kubernetesV1beta1.LoadBalancersClient
+	metdataClient      kubernetesV1beta1.MetadataClient
+}
+
+func (k *kubernetesV1beta1Service) Client() kubernetesV1beta1.ClientsClient {
+	return k.clientsClient
+}
+
+func (k *kubernetesV1beta1Service) Cluster() kubernetesV1beta1.ClustersClient {
 	return k.clusterClient
 }
 
-func (k *kubernetesService) Event() kubernetes.EventsClient {
+func (k *kubernetesV1beta1Service) Event() kubernetesV1beta1.EventsClient {
 	return k.eventsClient
 }
 
-func (k *kubernetesService) Metadata() kubernetes.MetadataClient {
-	return k.metdataClient
-}
-
-func (a *kubernetesService) Incident() kubernetes.IncidentsClient {
+func (a *kubernetesV1beta1Service) Incident() kubernetesV1beta1.IncidentsClient {
 	return a.incidentClient
 }
 
+func (a *kubernetesV1beta1Service) LoadBalancer() kubernetesV1beta1.LoadBalancersClient {
+	return a.loadBalancerClient
+}
+
+func (k *kubernetesV1beta1Service) Metadata() kubernetesV1beta1.MetadataClient {
+	return k.metdataClient
+}
+
+type kubernetesV1beta2Service struct {
+	clientsClient kubernetesV1beta2.ClientsClient
+	diskClient    kubernetesV1beta2.DisksClient
+}
+
+func (k *kubernetesV1beta2Service) Client() kubernetesV1beta2.ClientsClient {
+	return k.clientsClient
+}
+
+func (k *kubernetesV1beta2Service) Disk() kubernetesV1beta2.DisksClient {
+	return k.diskClient
+}
+
 type pvService struct {
-	disk pv.DisksClient
-	pv   pv.PersistentVolumesClient
-	pvc  pv.PersistentVolumeClaimsClient
+	diskClient pv.DisksClient
+	pvClient   pv.PersistentVolumesClient
+	pvcClient  pv.PersistentVolumeClaimsClient
 }
 
 func (p *pvService) Disk() pv.DisksClient {
-	return p.disk
+	return p.diskClient
 }
 
 func (p *pvService) PersistentVolume() pv.PersistentVolumesClient {
-	return p.pv
+	return p.pvClient
 }
 
 func (p *pvService) PersistentVolumeClaim() pv.PersistentVolumeClaimsClient {
-	return p.pvc
+	return p.pvcClient
 }
 
 type dbService struct {

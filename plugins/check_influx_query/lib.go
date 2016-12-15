@@ -51,7 +51,7 @@ func trunc(val float64) interface{} {
 }
 
 func getInfluxDBSecretData(secretName string) *authInfo {
-	kubeClient, err := config.GetKubeClient()
+	kubeClient, err := config.NewKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
@@ -64,7 +64,7 @@ func getInfluxDBSecretData(secretName string) *authInfo {
 		namespace = parts[1]
 	}
 
-	secret, err := kubeClient.Secrets(namespace).Get(name)
+	secret, err := kubeClient.Client.Core().Secrets(namespace).Get(name)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)

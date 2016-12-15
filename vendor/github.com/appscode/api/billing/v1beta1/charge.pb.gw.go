@@ -99,7 +99,7 @@ func RegisterChargesHandler(ctx context.Context, mux *runtime.ServeMux, conn *gr
 }
 
 var (
-	pattern_Charges_Estimate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"appscode", "api", "billing", "v1beta1", "charges"}, ""))
+	pattern_Charges_Estimate_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"_appscode", "api", "billing", "v1beta1", "charges"}, ""))
 )
 
 var (

@@ -1,8 +1,13 @@
 package client
 
 import (
+	"fmt"
+
+	"k8s.io/kubernetes/pkg/api"
+	schema "k8s.io/kubernetes/pkg/api/unversioned"
 	"k8s.io/kubernetes/pkg/apimachinery/registered"
-	"k8s.io/kubernetes/pkg/client/restclient"
+	rest "k8s.io/kubernetes/pkg/client/restclient"
+	"k8s.io/kubernetes/pkg/runtime/serializer"
 )
 
 const (
@@ -10,6 +15,7 @@ const (
 )
 
 type AppsCodeExtensionInterface interface {
+	RESTClient() rest.Interface
 	IngressNamespacer
 	AlertNamespacer
 	CertificateNamespacer
@@ -19,7 +25,7 @@ type AppsCodeExtensionInterface interface {
 // Features of Extensions group are not supported and may be changed or removed in
 // incompatible ways at any time.
 type AppsCodeExtensionsClient struct {
-	*restclient.RESTClient
+	restClient rest.Interface
 }
 
 func (a *AppsCodeExtensionsClient) Ingress(namespace string) IngressInterface {
@@ -38,12 +44,12 @@ func (a *AppsCodeExtensionsClient) Certificate(namespace string) CertificateInte
 // provides access to experimental Kubernetes features.
 // Features of Extensions group are not supported and may be changed or removed in
 // incompatible ways at any time.
-func NewAppsCodeExtensions(c *restclient.Config) (*AppsCodeExtensionsClient, error) {
+func NewACExtensionsForConfig(c *rest.Config) (*AppsCodeExtensionsClient, error) {
 	config := *c
 	if err := setExtensionsDefaults(&config); err != nil {
 		return nil, err
 	}
-	client, err := restclient.RESTClientFor(&config)
+	client, err := rest.RESTClientFor(&config)
 	if err != nil {
 		return nil, err
 	}
@@ -54,25 +60,32 @@ func NewAppsCodeExtensions(c *restclient.Config) (*AppsCodeExtensionsClient, err
 // panics if there is an error in the config.
 // Features of Extensions group are not supported and may be changed or removed in
 // incompatible ways at any time.
-func NewAppsCodeExtensionsOrDie(c *restclient.Config) *AppsCodeExtensionsClient {
-	client, err := NewAppsCodeExtensions(c)
+func NewACExtensionsForConfigOrDie(c *rest.Config) *AppsCodeExtensionsClient {
+	client, err := NewACExtensionsForConfig(c)
 	if err != nil {
 		panic(err)
 	}
 	return client
 }
 
-func setExtensionsDefaults(config *restclient.Config) error {
+// New creates a new ExtensionsV1beta1Client for the given RESTClient.
+func NewNewACExtensions(c rest.Interface) *AppsCodeExtensionsClient {
+	return &AppsCodeExtensionsClient{c}
+}
+
+func setExtensionsDefaults(config *rest.Config) error {
+	gv, err := schema.ParseGroupVersion("appscode.com/v1beta1")
+	if err != nil {
+		return err
+	}
+	// if appscode.com/v1beta1 is not enabled, return an error
+	if !registered.IsEnabledVersion(gv) {
+		return fmt.Errorf("appscode.com/v1beta1 is not enabled")
+	}
 	config.APIPath = defaultAPIPath
 	if config.UserAgent == "" {
-		config.UserAgent = restclient.DefaultKubernetesUserAgent()
+		config.UserAgent = rest.DefaultKubernetesUserAgent()
 	}
-
-	contentConfig := ContentConfig()
-	if config.NegotiatedSerializer == nil {
-		config.NegotiatedSerializer = contentConfig.NegotiatedSerializer
-	}
-	config.ContentConfig = contentConfig
 
 	if config.GroupVersion == nil || config.GroupVersion.Group != "appscode.com" {
 		g, err := registered.Group("appscode.com")
@@ -83,11 +96,16 @@ func setExtensionsDefaults(config *restclient.Config) error {
 		config.GroupVersion = &copyGroupVersion
 	}
 
-	if config.QPS == 0 {
-		config.QPS = 5
-	}
-	if config.Burst == 0 {
-		config.Burst = 10
-	}
+	config.NegotiatedSerializer = serializer.DirectCodecFactory{CodecFactory: api.Codecs}
+
 	return nil
+}
+
+// RESTClient returns a RESTClient that is used to communicate
+// with API server by this client implementation.
+func (c *AppsCodeExtensionsClient) RESTClient() rest.Interface {
+	if c == nil {
+		return nil
+	}
+	return c.restClient
 }

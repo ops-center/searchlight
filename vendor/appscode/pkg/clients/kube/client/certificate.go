@@ -4,6 +4,7 @@ import (
 	"appscode/pkg/clients/kube"
 
 	"k8s.io/kubernetes/pkg/api"
+	rest "k8s.io/kubernetes/pkg/client/restclient"
 	"k8s.io/kubernetes/pkg/watch"
 )
 
@@ -22,12 +23,12 @@ type CertificateInterface interface {
 }
 
 type CertificateImpl struct {
-	r  *AppsCodeExtensionsClient
+	r  rest.Interface
 	ns string
 }
 
 func newCertificate(c *AppsCodeExtensionsClient, namespace string) *CertificateImpl {
-	return &CertificateImpl{c, namespace}
+	return &CertificateImpl{c.restClient, namespace}
 }
 
 func (c *CertificateImpl) List(opts api.ListOptions) (result *kube.CertificateList, err error) {
@@ -90,7 +91,7 @@ func (c *CertificateImpl) Watch(opts api.ListOptions) (watch.Interface, error) {
 		Prefix("watch").
 		Namespace(c.ns).
 		Resource("certificates").
-		VersionedParams(&opts, ExtendedCodec).
+		VersionedParams(&opts, api.ParameterCodec).
 		Watch()
 }
 

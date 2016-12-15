@@ -63,8 +63,8 @@ func request_Certificates_Describe_0(ctx context.Context, marshaler runtime.Mars
 
 }
 
-func request_Certificates_Obtain_0(ctx context.Context, marshaler runtime.Marshaler, client CertificatesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
-	var protoReq CertificateObtainRequest
+func request_Certificates_Load_0(ctx context.Context, marshaler runtime.Marshaler, client CertificatesClient, req *http.Request, pathParams map[string]string) (proto.Message, runtime.ServerMetadata, error) {
+	var protoReq CertificateLoadRequest
 	var metadata runtime.ServerMetadata
 
 	if err := marshaler.NewDecoder(req.Body).Decode(&protoReq); err != nil {
@@ -89,7 +89,7 @@ func request_Certificates_Obtain_0(ctx context.Context, marshaler runtime.Marsha
 		return nil, metadata, err
 	}
 
-	msg, err := client.Obtain(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
+	msg, err := client.Load(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
 	return msg, metadata, err
 
 }
@@ -238,7 +238,7 @@ func RegisterCertificatesHandler(ctx context.Context, mux *runtime.ServeMux, con
 
 	})
 
-	mux.Handle("PUT", pattern_Certificates_Obtain_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
+	mux.Handle("PUT", pattern_Certificates_Load_0, func(w http.ResponseWriter, req *http.Request, pathParams map[string]string) {
 		ctx, cancel := context.WithCancel(ctx)
 		defer cancel()
 		if cn, ok := w.(http.CloseNotifier); ok {
@@ -255,14 +255,14 @@ func RegisterCertificatesHandler(ctx context.Context, mux *runtime.ServeMux, con
 		if err != nil {
 			runtime.HTTPError(ctx, outboundMarshaler, w, req, err)
 		}
-		resp, md, err := request_Certificates_Obtain_0(rctx, inboundMarshaler, client, req, pathParams)
+		resp, md, err := request_Certificates_Load_0(rctx, inboundMarshaler, client, req, pathParams)
 		ctx = runtime.NewServerMetadataContext(ctx, md)
 		if err != nil {
 			runtime.HTTPError(ctx, outboundMarshaler, w, req, err)
 			return
 		}
 
-		forward_Certificates_Obtain_0(ctx, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
+		forward_Certificates_Load_0(ctx, outboundMarshaler, w, req, resp, mux.GetForwardResponseOptions()...)
 
 	})
 
@@ -326,15 +326,15 @@ func RegisterCertificatesHandler(ctx context.Context, mux *runtime.ServeMux, con
 }
 
 var (
-	pattern_Certificates_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"appscode", "api", "certificate", "v1beta1", "certificates"}, ""))
+	pattern_Certificates_List_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"_appscode", "api", "certificate", "v1beta1", "certificates"}, ""))
 
-	pattern_Certificates_Describe_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"appscode", "api", "certificate", "v1beta1", "certificates", "uid"}, ""))
+	pattern_Certificates_Describe_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"_appscode", "api", "certificate", "v1beta1", "certificates", "uid"}, ""))
 
-	pattern_Certificates_Obtain_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"appscode", "api", "certificate", "v1beta1", "certificates", "name", "actions", "obtain"}, ""))
+	pattern_Certificates_Load_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"_appscode", "api", "certificate", "v1beta1", "certificates", "name", "actions", "obtain"}, ""))
 
-	pattern_Certificates_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"appscode", "api", "certificate", "v1beta1", "certificates", "uid"}, ""))
+	pattern_Certificates_Delete_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"_appscode", "api", "certificate", "v1beta1", "certificates", "uid"}, ""))
 
-	pattern_Certificates_Deploy_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"appscode", "api", "certificate", "v1beta1", "certificates", "uid", "actions", "deploy"}, ""))
+	pattern_Certificates_Deploy_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6, 2, 7}, []string{"_appscode", "api", "certificate", "v1beta1", "certificates", "uid", "actions", "deploy"}, ""))
 )
 
 var (
@@ -342,7 +342,7 @@ var (
 
 	forward_Certificates_Describe_0 = runtime.ForwardResponseMessage
 
-	forward_Certificates_Obtain_0 = runtime.ForwardResponseMessage
+	forward_Certificates_Load_0 = runtime.ForwardResponseMessage
 
 	forward_Certificates_Delete_0 = runtime.ForwardResponseMessage
 

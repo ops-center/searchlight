@@ -3,13 +3,12 @@ package check_pod_exists
 import (
 	"fmt"
 	"os"
-
 	"strings"
 
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/spf13/cobra"
-	kApi "k8s.io/kubernetes/pkg/api"
+	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
 )
 
@@ -30,7 +29,7 @@ type serviceOutput struct {
 }
 
 func checkPodExists(req *request, namespace, objectType, objectName string, checkCount bool) {
-	kubeClient, err := config.GetKubeClient()
+	kubeClient, err := config.NewKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
@@ -38,7 +37,7 @@ func checkPodExists(req *request, namespace, objectType, objectName string, chec
 
 	total_pod := 0
 	if objectType == config.TypePods {
-		pod, err := kubeClient.Pods(namespace).Get(objectName)
+		pod, err := kubeClient.Client.Core().Pods(namespace).Get(objectName)
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)
@@ -47,19 +46,20 @@ func checkPodExists(req *request, namespace, objectType, objectName string, chec
 			total_pod = 1
 		}
 	} else {
-		var labelSelector labels.Selector
-		if objectType == "" {
-			labelSelector = labels.Everything()
-		} else {
+		labelSelector := labels.Everything()
+		if objectType != "" {
 			if labelSelector, err = util.GetLabels(kubeClient, namespace, objectType, objectName); err != nil {
 				fmt.Fprintln(os.Stdout, util.State[3], err)
 				os.Exit(3)
 			}
 		}
 
-		podList, err := kubeClient.Pods(namespace).List(kApi.ListOptions{
-			LabelSelector: labelSelector,
-		})
+		podList, err := kubeClient.Client.Core().
+			Pods(namespace).List(
+			kapi.ListOptions{
+				LabelSelector: labelSelector,
+			},
+		)
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)

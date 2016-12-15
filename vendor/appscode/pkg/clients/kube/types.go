@@ -224,7 +224,7 @@ type AlertSpec struct {
 
 	// NotifierParams contains information to send notifications for Incident
 	// State, UserUid, Method
-	NotifierParams []*NotifierParam `json:"notifierParams,omitempty"`
+	NotifierParams []NotifierParam `json:"notifierParams,omitempty"`
 
 	// Vars contains Icinga Service variables to be used in CheckCommand
 	Vars map[string]interface{} `json:"vars,omitempty"`

@@ -250,13 +250,13 @@ func RegisterTeamsHandler(ctx context.Context, mux *runtime.ServeMux, conn *grpc
 }
 
 var (
-	pattern_Teams_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"appscode", "api", "namespace", "v1beta1", "teams"}, ""))
+	pattern_Teams_Create_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"_appscode", "api", "namespace", "v1beta1", "teams"}, ""))
 
-	pattern_Teams_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"appscode", "api", "namespace", "v1beta1", "teams", "name"}, ""))
+	pattern_Teams_Get_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5}, []string{"_appscode", "api", "namespace", "v1beta1", "teams", "name"}, ""))
 
-	pattern_Teams_IsAvailable_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"appscode", "api", "namespace", "v1beta1", "teams", "name", "is-available"}, ""))
+	pattern_Teams_IsAvailable_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 1, 0, 4, 1, 5, 5, 2, 6}, []string{"_appscode", "api", "namespace", "v1beta1", "teams", "name", "is-available"}, ""))
 
-	pattern_Teams_Subscription_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"appscode", "api", "namespace", "v1beta1", "billing", "subscription"}, ""))
+	pattern_Teams_Subscription_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4, 2, 5}, []string{"_appscode", "api", "namespace", "v1beta1", "billing", "subscription"}, ""))
 )
 
 var (

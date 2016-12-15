@@ -4,6 +4,7 @@ import (
 	"appscode/pkg/clients/kube"
 
 	"k8s.io/kubernetes/pkg/api"
+	rest "k8s.io/kubernetes/pkg/client/restclient"
 	"k8s.io/kubernetes/pkg/watch"
 )
 
@@ -25,13 +26,13 @@ type IngressInterface interface {
 
 // ExtendedIngress implements ExtendedIngressNamespacer interface
 type IngressImpl struct {
-	r  *AppsCodeExtensionsClient
+	r  rest.Interface
 	ns string
 }
 
 // newExtendedIngress returns a ExtendedIngress
 func newExtendedIngress(c *AppsCodeExtensionsClient, namespace string) *IngressImpl {
-	return &IngressImpl{c, namespace}
+	return &IngressImpl{c.restClient, namespace}
 }
 
 // List returns a list of ExtendedIngress that match the label and field selectors.
@@ -100,7 +101,7 @@ func (c *IngressImpl) Watch(opts api.ListOptions) (watch.Interface, error) {
 		Prefix("watch").
 		Namespace(c.ns).
 		Resource("ingresses").
-		VersionedParams(&opts, ExtendedCodec).
+		VersionedParams(&opts, api.ParameterCodec).
 		Watch()
 }
 

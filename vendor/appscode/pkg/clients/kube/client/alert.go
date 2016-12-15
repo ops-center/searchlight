@@ -4,6 +4,7 @@ import (
 	"appscode/pkg/clients/kube"
 
 	"k8s.io/kubernetes/pkg/api"
+	rest "k8s.io/kubernetes/pkg/client/restclient"
 	"k8s.io/kubernetes/pkg/watch"
 )
 
@@ -22,12 +23,12 @@ type AlertInterface interface {
 }
 
 type AlertImpl struct {
-	r  *AppsCodeExtensionsClient
+	r  rest.Interface
 	ns string
 }
 
 func newAlert(c *AppsCodeExtensionsClient, namespace string) *AlertImpl {
-	return &AlertImpl{c, namespace}
+	return &AlertImpl{c.restClient, namespace}
 }
 
 func (c *AlertImpl) List(opts api.ListOptions) (result *kube.AlertList, err error) {
@@ -90,7 +91,7 @@ func (c *AlertImpl) Watch(opts api.ListOptions) (watch.Interface, error) {
 		Prefix("watch").
 		Namespace(c.ns).
 		Resource("alerts").
-		VersionedParams(&opts, ExtendedCodec).
+		VersionedParams(&opts, api.ParameterCodec).
 		Watch()
 }
 

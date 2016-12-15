@@ -102,7 +102,7 @@ func RegisterSubscriptionsHandler(ctx context.Context, mux *runtime.ServeMux, co
 }
 
 var (
-	pattern_Subscriptions_Subscribe_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"appscode", "api", "billing", "v1beta1", "subscriptions"}, ""))
+	pattern_Subscriptions_Subscribe_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 2, 3, 2, 4}, []string{"_appscode", "api", "billing", "v1beta1", "subscriptions"}, ""))
 )
 
 var (

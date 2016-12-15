@@ -12,12 +12,11 @@ import (
 	"github.com/appscode/log"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/appscode/searchlight/plugins/notifier/driver/extpoints"
-	"github.com/spf13/cobra"
-
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/hipchat"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/mailgun"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/smtp"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/twilio"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -58,7 +57,7 @@ func notifyViaAppsCode(req *api.IncidentNotifyRequest) error {
 	}
 	defer conn.Close()
 
-	if _, err := conn.Kubernetes().Incident().Notify(conn.Context(), req); err != nil {
+	if _, err := conn.Kubernetes().V1beta1().Incident().Notify(conn.Context(), req); err != nil {
 		return err
 	}
 

@@ -14,10 +14,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	prometheusService string = "PROMETHEUS_K8S_SERVICE"
-)
-
 type request struct {
 	host        string
 	query       string

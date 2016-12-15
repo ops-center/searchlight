@@ -13,7 +13,7 @@ import (
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/pkg/util"
 	"github.com/spf13/cobra"
-	kApi "k8s.io/kubernetes/pkg/api"
+	kapi "k8s.io/kubernetes/pkg/api"
 )
 
 const (
@@ -39,7 +39,7 @@ const (
 	vsphereVolumePluginName        = "kubernetes.io~vsphere-volume"
 )
 
-func getVolumePluginName(volumeSource *kApi.VolumeSource) string {
+func getVolumePluginName(volumeSource *kapi.VolumeSource) string {
 	if volumeSource.AWSElasticBlockStore != nil {
 		return awsElasticBlockStorePluginName
 	} else if volumeSource.AzureDisk != nil {
@@ -84,7 +84,7 @@ func getVolumePluginName(volumeSource *kApi.VolumeSource) string {
 	return ""
 }
 
-func getPersistentVolumePluginName(volumeSource *kApi.PersistentVolumeSource) string {
+func getPersistentVolumePluginName(volumeSource *kapi.PersistentVolumeSource) string {
 	if volumeSource.AWSElasticBlockStore != nil {
 		return awsElasticBlockStorePluginName
 	} else if volumeSource.AzureDisk != nil {
@@ -206,14 +206,14 @@ func checkNodeDiskStat(req *request) {
 		os.Exit(3)
 	}
 
-	kubeClient, err := config.GetKubeClient()
+	kubeClient, err := config.NewKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
 	}
 
 	node_name := parts[0]
-	node, err := kubeClient.Nodes().Get(node_name)
+	node, err := kubeClient.Client.Core().Nodes().Get(node_name)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
@@ -226,7 +226,7 @@ func checkNodeDiskStat(req *request) {
 
 	hostIP := ""
 	for _, address := range node.Status.Addresses {
-		if address.Type == kApi.NodeInternalIP {
+		if address.Type == kapi.NodeInternalIP {
 			hostIP = address.Address
 		}
 	}
@@ -246,7 +246,7 @@ func checkPodVolumeStat(req *request) {
 		os.Exit(3)
 	}
 
-	kubeClient, err := config.GetKubeClient()
+	kubeClient, err := config.NewKubeClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
@@ -254,7 +254,7 @@ func checkPodVolumeStat(req *request) {
 
 	pod_name := parts[0]
 	namespace := parts[1]
-	pod, err := kubeClient.Pods(namespace).Get(pod_name)
+	pod, err := kubeClient.Client.Core().Pods(namespace).Get(pod_name)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
@@ -265,13 +265,13 @@ func checkPodVolumeStat(req *request) {
 	for _, volume := range pod.Spec.Volumes {
 		if volume.Name == name {
 			if volume.PersistentVolumeClaim != nil {
-				claim, err := kubeClient.PersistentVolumeClaims(namespace).Get(volume.PersistentVolumeClaim.ClaimName)
+				claim, err := kubeClient.Client.Core().PersistentVolumeClaims(namespace).Get(volume.PersistentVolumeClaim.ClaimName)
 				if err != nil {
 					fmt.Fprintln(os.Stdout, util.State[3], err)
 					os.Exit(3)
 
 				}
-				volume, err := kubeClient.PersistentVolumes().Get(claim.Spec.VolumeName)
+				volume, err := kubeClient.Client.Core().PersistentVolumes().Get(claim.Spec.VolumeName)
 				if err != nil {
 					fmt.Fprintln(os.Stdout, util.State[3], err)
 					os.Exit(3)
