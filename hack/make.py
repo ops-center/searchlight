@@ -1,84 +1,19 @@
 #!/usr/bin/env python
 
-import datetime
-import io
-import json
+# ref: https://github.com/ellisonbg/antipackage
+import antipackage
+from github.appscode.libbuild import libbuild
+
 import os
 import os.path
-import socket
 import subprocess
 import sys
-from collections import OrderedDict
 from os.path import expandvars
 
 
-def _goenv():
-    env = {}
-    for line in subprocess.check_output(['go', 'env']).split('\n'):
-        line = line.strip()
-        if len(line) == 0:
-            continue
-        k, v = line.split('=', 1)
-        v = v.strip('"')
-        if len(v) > 0:
-            env[k] = v
-    return env
-
-
-GOENV = _goenv()
-GOHOSTOS = GOENV["GOHOSTOS"]
-GOHOSTARCH = GOENV["GOHOSTARCH"]
-GOC = 'go'  # if ENV in ['dev'] else 'godep go'
-
-
-def metadata(cwd, goos='', goarch=''):
-    # Nearest tag
-    # try:
-    #     tag = subprocess.check_output('git describe --abbrev=0 2>/dev/null', shell=True, cwd=cwd).strip()
-    # except subprocess.CalledProcessError:
-    #     pass
-
-    metadata = {
-        'commit_hash': subprocess.check_output('git rev-parse --verify HEAD', shell=True, cwd=cwd).strip(),
-        'git_branch': subprocess.check_output('git rev-parse --abbrev-ref HEAD', shell=True, cwd=cwd).strip(),
-        # http://stackoverflow.com/a/1404862/3476121
-        'git_tag': subprocess.check_output('git describe --exact-match --abbrev=0 2>/dev/null || echo ""', shell=True,
-                                           cwd=cwd).strip(),
-        'commit_timestamp': datetime.datetime.utcfromtimestamp(
-            int(subprocess.check_output('git show -s --format=%ct', shell=True, cwd=cwd).strip())).isoformat(),
-        'build_timestamp': datetime.datetime.utcnow().isoformat(),
-        'build_host': socket.gethostname(),
-        'build_host_os': GOENV["GOHOSTOS"],
-        'build_host_arch': GOENV["GOHOSTARCH"]
-    }
-    if metadata['git_tag']:
-        metadata['version'] = metadata['git_tag']
-        metadata['version_strategy'] = 'tag'
-    elif not metadata['git_branch'] in ['master', 'HEAD']:
-        metadata['version'] = metadata['git_branch']
-        metadata['version_strategy'] = 'branch'
-    else:
-        commit_ts = subprocess.check_output('git show -s --format=%ct', shell=True, cwd=cwd).strip()
-        metadata['version'] = datetime.datetime.utcfromtimestamp(int(commit_ts)).strftime('%Y%m%d')
-        # metadata['version'] = subprocess.check_output('TZ=UTC gdate -d @$(git show -s --format=%ct) +"%Y%m%d"', shell=True, cwd=cwd).strip()
-        nearest_tag = subprocess.check_output('git describe --abbrev=0 2>/dev/null || echo "0.0"', shell=True,
-                                              cwd=cwd).strip()
-        if nearest_tag:
-            metadata['version'] = nearest_tag + '.' + metadata['version']
-        metadata['version_strategy'] = 'timestamp'
-    if goos:
-        metadata['os'] = goos
-    if goarch:
-        metadata['arch'] = goarch
-    return metadata
-
-
-# Debian package
-# https://gist.github.com/rcrowley/3728417
-REPO_ROOT = expandvars('$GOPATH') + '/src/github.com/appscode/searchlight'
-ENV = os.getenv('APPSCODE_ENV', 'dev').lower()
-BUILD_METADATA = metadata(REPO_ROOT)
-BIN_MATRIX = {
+libbuild.REPO_ROOT = expandvars('$GOPATH') + '/src/github.com/appscode/searchlight'
+BUILD_METADATA = libbuild.metadata(libbuild.REPO_ROOT)
+libbuild.BIN_MATRIX = {
     'hyperalert': {
         'type': 'go',
         'go_version': True,
@@ -170,54 +105,13 @@ BIN_MATRIX = {
         }
     },
 }
-BUCKET_MATRIX = {
+libbuild.BUCKET_MATRIX = {
     'prod': 'gs://appscode-cdn',
     'dev': 'gs://appscode-dev'
 }
 
 
-def read_file(name):
-    with open(name, 'r') as f:
-        return f.read()
-    return ''
-
-
-def write_file(name, content):
-    dir = os.path.dirname(name)
-    if not os.path.exists(dir):
-        os.makedirs(dir)
-    with open(name, 'w') as f:
-        return f.write(content)
-
-
-def append_file(name, content):
-    with open(name, 'a') as f:
-        return f.write(content)
-
-
-def write_checksum(folder, file):
-    cmd = "openssl md5 {0} | sed 's/^.* //' > {0}.md5".format(file)
-    subprocess.call(cmd, shell=True, cwd=folder)
-    cmd = "openssl sha1 {0} | sed 's/^.* //' > {0}.sha1".format(file)
-    subprocess.call(cmd, shell=True, cwd=folder)
-
-
-# TODO: use unicode encoding
-def read_json(name):
-    try:
-        with open(name, 'r') as f:
-            return json.load(f, object_pairs_hook=OrderedDict)
-    except IOError:
-        return {}
-
-
-def write_json(obj, name):
-    with io.open(name, 'w') as f:
-        data = json.dumps(obj, indent=2, separators=(',', ': '), ensure_ascii=False)
-        f.write(data)
-
-
-def call(cmd, stdin=None, cwd=REPO_ROOT):
+def call(cmd, stdin=None, cwd=libbuild.REPO_ROOT):
     print(cmd)
     return subprocess.call([expandvars(cmd)], shell=True, stdin=stdin, cwd=cwd)
 
@@ -227,7 +121,7 @@ def die(status):
         sys.exit(status)
 
 
-def check_output(cmd, stdin=None, cwd=REPO_ROOT):
+def check_output(cmd, stdin=None, cwd=libbuild.REPO_ROOT):
     print(cmd)
     return subprocess.check_output([expandvars(cmd)], shell=True, stdin=stdin, cwd=cwd)
 
@@ -250,70 +144,35 @@ def vet():
 def gen_extpoints():
     die(call('go generate cmd/notifier/main.go'))
 
+
 def gen():
     gen_extpoints()
     return
 
 
 def build_cmd(name):
-    cfg = BIN_MATRIX[name]
+    cfg = libbuild.BIN_MATRIX[name]
     if cfg['type'] == 'go':
         if 'distro' in cfg.keys():
             for goos, archs in cfg['distro'].iteritems():
                 for goarch in archs:
-                    _go_build(name, goos, goarch)
+                    libbuild.go_build(name, goos, goarch, main='cmd/{}/*.go'.format(name))
         else:
-            _go_build(name, GOHOSTOS, GOHOSTARCH)
+            libbuild.go_build(name, libbuild.GOHOSTOS, libbuild.GOHOSTARCH, main='cmd/{}/*.go'.format(name))
 
 
-def _to_upper_camel(lower_snake):
-    components = lower_snake.split('_')
-    # We capitalize the first letter of each component
-    # with the 'title' method and join them together.
-    return ''.join(x.title() for x in components[:])
-
-
-# ref: https://golang.org/cmd/go/
-def _go_build(name, goos, goarch):
-    linker_opts = []
-    if BIN_MATRIX[name].get('go_version', False):
-        for k, v in metadata(REPO_ROOT, goos, goarch).iteritems():
-            linker_opts.append('-X')
-            linker_opts.append('main.' + _to_upper_camel(k) + '=' + v)
-
-    cgo_env = 'CGO_ENABLED=0'
-    cgo = ''
-    if BIN_MATRIX[name].get('use_cgo', False):
-        cgo_env = "CGO_ENABLED=1"
-        cgo = "-a -installsuffix cgo"
-        linker_opts.append('-linkmode external -extldflags -static -w')
-
-    ldflags = ''
-    if linker_opts:
-        ldflags = "-ldflags '{}'".format(' '.join(linker_opts))
-
-    bindir = 'dist/{name}'.format(name=name)
-    if not os.path.isdir(bindir):
-        os.makedirs(bindir)
-    cmd = "GOOS={goos} GOARCH={goarch} {cgo_env} {goc} build -o {bindir}/{name}-{goos}-{goarch}{ext} {cgo} {ldflags} cmd/{name}/*.go".format(
-        name=name,
-        goc=GOC,
-        goos=goos,
-        goarch=goarch,
-        bindir=bindir,
-        cgo_env=cgo_env,
-        cgo=cgo,
-        ldflags=ldflags,
-        ext='.exe' if goos == 'windows' else ''
-    )
-    die(call(cmd))
-    print '\n'
+def build(name):
+    cfg = libbuild.BIN_MATRIX[name]
+    if cfg['type'] == 'go':
+        gen()
+        fmt()
+        build_cmd(name)
 
 
 def build_cmds():
     gen()
     fmt()
-    for name in BIN_MATRIX.keys():
+    for name in libbuild.BIN_MATRIX.keys():
         build_cmd(name)
 
 
@@ -322,77 +181,38 @@ def build_all():
 
 
 def push_all():
-    dist = REPO_ROOT + '/dist'
+    dist = libbuild.REPO_ROOT + '/dist'
     for name in os.listdir(dist):
         d = dist + '/' + name
         if os.path.isdir(d):
-            push(d)
+            push_bin(d)
 
 
-def push_cmd(name):
-    bindir = REPO_ROOT + '/dist/' + name
-    push(bindir)
+def push(name):
+    bindir = libbuild.REPO_ROOT + '/dist/' + name
+    push_bin(bindir)
 
 
-def push(bindir):
+def push_bin(bindir):
     call('rm -f *.md5', cwd=bindir)
     call('rm -f *.sha1', cwd=bindir)
     for f in os.listdir(bindir):
         if os.path.isfile(bindir + '/' + f):
-            _upload_to_cloud(bindir, f)
-
-
-def _upload_to_cloud(folder, f):
-    write_checksum(folder, f)
-    name = os.path.basename(folder)
-    if name not in BIN_MATRIX.keys():
-        return
-    if ENV == 'prod' and not BIN_MATRIX[name].get('release', False):
-        return
-
-    bucket = BUCKET_MATRIX.get(ENV, BUCKET_MATRIX['dev'])
-    dst = "{bucket}/binaries/searchlight/{name}/{version}/{file}{ext}".format(
-        bucket=bucket,
-        name=name,
-        version=BUILD_METADATA['version'],
-        file=f,
-        ext='.exe' if '-windows-' in f else ''
-    )
-    if bucket.startswith('gs://'):
-        _upload_to_gcs(folder, f, dst, BIN_MATRIX[name].get('release', False))
-
-
-def _upload_to_gcs(folder, src, dst, public):
-    call("gsutil cp {0} {1}".format(src, dst), cwd=folder)
-    call("gsutil cp {0}.md5 {1}.md5".format(src, dst), cwd=folder)
-    call("gsutil cp {0}.sha1 {1}.sha1".format(src, dst), cwd=folder)
-    if public:
-        call("gsutil acl ch -u AllUsers:R {0}".format(dst), cwd=folder)
-        call("gsutil acl ch -u AllUsers:R {0}.md5".format(dst), cwd=folder)
-        call("gsutil acl ch -u AllUsers:R {0}.sha1".format(dst), cwd=folder)
+            libbuild.upload_to_cloud(bindir, f, BUILD_METADATA['version'])
 
 
 def update_registry():
-    dist = REPO_ROOT + '/dist'
-    bucket = BUCKET_MATRIX.get(ENV, BUCKET_MATRIX['dev'])
-    lf = dist + '/latest.txt'
-    write_file(lf, BUILD_METADATA['version'])
-    for name in os.listdir(dist):
-        if name not in BIN_MATRIX.keys():
-            return
-        call("gsutil cp {2} {0}/binaries/searchlight/{1}/latest.txt".format(bucket, name, lf))
-        if BIN_MATRIX[name].get('release', False):
-            call('gsutil acl ch -u AllUsers:R -r {0}/binaries/{1}/latest.txt'.format(bucket, name))
+    libbuild.update_registry(BUILD_METADATA['version'])
 
 
 def install():
-    die(call('GO15VENDOREXPERIMENT=1 ' + GOC + ' install ./pkg/... ./cmd/... ./plugins/...'))
+    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./pkg/... ./cmd/... ./plugins/...'))
 
 
 def default():
     gen()
     fmt()
-    die(call('GO15VENDOREXPERIMENT=1 ' + GOC + ' install ./pkg/... ./cmd/... ./plugins/...'))
+    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./pkg/... ./cmd/... ./plugins/...'))
 
 
 if __name__ == "__main__":
