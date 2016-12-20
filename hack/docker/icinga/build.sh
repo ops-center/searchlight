@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-LIB_ROOT=$(dirname "${BASH_SOURCE}")/../..
+LIB_ROOT=$(dirname "${BASH_SOURCE}")/../../..
 source "$LIB_ROOT/hack/libbuild/common/lib.sh"
 source "$LIB_ROOT/hack/libbuild/common/public_image.sh"
 
@@ -19,9 +19,9 @@ clean() {
 
 build() {
 	rm -rf icingaweb2
-	clone git@diffusion.appscode.com:appscode/79/icingaweb.git icingaweb2
+	clone https://github.com/Icinga/icingaweb2.git
 	cd icingaweb2
-	checkout apicss
+	git checkout tags/v$ICINGAWEB_VER
 	cd ..
 
 	rm -rf plugins; mkdir -p plugins
@@ -29,16 +29,16 @@ build() {
 	gsutil cp gs://appscode-dev/binaries/searchlight/0.1.0/searchlight-linux-amd64 plugins/searchlight
 	chmod 755 plugins/*
 
-	local cmd="docker build -t appscode/$IMG:$TAG-$K8S_VER-ac ."
+	local cmd="docker build -t appscode/$IMG:$TAG-$K8S_VER ."
 	echo $cmd; $cmd
 }
 
 docker_push() {
-	docker_up $IMG:$TAG-$K8S_VER-ac
+	docker_up $IMG:$TAG-$K8S_VER
 }
 
 docker_release() {
-	local cmd="docker push appscode/$IMG:$TAG-$K8S_VER-ac"
+	local cmd="docker push appscode/$IMG:$TAG-$K8S_VER"
 	echo $cmd; $cmd
 }
 
