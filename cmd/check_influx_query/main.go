@@ -1,15 +1,15 @@
 package main
 
 import (
-	v "appscode/pkg/util/versionutil"
 	"os"
 
 	"github.com/appscode/searchlight/plugins/check_influx_query"
+	v "github.com/appscode/searchlight/util/version"
 )
 
 var (
-	Name            string
 	Version         string
+	VersionStrategy string
 	Os              string
 	Arch            string
 	CommitHash      string
@@ -23,8 +23,8 @@ var (
 )
 
 func init() {
-	v.Version.Name = Name
 	v.Version.Version = Version
+	v.Version.VersionStrategy = VersionStrategy
 	v.Version.Os = Os
 	v.Version.Arch = Arch
 	v.Version.CommitHash = CommitHash

@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/appscode/searchlight/pkg/util"
+	"github.com/appscode/searchlight/util"
 	"github.com/prometheus/client_golang/api/prometheus"
 	"github.com/prometheus/common/model"
 	"github.com/spf13/cobra"
@@ -116,7 +116,7 @@ func NewCmd() *cobra.Command {
 	var req request
 
 	c := &cobra.Command{
-		Use:     "prometheus_metric",
+		Use:     "check_prometheus_metric",
 		Short:   "Check prometheus metric",
 		Example: "",
 

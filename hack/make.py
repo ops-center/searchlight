@@ -133,12 +133,12 @@ def version():
 
 
 def fmt():
-    die(call('goimports -w cmd data pkg plugins'))
-    call('go fmt ./cmd/... ./data/... ./pkg/... ./plugins/...')
+    die(call('goimports -w cmd data pkg plugins util'))
+    call('go fmt ./cmd/... ./data/... ./pkg/... ./plugins/... ./util/...')
 
 
 def vet():
-    call('go vet ./cmd/... ./data/... ./pkg/... ./plugins/...')
+    call('go vet ./cmd/... ./data/... ./pkg/... ./plugins/... ./util/...')
 
 
 def lint():
@@ -146,6 +146,7 @@ def lint():
     call('golint ./data/...')
     call('golint ./pkg/...')
     call('golint ./plugins/...')
+    call('golint ./util/...')
 
 
 def gen_assets():
@@ -217,13 +218,13 @@ def update_registry():
 
 
 def install():
-    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./cmd/... ./data/... ./pkg/... ./plugins/...'))
+    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./cmd/...'))
 
 
 def default():
     gen()
     fmt()
-    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./cmd/... ./data/... ./pkg/... ./plugins/...'))
+    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./cmd/...'))
 
 
 if __name__ == "__main__":

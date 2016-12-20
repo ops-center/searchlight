@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/appscode/searchlight/pkg/config"
-	"github.com/appscode/searchlight/pkg/util"
+	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
 	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
@@ -74,7 +74,7 @@ func checkComponentStatus() {
 
 func NewCmd() *cobra.Command {
 	c := &cobra.Command{
-		Use:     "component_status",
+		Use:     "check_component_status",
 		Short:   "Check Kubernetes Component Status",
 		Example: "",
 

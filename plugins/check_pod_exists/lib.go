@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/appscode/searchlight/pkg/config"
-	"github.com/appscode/searchlight/pkg/util"
+	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
 	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
@@ -90,7 +90,7 @@ func checkPodExists(req *request, namespace, objectType, objectName string, chec
 func NewCmd() *cobra.Command {
 	var req request
 	c := &cobra.Command{
-		Use:     "pod_exists",
+		Use:     "check_pod_exists",
 		Short:   "Check Kubernetes Pod(s)",
 		Example: "",
 

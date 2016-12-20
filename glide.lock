@@ -1,5 +1,5 @@
-hash: fe9b990617a7d2a6328ab8d599dd0675e93ee617f07849ab6e16e6f8a0b7834a
-updated: 2016-12-15T06:55:37.05171545-08:00
+hash: 2ec35b3689ad18d46842b3a827cae87e5311c776274998706dc8779cf8bd3fc3
+updated: 2016-12-20T05:33:06.548025791-08:00
 imports:
 - name: appscode
   version: 956f4e547c1456353c3677c344cabb65d5afa242
@@ -17,7 +17,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: 7042e51f302961ea4151fdc06f6af5f0a8748983
+  version: d691091f32790720dc5ffa0cd547fc5d140c9100
   subpackages:
   - artifactory/v1beta1
   - auth/v1beta1
@@ -111,7 +111,7 @@ imports:
 - name: github.com/golang/glog
   version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/golang/protobuf
-  version: 888eb0692c857ec880338addf316bd662d5e630e
+  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
   - jsonpb
   - proto
@@ -124,7 +124,7 @@ imports:
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: a04adb3c66df3ca5809284ab5ebbebbe47f8c5e7
+  version: 93cde5d82c4bca62da70d631a348542eb2d44cd3
   repo: git@github.com:appscode/grpc-gateway.git
   vcs: git
   subpackages:
@@ -150,7 +150,7 @@ imports:
 - name: github.com/kelseyhightower/envconfig
   version: 9aca109c9aec4633fced9717c4a09ecab3d33111
 - name: github.com/Knetic/govaluate
-  version: 93f778d2172335e459bd2fb6d8db5429ecedccdf
+  version: 39e44fbf6e8e13420e14369b28e7196c719ee185
   subpackages:
   - hipchat
   - mailgun
@@ -167,7 +167,7 @@ imports:
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/prometheus/client_golang
-  version: c5b7fccd204277076155f10851dad72b76a49317
+  version: e51041b3fa41cece0dca035740ba6411905be473
   subpackages:
   - api/prometheus
 - name: github.com/prometheus/common
@@ -380,4 +380,12 @@ imports:
   - plugin/pkg/client/auth/oidc
   - third_party/forked/golang/reflect
   - third_party/forked/golang/template
-testImports: []
+testImports:
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- name: github.com/stretchr/testify
+  version: e3a8ff8ce36581f87a15341206f205b1da467059
+  subpackages:
+  - assert

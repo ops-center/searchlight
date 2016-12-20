@@ -9,6 +9,12 @@ import:
   - pkg/util/versionutil
   - pkg/clients/kube/client
   - pkg/clients/kube/install
+- package: github.com/golang/protobuf
+  version: 8ee79997227bf9b34611aee7946ae64735e6fd93
+- package: github.com/grpc-ecosystem/grpc-gateway
+  repo: git@github.com:appscode/grpc-gateway.git
+  vcs: git
+  version: 93cde5d82c4bca62da70d631a348542eb2d44cd3
 - package: github.com/appscode/api
   subpackages:
   - kubernetes/v1beta1

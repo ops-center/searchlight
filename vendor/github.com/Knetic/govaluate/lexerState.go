@@ -1,13 +1,7 @@
 package govaluate
 
-import (
-	"errors"
-	"fmt"
-)
-
 type lexerState struct {
 	isEOF          bool
-	isNullable     bool
 	kind           TokenKind
 	validNextKinds []TokenKind
 }
@@ -18,17 +12,14 @@ var validLexerStates = []lexerState{
 
 	lexerState{
 
-		kind:       CLAUSE,
-		isEOF:      false,
-		isNullable: true,
+		kind:  CLAUSE,
+		isEOF: false,
 		validNextKinds: []TokenKind{
 
 			PREFIX,
 			NUMERIC,
 			BOOLEAN,
 			VARIABLE,
-			PATTERN,
-			FUNCTION,
 			STRING,
 			TIME,
 			CLAUSE,
@@ -38,163 +29,106 @@ var validLexerStates = []lexerState{
 
 	lexerState{
 
-		kind:       CLAUSE_CLOSE,
-		isEOF:      true,
-		isNullable: true,
+		kind:  CLAUSE_CLOSE,
+		isEOF: true,
 		validNextKinds: []TokenKind{
 
 			COMPARATOR,
 			MODIFIER,
-			NUMERIC,
-			BOOLEAN,
-			VARIABLE,
-			STRING,
-			PATTERN,
-			TIME,
-			CLAUSE,
-			CLAUSE_CLOSE,
-			LOGICALOP,
-			TERNARY,
-			SEPARATOR,
-		},
-	},
-
-	lexerState{
-
-		kind:       NUMERIC,
-		isEOF:      true,
-		isNullable: false,
-		validNextKinds: []TokenKind{
-
-			MODIFIER,
-			COMPARATOR,
-			LOGICALOP,
-			CLAUSE_CLOSE,
-			TERNARY,
-			SEPARATOR,
-		},
-	},
-	lexerState{
-
-		kind:       BOOLEAN,
-		isEOF:      true,
-		isNullable: false,
-		validNextKinds: []TokenKind{
-
-			MODIFIER,
-			COMPARATOR,
-			LOGICALOP,
-			CLAUSE_CLOSE,
-			TERNARY,
-			SEPARATOR,
-		},
-	},
-	lexerState{
-
-		kind:       STRING,
-		isEOF:      true,
-		isNullable: false,
-		validNextKinds: []TokenKind{
-
-			MODIFIER,
-			COMPARATOR,
-			LOGICALOP,
-			CLAUSE_CLOSE,
-			TERNARY,
-			SEPARATOR,
-		},
-	},
-	lexerState{
-
-		kind:       TIME,
-		isEOF:      true,
-		isNullable: false,
-		validNextKinds: []TokenKind{
-
-			MODIFIER,
-			COMPARATOR,
-			LOGICALOP,
-			CLAUSE_CLOSE,
-			SEPARATOR,
-		},
-	},
-	lexerState{
-
-		kind:       PATTERN,
-		isEOF:      true,
-		isNullable: false,
-		validNextKinds: []TokenKind{
-
-			MODIFIER,
-			COMPARATOR,
-			LOGICALOP,
-			CLAUSE_CLOSE,
-			SEPARATOR,
-		},
-	},
-	lexerState{
-
-		kind:       VARIABLE,
-		isEOF:      true,
-		isNullable: false,
-		validNextKinds: []TokenKind{
-
-			MODIFIER,
-			COMPARATOR,
-			LOGICALOP,
-			CLAUSE_CLOSE,
-			TERNARY,
-			SEPARATOR,
-		},
-	},
-	lexerState{
-
-		kind:       MODIFIER,
-		isEOF:      false,
-		isNullable: false,
-		validNextKinds: []TokenKind{
-
-			PREFIX,
-			NUMERIC,
-			VARIABLE,
-			FUNCTION,
-			STRING,
-			BOOLEAN,
-			CLAUSE,
-			CLAUSE_CLOSE,
-		},
-	},
-	lexerState{
-
-		kind:       COMPARATOR,
-		isEOF:      false,
-		isNullable: false,
-		validNextKinds: []TokenKind{
-
 			PREFIX,
 			NUMERIC,
 			BOOLEAN,
 			VARIABLE,
-			FUNCTION,
 			STRING,
 			TIME,
 			CLAUSE,
 			CLAUSE_CLOSE,
-			PATTERN,
+		},
+	},
+
+	lexerState{
+
+		kind:  NUMERIC,
+		isEOF: true,
+		validNextKinds: []TokenKind{
+
+			MODIFIER,
+			COMPARATOR,
+			LOGICALOP,
+			CLAUSE_CLOSE,
 		},
 	},
 	lexerState{
 
-		kind:       LOGICALOP,
-		isEOF:      false,
-		isNullable: false,
+		kind:  BOOLEAN,
+		isEOF: true,
+		validNextKinds: []TokenKind{
+
+			MODIFIER,
+			COMPARATOR,
+			LOGICALOP,
+			CLAUSE_CLOSE,
+		},
+	},
+	lexerState{
+
+		kind:  STRING,
+		isEOF: true,
+		validNextKinds: []TokenKind{
+
+			MODIFIER,
+			COMPARATOR,
+			LOGICALOP,
+			CLAUSE_CLOSE,
+		},
+	},
+	lexerState{
+
+		kind:  TIME,
+		isEOF: true,
+		validNextKinds: []TokenKind{
+
+			MODIFIER,
+			COMPARATOR,
+			LOGICALOP,
+			CLAUSE_CLOSE,
+		},
+	},
+	lexerState{
+
+		kind:  VARIABLE,
+		isEOF: true,
+		validNextKinds: []TokenKind{
+
+			MODIFIER,
+			COMPARATOR,
+			LOGICALOP,
+			CLAUSE_CLOSE,
+		},
+	},
+	lexerState{
+
+		kind:  MODIFIER,
+		isEOF: false,
+		validNextKinds: []TokenKind{
+
+			PREFIX,
+			NUMERIC,
+			VARIABLE,
+			CLAUSE,
+			CLAUSE_CLOSE,
+		},
+	},
+	lexerState{
+
+		kind:  COMPARATOR,
+		isEOF: false,
 		validNextKinds: []TokenKind{
 
 			PREFIX,
 			NUMERIC,
 			BOOLEAN,
 			VARIABLE,
-			FUNCTION,
 			STRING,
 			TIME,
 			CLAUSE,
@@ -203,62 +137,31 @@ var validLexerStates = []lexerState{
 	},
 	lexerState{
 
-		kind:       PREFIX,
-		isEOF:      false,
-		isNullable: false,
+		kind:  LOGICALOP,
+		isEOF: false,
 		validNextKinds: []TokenKind{
 
+			PREFIX,
 			NUMERIC,
 			BOOLEAN,
 			VARIABLE,
-			FUNCTION,
+			STRING,
+			TIME,
 			CLAUSE,
 			CLAUSE_CLOSE,
 		},
 	},
-
 	lexerState{
 
-		kind:       TERNARY,
-		isEOF:      false,
-		isNullable: false,
+		kind:  PREFIX,
+		isEOF: false,
 		validNextKinds: []TokenKind{
 
-			PREFIX,
 			NUMERIC,
 			BOOLEAN,
-			STRING,
-			TIME,
 			VARIABLE,
-			FUNCTION,
 			CLAUSE,
-			SEPARATOR,
-		},
-	},
-	lexerState{
-
-		kind:       FUNCTION,
-		isEOF:      false,
-		isNullable: false,
-		validNextKinds: []TokenKind{
-			CLAUSE,
-		},
-	},
-	lexerState{
-
-		kind:       SEPARATOR,
-		isEOF:      false,
-		isNullable: true,
-		validNextKinds: []TokenKind{
-
-			PREFIX,
-			NUMERIC,
-			BOOLEAN,
-			STRING,
-			TIME,
-			VARIABLE,
-			FUNCTION,
-			CLAUSE,
+			CLAUSE_CLOSE,
 		},
 	},
 }
@@ -273,55 +176,4 @@ func (this lexerState) canTransitionTo(kind TokenKind) bool {
 	}
 
 	return false
-}
-
-func checkExpressionSyntax(tokens []ExpressionToken) error {
-
-	var state lexerState
-	var lastToken ExpressionToken
-	var err error
-
-	state = validLexerStates[0]
-
-	for _, token := range tokens {
-
-		if !state.canTransitionTo(token.Kind) {
-
-			firstStateName := fmt.Sprintf("%s [%v]", GetTokenKindString(state.kind), lastToken.Value)
-			nextStateName := fmt.Sprintf("%s [%v]", GetTokenKindString(token.Kind), token.Value)
-
-			return errors.New("Cannot transition token types from " + firstStateName + " to " + nextStateName)
-		}
-
-		state, err = getLexerStateForToken(token.Kind)
-		if err != nil {
-			return err
-		}
-
-		if !state.isNullable && token.Value == nil {
-
-			errorMsg := fmt.Sprintf("Token kind '%v' cannot have a nil value", GetTokenKindString(token.Kind))
-			return errors.New(errorMsg)
-		}
-
-		lastToken = token
-	}
-
-	if !state.isEOF {
-		return errors.New("Unexpected end of expression")
-	}
-	return nil
-}
-
-func getLexerStateForToken(kind TokenKind) (lexerState, error) {
-
-	for _, possibleState := range validLexerStates {
-
-		if possibleState.kind == kind {
-			return possibleState, nil
-		}
-	}
-
-	errorMsg := fmt.Sprintf("No lexer state found for token kind '%v'\n", GetTokenKindString(kind))
-	return validLexerStates[0], errors.New(errorMsg)
 }

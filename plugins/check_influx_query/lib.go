@@ -11,7 +11,7 @@ import (
 
 	"github.com/Knetic/govaluate"
 	"github.com/appscode/searchlight/pkg/config"
-	"github.com/appscode/searchlight/pkg/util"
+	"github.com/appscode/searchlight/util"
 	influxdb "github.com/influxdata/influxdb/client"
 	"github.com/spf13/cobra"
 	ini "github.com/vaughan0/go-ini"
@@ -237,7 +237,7 @@ func NewCmd() *cobra.Command {
 	var req request
 
 	c := &cobra.Command{
-		Use:     "influx_query",
+		Use:     "check_influx_query",
 		Short:   "Check InfluxDB Query Data",
 		Example: "",
 

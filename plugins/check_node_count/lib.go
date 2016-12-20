@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/appscode/searchlight/pkg/config"
-	"github.com/appscode/searchlight/pkg/util"
+	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
 	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/labels"
@@ -46,7 +46,7 @@ func NewCmd() *cobra.Command {
 	var req request
 
 	c := &cobra.Command{
-		Use:     "node_count",
+		Use:     "check_node_count",
 		Short:   "Count Kubernetes Nodes",
 		Example: "",
 

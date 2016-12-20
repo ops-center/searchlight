@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/appscode/searchlight/pkg/config"
-	"github.com/appscode/searchlight/pkg/util"
+	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
 	kapi "k8s.io/kubernetes/pkg/api"
 )
@@ -48,7 +48,7 @@ func NewCmd() *cobra.Command {
 	var req request
 	var host string
 	c := &cobra.Command{
-		Use:     "node_status",
+		Use:     "check_node_status",
 		Short:   "Check Kubernetes Node",
 		Example: "",
 

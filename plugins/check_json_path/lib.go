@@ -11,7 +11,7 @@ import (
 
 	"github.com/appscode/go-httpclient"
 	"github.com/appscode/searchlight/pkg/config"
-	"github.com/appscode/searchlight/pkg/util"
+	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
 	rest "k8s.io/kubernetes/pkg/client/restclient"
 )
@@ -179,7 +179,7 @@ func NewCmd() *cobra.Command {
 	var req request
 
 	c := &cobra.Command{
-		Use:     "json_path",
+		Use:     "check_json_path",
 		Short:   "Check Json Object",
 		Example: "",
 

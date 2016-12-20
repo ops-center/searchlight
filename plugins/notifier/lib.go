@@ -1,7 +1,6 @@
 package notifier
 
 import (
-	"appscode/pkg/util/logs"
 	"flag"
 	"fmt"
 	"os"
@@ -10,12 +9,13 @@ import (
 	api "github.com/appscode/api/kubernetes/v1beta1"
 	"github.com/appscode/client"
 	"github.com/appscode/log"
-	"github.com/appscode/searchlight/pkg/util"
 	"github.com/appscode/searchlight/plugins/notifier/driver/extpoints"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/hipchat"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/mailgun"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/smtp"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/twilio"
+	"github.com/appscode/searchlight/util"
+	"github.com/appscode/searchlight/util/logs"
 	"github.com/spf13/cobra"
 )
 
