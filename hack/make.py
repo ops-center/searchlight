@@ -183,7 +183,6 @@ def build(name):
 
 def build_cmds():
     gen()
-    fmt()
     for name in libbuild.BIN_MATRIX.keys():
         build_cmd(name)
 
