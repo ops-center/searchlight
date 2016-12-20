@@ -10,5 +10,4 @@ node_modules
 **/*.pyc
 kluster.json
 !hack/populate.sh
-**/bindata.go
 **/tuf.log

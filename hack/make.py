@@ -133,12 +133,23 @@ def version():
 
 
 def fmt():
-    die(call('goimports -w pkg cmd plugins'))
-    call('go fmt ./pkg/... ./cmd/... ./plugins/...')
+    die(call('goimports -w cmd data pkg plugins'))
+    call('go fmt ./cmd/... ./data/... ./pkg/... ./plugins/...')
 
 
 def vet():
-    call('go vet ./pkg/... ./cmd/... ./plugins/...')
+    call('go vet ./cmd/... ./data/... ./pkg/... ./plugins/...')
+
+
+def lint():
+    call('golint ./cmd/...')
+    call('golint ./data/...')
+    call('golint ./pkg/...')
+    call('golint ./plugins/...')
+
+
+def gen_assets():
+    die(call('go-bindata -ignore=\\.go -ignore=\\.DS_Store -modtime=1453795200 -o bindata.go -pkg files ./...', cwd=libbuild.REPO_ROOT + '/data/files'))
 
 
 def gen_extpoints():
@@ -146,8 +157,8 @@ def gen_extpoints():
 
 
 def gen():
+    gen_assets()
     gen_extpoints()
-    return
 
 
 def build_cmd(name):
@@ -206,13 +217,13 @@ def update_registry():
 
 
 def install():
-    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./pkg/... ./cmd/... ./plugins/...'))
+    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./cmd/... ./data/... ./pkg/... ./plugins/...'))
 
 
 def default():
     gen()
     fmt()
-    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./pkg/... ./cmd/... ./plugins/...'))
+    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./cmd/... ./data/... ./pkg/... ./plugins/...'))
 
 
 if __name__ == "__main__":
