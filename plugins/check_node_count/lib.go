@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	flags "github.com/appscode/go-flags"
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
@@ -51,7 +52,7 @@ func NewCmd() *cobra.Command {
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			util.EnsureFlagsSet(cmd, "count")
+			flags.EnsureRequiredFlags(cmd, "count")
 			checkNodeStatus(&req)
 		},
 	}

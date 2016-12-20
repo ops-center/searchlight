@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/Knetic/govaluate"
+	flags "github.com/appscode/go-flags"
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/util"
 	influxdb "github.com/influxdata/influxdb/client"
@@ -242,9 +243,9 @@ func NewCmd() *cobra.Command {
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			util.EnsureFlagsSet(cmd, "secret", "R")
-			util.EnsureAlterableFlagsSet(cmd, "A", "B", "C", "D", "E")
-			util.EnsureAlterableFlagsSet(cmd, "warning", "critical")
+			flags.EnsureRequiredFlags(cmd, "secret", "R")
+			flags.EnsureAlterableFlags(cmd, "A", "B", "C", "D", "E")
+			flags.EnsureAlterableFlags(cmd, "warning", "critical")
 			checkInfluxQuery(&req)
 		},
 	}

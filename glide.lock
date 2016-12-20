@@ -1,5 +1,5 @@
 hash: 2ec35b3689ad18d46842b3a827cae87e5311c776274998706dc8779cf8bd3fc3
-updated: 2016-12-20T05:33:06.548025791-08:00
+updated: 2016-12-20T08:49:15.221253645-08:00
 imports:
 - name: appscode
   version: 956f4e547c1456353c3677c344cabb65d5afa242
@@ -45,6 +45,12 @@ imports:
   - util
 - name: github.com/appscode/errors
   version: f11a3c92f49a735668f44eff11293e7961849d66
+- name: github.com/appscode/go-env
+  version: 908c6e2ba02cbab6e247bb9dbd7b022f8fa75d3d
+- name: github.com/appscode/go-files
+  version: e3bee84616faaefe1bf4c0a7cecc6d856f41135a
+- name: github.com/appscode/go-flags
+  version: 39969dfe5329f717c650eee1bae718baa6899ac5
 - name: github.com/appscode/go-httpclient
   version: 2dcd1877d59cfa67148606cf5beb8f58b2f1f451
 - name: github.com/appscode/go-notify
@@ -54,8 +60,14 @@ imports:
   - mailgun
   - smtp
   - twilio
+- name: github.com/appscode/go-term
+  version: 6a1928af8efb57ae3f1b6db0e9a1bb5de3172aa0
+- name: github.com/appscode/go-tracer
+  version: ff1131e240e3a9ef9931b1fa5ab7d920a81f1cd7
 - name: github.com/appscode/log
-  version: 80eca9c5883c667072798ef42e7be885d446d642
+  version: 3f1acdeb89863d101e1d5fc0fefb478b1e990b28
+  subpackages:
+  - golog
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/cenkalti/backoff
@@ -91,6 +103,8 @@ imports:
   - swagger
 - name: github.com/facebookgo/stack
   version: d9d227395bc3d7a635388c75b2e3b3a750e11888
+- name: github.com/fatih/color
+  version: 9aae6aaa22315390f03959adca2c4d395b02fcef
 - name: github.com/flosch/pongo2
   version: 22499f94d3d56c7238591344a6902715d0b8fbbf
 - name: github.com/ghodss/yaml
@@ -145,12 +159,14 @@ imports:
   version: 52d9b785554a1918cb09909b89a1509a98b853fd
 - name: github.com/jonboulle/clockwork
   version: 3f831b65b61282ba6bece21b91beea2edc4c887a
+- name: github.com/jpillora/go-ogle-analytics
+  version: 2fcc54fe85cce40ab0d9ce84d974f3be9948b9c0
 - name: github.com/juju/ratelimit
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
 - name: github.com/kelseyhightower/envconfig
   version: 9aca109c9aec4633fced9717c4a09ecab3d33111
 - name: github.com/Knetic/govaluate
-  version: 39e44fbf6e8e13420e14369b28e7196c719ee185
+  version: 36d12fdf60d2eced73454479e9935c9ea8bbe46a
   subpackages:
   - hipchat
   - mailgun
@@ -164,10 +180,14 @@ imports:
   - buffer
   - jlexer
   - jwriter
+- name: github.com/mattn/go-colorable
+  version: 3dac7b4f76f6e17fb39b768b89e3783d16e237fe
+- name: github.com/mattn/go-isatty
+  version: 56b76bdf51f7708750eac80fa38b952bb9f32639
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/prometheus/client_golang
-  version: e51041b3fa41cece0dca035740ba6411905be473
+  version: 575f371f7862609249a1be4c9145f429fe065e32
   subpackages:
   - api/prometheus
 - name: github.com/prometheus/common
@@ -220,6 +240,10 @@ imports:
   - internal
   - jws
   - jwt
+- name: golang.org/x/sys
+  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
+  subpackages:
+  - unix
 - name: golang.org/x/text
   version: 2910a502d2bf9e43193af9d68ca516529614eed3
   subpackages:

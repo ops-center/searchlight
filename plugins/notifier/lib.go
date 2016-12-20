@@ -8,14 +8,15 @@ import (
 
 	api "github.com/appscode/api/kubernetes/v1beta1"
 	"github.com/appscode/client"
+	files "github.com/appscode/go-files"
+	flags "github.com/appscode/go-flags"
 	"github.com/appscode/log"
+	logs "github.com/appscode/log/golog"
 	"github.com/appscode/searchlight/plugins/notifier/driver/extpoints"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/hipchat"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/mailgun"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/smtp"
 	_ "github.com/appscode/searchlight/plugins/notifier/driver/twilio"
-	"github.com/appscode/searchlight/util"
-	"github.com/appscode/searchlight/util/logs"
 	"github.com/spf13/cobra"
 )
 
@@ -32,13 +33,13 @@ type Secret struct {
 }
 
 func notifyViaAppsCode(req *api.IncidentNotifyRequest) error {
-	cluster_uid, err := util.ReadFile(appscodeConfigPath + "cluster-uid")
+	cluster_uid, err := files.ReadFile(appscodeConfigPath + "cluster-uid")
 	if err != nil {
 		return err
 	}
 	req.KubernetesCluster = cluster_uid
 
-	grpc_endpoint, err := util.ReadFile(appscodeConfigPath + "appscode-api-grpc-endpoint")
+	grpc_endpoint, err := files.ReadFile(appscodeConfigPath + "appscode-api-grpc-endpoint")
 	if err != nil {
 		return err
 	}
@@ -46,7 +47,7 @@ func notifyViaAppsCode(req *api.IncidentNotifyRequest) error {
 	apiOptions := client.NewOption(grpc_endpoint)
 
 	var secretData Secret
-	if err := util.ReadFileAs(appscodeSecretPath+"api-token", &secretData); err != nil {
+	if err := files.ReadFileAs(appscodeSecretPath+"api-token", &secretData); err != nil {
 		return err
 	}
 
@@ -78,7 +79,7 @@ func sendNotification(req *api.IncidentNotifyRequest) {
 		os.Exit(1)
 	}
 
-	cluster_uid, err := util.ReadFile(appscodeConfigPath + "cluster-name")
+	cluster_uid, err := files.ReadFile(appscodeConfigPath + "cluster-name")
 	if err != nil {
 		cluster_uid = ""
 	}
@@ -106,7 +107,7 @@ func NewCmd() *cobra.Command {
 		Short:   "AppsCode Icinga2 Notifier",
 		Example: "",
 		Run: func(cmd *cobra.Command, args []string) {
-			util.EnsureFlagsSet(cmd, "alert", "host", "type", "state", "output", "time")
+			flags.EnsureRequiredFlags(cmd, "alert", "host", "type", "state", "output", "time")
 			t, err := time.Parse("2006-01-02 15:04:05 +0000", eventTime)
 			if err != nil {
 				log.Errorln(err)

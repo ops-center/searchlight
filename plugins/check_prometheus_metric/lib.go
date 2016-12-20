@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	flags "github.com/appscode/go-flags"
 	"github.com/appscode/searchlight/util"
 	"github.com/prometheus/client_golang/api/prometheus"
 	"github.com/prometheus/common/model"
@@ -125,7 +126,7 @@ func NewCmd() *cobra.Command {
 				fmt.Fprintln(os.Stdout, util.State[3], errors.New("No prometheus host found"))
 				os.Exit(3)
 			}
-			util.EnsureFlagsSet(cmd, "query", "warning", "critical")
+			flags.EnsureRequiredFlags(cmd, "query", "warning", "critical")
 			checkPrometheusMetric(&req)
 		},
 	}

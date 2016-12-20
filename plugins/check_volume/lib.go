@@ -10,6 +10,7 @@ import (
 	"os"
 	"strings"
 
+	flags "github.com/appscode/go-flags"
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
@@ -305,11 +306,11 @@ func NewCmd() *cobra.Command {
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			util.EnsureFlagsSet(cmd, "host")
+			flags.EnsureRequiredFlags(cmd, "host")
 			if req.node_stat {
 				checkNodeDiskStat(&req)
 			} else {
-				util.EnsureFlagsSet(cmd, "name")
+				flags.EnsureRequiredFlags(cmd, "name")
 				checkPodVolumeStat(&req)
 			}
 		},

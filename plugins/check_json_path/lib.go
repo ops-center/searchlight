@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 
+	flags "github.com/appscode/go-flags"
 	"github.com/appscode/go-httpclient"
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/util"
@@ -184,8 +185,8 @@ func NewCmd() *cobra.Command {
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			util.EnsureFlagsSet(cmd, "url", "query")
-			util.EnsureAlterableFlagsSet(cmd, "warning", "critical")
+			flags.EnsureRequiredFlags(cmd, "url", "query")
+			flags.EnsureAlterableFlags(cmd, "warning", "critical")
 			checkJsonPath(&req)
 		},
 	}

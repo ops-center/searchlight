@@ -4,8 +4,8 @@ package main
 import (
 	"os"
 
+	logs "github.com/appscode/log/golog"
 	"github.com/appscode/searchlight/plugins/notifier"
-	"github.com/appscode/searchlight/util/logs"
 	v "github.com/appscode/searchlight/util/version"
 )
 

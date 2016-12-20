@@ -1,19 +1,17 @@
 package govaluate
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
-	"math"
-	"time"
-	"reflect"
 )
 
 const isoDateFormat string = "2006-01-02T15:04:05.999999999Z0700"
 
+var DUMMY_PARAMETERS = MapParameters(map[string]interface{}{})
+
 /*
 	EvaluableExpression represents a set of ExpressionTokens which, taken together,
-	represent an arbitrary expression that can be evaluated down into a single value.
+	are an expression that can be evaluated down into a single value.
 */
 type EvaluableExpression struct {
 
@@ -23,15 +21,72 @@ type EvaluableExpression struct {
 	*/
 	QueryDateFormat string
 
-	tokens          []ExpressionToken
-	inputExpression string
+	/*
+		Whether or not to safely check types when evaluating.
+		If true, this library will return error messages when invalid types are used.
+		If false, the library will panic when operators encounter types they can't use.
+
+		This is exclusively for users who need to squeeze every ounce of speed out of the library as they can,
+		and you should only set this to false if you know exactly what you're doing.
+	*/
+	ChecksTypes bool
+
+	tokens           []ExpressionToken
+	evaluationStages *evaluationStage
+	inputExpression  string
 }
 
 /*
-	Creates a new EvaluableExpression from the given [expression] string.
+	Parses a new EvaluableExpression from the given [expression] string.
 	Returns an error if the given expression has invalid syntax.
 */
 func NewEvaluableExpression(expression string) (*EvaluableExpression, error) {
+
+	functions := make(map[string]ExpressionFunction)
+	return NewEvaluableExpressionWithFunctions(expression, functions)
+}
+
+/*
+	Similar to [NewEvaluableExpression], except that instead of a string, an already-tokenized expression is given.
+	This is useful in cases where you may be generating an expression automatically, or using some other parser (e.g., to parse from a query language)
+*/
+func NewEvaluableExpressionFromTokens(tokens []ExpressionToken) (*EvaluableExpression, error) {
+
+	var ret *EvaluableExpression
+	var err error
+
+	ret = new(EvaluableExpression)
+	ret.QueryDateFormat = isoDateFormat
+
+	err = checkBalance(tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkExpressionSyntax(tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	ret.tokens, err = optimizeTokens(tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	ret.evaluationStages, err = planStages(ret.tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	ret.ChecksTypes = true
+	return ret, nil
+}
+
+/*
+	Similar to [NewEvaluableExpression], except enables the use of user-defined functions.
+	Functions passed into this will be available to the expression.
+*/
+func NewEvaluableExpressionWithFunctions(expression string, functions map[string]ExpressionFunction) (*EvaluableExpression, error) {
 
 	var ret *EvaluableExpression
 	var err error
@@ -39,577 +94,125 @@ func NewEvaluableExpression(expression string) (*EvaluableExpression, error) {
 	ret = new(EvaluableExpression)
 	ret.QueryDateFormat = isoDateFormat
 	ret.inputExpression = expression
-	ret.tokens, err = parseTokens(expression)
 
+	ret.tokens, err = parseTokens(expression, functions)
 	if err != nil {
 		return nil, err
 	}
+
+	err = checkBalance(ret.tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkExpressionSyntax(ret.tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	ret.tokens, err = optimizeTokens(ret.tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	ret.evaluationStages, err = planStages(ret.tokens)
+	if err != nil {
+		return nil, err
+	}
+
+	ret.ChecksTypes = true
 	return ret, nil
 }
 
 /*
-	Evaluate runs the entire expression using the given [parameters].
-	Each parameter is mapped from a string to a value, such as "foo" = 1.0.
-	If the expression contains a reference to the variable "foo", it will be taken from parameters["foo"].
-
-	This function returns errors if the combination of expression and parameters cannot be run,
-	such as if a string parameter is given in an expression that expects it to be a boolean.
-	e.g., "foo == true", where foo is any string.
-	These errors are almost exclusively returned for parameters not being present, or being of the wrong type.
-	Structural problems with the expression (unexpected tokens, unexpected end of expression, etc) are discovered
-	during parsing of the expression in NewEvaluableExpression.
-
-	In all non-error circumstances, this returns the single value result of the expression and parameters given.
-	e.g., if the expression is "1 + 1", Evaluate will return 2.0.
-	e.g., if the expression is "foo + 1" and parameters contains "foo" = 2, Evaluate will return 3.0
+	Same as `Eval`, but automatically wraps a map of parameters into a `govalute.Parameters` structure.
 */
 func (this EvaluableExpression) Evaluate(parameters map[string]interface{}) (interface{}, error) {
 
-	var stream *tokenStream
-	var cleanedParameters map[string]interface{}
-	var err error
-
-	cleanedParameters, err = sanitizeParamters(parameters)
-
-	if(err != nil) {
-		return nil, err
+	if parameters == nil {
+		return this.Eval(nil)
 	}
-
-	stream = newTokenStream(this.tokens)
-	return evaluateTokens(stream, cleanedParameters)
-}
-
-func evaluateTokens(stream *tokenStream, parameters map[string]interface{}) (interface{}, error) {
-
-	if stream.hasNext() {
-		return evaluateLogical(stream, parameters)
-	}
-	return nil, nil
-}
-
-func evaluateLogical(stream *tokenStream, parameters map[string]interface{}) (interface{}, error) {
-
-	var token ExpressionToken
-	var value interface{}
-	var symbol OperatorSymbol
-	var err error
-	var keyFound bool
-
-	value, err = evaluateComparator(stream, parameters)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for stream.hasNext() {
-
-		token = stream.next()
-
-		if !isString(token.Value) {
-			break
-		}
-
-		symbol, keyFound = LOGICAL_SYMBOLS[token.Value.(string)]
-		if !keyFound {
-			break
-		}
-
-		switch symbol {
-
-		case OR:
-			if value != nil {
-				return evaluateLogical(stream, parameters)
-			} else {
-				value, err = evaluateComparator(stream, parameters)
-			}
-		case AND:
-			if value == nil {
-				return evaluateLogical(stream, parameters)
-			} else {
-				value, err = evaluateComparator(stream, parameters)
-			}
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	stream.rewind()
-	return value, nil
-}
-
-func evaluateComparator(stream *tokenStream, parameters map[string]interface{}) (interface{}, error) {
-
-	var token ExpressionToken
-	var value, rightValue interface{}
-	var symbol OperatorSymbol
-	var err error
-	var keyFound bool
-
-	value, err = evaluateAdditiveModifier(stream, parameters)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for stream.hasNext() {
-
-		token = stream.next()
-
-		if !isString(token.Value) {
-			break
-		}
-
-		symbol, keyFound = COMPARATOR_SYMBOLS[token.Value.(string)]
-		if !keyFound {
-			break
-		}
-
-		rightValue, err = evaluateAdditiveModifier(stream, parameters)
-		if err != nil {
-			return nil, err
-		}
-
-		switch symbol {
-
-		case LT:
-			return (value.(float64) < rightValue.(float64)), nil
-		case LTE:
-			return (value.(float64) <= rightValue.(float64)), nil
-		case GT:
-			return (value.(float64) > rightValue.(float64)), nil
-		case GTE:
-			return (value.(float64) >= rightValue.(float64)), nil
-		case EQ:
-			return (value == rightValue), nil
-		case NEQ:
-			return (value != rightValue), nil
-		}
-	}
-
-	stream.rewind()
-	return value, nil
-}
-
-func evaluateAdditiveModifier(stream *tokenStream, parameters map[string]interface{}) (interface{}, error) {
-
-	var token ExpressionToken
-	var value, rightValue interface{}
-	var symbol OperatorSymbol
-	var err error
-	var keyFound bool
-
-	value, err = evaluateMultiplicativeModifier(stream, parameters)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for stream.hasNext() {
-
-		token = stream.next()
-
-		if !isString(token.Value) {
-			break
-		}
-
-		symbol, keyFound = MODIFIER_SYMBOLS[token.Value.(string)]
-		if !keyFound {
-			break
-		}
-
-		switch symbol {
-
-		case PLUS:
-			rightValue, err = evaluateMultiplicativeModifier(stream, parameters)
-			if err != nil {
-				return nil, err
-			}
-			value = value.(float64) + rightValue.(float64)
-
-		case MINUS:
-			rightValue, err = evaluateMultiplicativeModifier(stream, parameters)
-			if err != nil {
-				return nil, err
-			}
-
-			return value.(float64) - rightValue.(float64), nil
-
-		default:
-			stream.rewind()
-			return value, nil
-		}
-	}
-
-	stream.rewind()
-	return value, nil
-}
-
-func evaluateMultiplicativeModifier(stream *tokenStream, parameters map[string]interface{}) (interface{}, error) {
-
-	var token ExpressionToken
-	var value, rightValue interface{}
-	var symbol OperatorSymbol
-	var err error
-	var keyFound bool
-
-	value, err = evaluateExponentialModifier(stream, parameters)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for stream.hasNext() {
-
-		token = stream.next()
-
-		if !isString(token.Value) {
-			break
-		}
-
-		symbol, keyFound = MODIFIER_SYMBOLS[token.Value.(string)]
-		if !keyFound {
-			break
-		}
-
-		switch symbol {
-
-		case MULTIPLY:
-			rightValue, err = evaluateMultiplicativeModifier(stream, parameters)
-			if err != nil {
-				return nil, err
-			}
-			return value.(float64) * rightValue.(float64), nil
-
-		case DIVIDE:
-			rightValue, err = evaluateMultiplicativeModifier(stream, parameters)
-			if err != nil {
-				return nil, err
-			}
-			return value.(float64) / rightValue.(float64), nil
-
-		case MODULUS:
-			rightValue, err = evaluateMultiplicativeModifier(stream, parameters)
-			if err != nil {
-				return nil, err
-			}
-			return math.Mod(value.(float64), rightValue.(float64)), nil
-
-		default:
-			stream.rewind()
-			return value, nil
-		}
-	}
-
-	stream.rewind()
-	return value, nil
-}
-
-func evaluateExponentialModifier(stream *tokenStream, parameters map[string]interface{}) (interface{}, error) {
-
-	var token ExpressionToken
-	var value, rightValue interface{}
-	var symbol OperatorSymbol
-	var err error
-	var keyFound bool
-
-	value, err = evaluateValue(stream, parameters)
-
-	if err != nil {
-		return nil, err
-	}
-
-	for stream.hasNext() {
-
-		token = stream.next()
-
-		if !isString(token.Value) {
-			break
-		}
-
-		symbol, keyFound = MODIFIER_SYMBOLS[token.Value.(string)]
-		if !keyFound {
-			break
-		}
-
-		switch symbol {
-
-		case EXPONENT:
-			rightValue, err = evaluateExponentialModifier(stream, parameters)
-			if err != nil {
-				return nil, err
-			}
-			return math.Pow(value.(float64), rightValue.(float64)), nil
-
-		default:
-			stream.rewind()
-			return value, nil
-		}
-	}
-
-	stream.rewind()
-	return value, nil
-}
-
-func evaluatePrefix(stream *tokenStream, parameters map[string]interface{}) (interface{}, error) {
-
-	var token ExpressionToken
-	var value interface{}
-	var symbol OperatorSymbol
-	var err error
-	var keyFound bool
-
-	for stream.hasNext() {
-
-		token = stream.next()
-
-		if token.Kind != PREFIX || !isString(token.Value) {
-			break
-		}
-
-		symbol, keyFound = PREFIX_SYMBOLS[token.Value.(string)]
-		if !keyFound {
-			break
-		}
-
-		switch symbol {
-
-		case INVERT:
-			value, err = evaluateValue(stream, parameters)
-			if err != nil {
-				return nil, err
-			}
-
-			return !value.(bool), nil
-
-		case NEGATE:
-			value, err = evaluateValue(stream, parameters)
-			if err != nil {
-				return nil, err
-			}
-
-			return -value.(float64), nil
-
-		default:
-			stream.rewind()
-			return value, nil
-		}
-	}
-
-	stream.rewind()
-	return nil, nil
-}
-
-func evaluateValue(stream *tokenStream, parameters map[string]interface{}) (interface{}, error) {
-
-	var token ExpressionToken
-	var value interface{}
-	var errorMessage, variableName string
-	var err error
-
-	token = stream.next()
-
-	switch token.Kind {
-
-	case CLAUSE:
-		value, err = evaluateTokens(stream, parameters)
-		if err != nil {
-			return nil, err
-		}
-
-		token = stream.next()
-		if token.Kind != CLAUSE_CLOSE {
-
-			return nil, errors.New("Unbalanced parenthesis")
-		}
-
-		return value, nil
-
-	case VARIABLE:
-		variableName = token.Value.(string)
-		value = parameters[variableName]
-
-		if value == nil {
-			errorMessage = "No parameter '" + variableName + "' found."
-			return nil, errors.New(errorMessage)
-		}
-
-		return value, nil
-
-	case NUMERIC:
-		fallthrough
-	case STRING:
-		fallthrough
-	case BOOLEAN:
-		return token.Value, nil
-	case TIME:
-		return float64(token.Value.(time.Time).Unix()), nil
-
-	case PREFIX:
-		stream.rewind()
-
-		value, err = evaluatePrefix(stream, parameters)
-		if err != nil {
-			return nil, err
-		}
-		if value == nil {
-			break
-		}
-
-		return value, nil
-	default:
-		break
-	}
-
-	stream.rewind()
-	return nil, errors.New("Unable to evaluate token kind: " + GetTokenKindString(token.Kind))
+	return this.Eval(MapParameters(parameters))
 }
 
 /*
-	Returns a string representing this expression as if it were written in SQL.
-	This function assumes that all parameters exist within the same table, and that the table essentially represents
-	a serialized object of some sort (e.g., hibernate).
-	If your data model is more normalized, you may need to consider iterating through each actual token given by `Tokens()`
-	to create your query.
+	Runs the entire expression using the given [parameters].
+	e.g., If the expression contains a reference to the variable "foo", it will be taken from `parameters.Get("foo")`.
 
-	Boolean values are considered to be "1" for true, "0" for false.
+	This function returns errors if the combination of expression and parameters cannot be run,
+	such as if a variable in the expression is not present in [parameters].
 
-	Times are formatted according to this.QueryDateFormat.
+	In all non-error circumstances, this returns the single value result of the expression and parameters given.
+	e.g., if the expression is "1 + 1", this will return 2.0.
+	e.g., if the expression is "foo + 1" and parameters contains "foo" = 2, this will return 3.0
 */
-func (this EvaluableExpression) ToSQLQuery() (string, error) {
+func (this EvaluableExpression) Eval(parameters Parameters) (interface{}, error) {
 
-	var stream *tokenStream
-	var token ExpressionToken
-	var retBuffer bytes.Buffer
-	var toWrite, ret string
-
-	stream = newTokenStream(this.tokens)
-
-	for stream.hasNext() {
-
-		token = stream.next()
-
-		switch token.Kind {
-
-		case STRING:
-			toWrite = fmt.Sprintf("'%v' ", token.Value)
-		case TIME:
-			toWrite = fmt.Sprintf("'%s' ", token.Value.(time.Time).Format(this.QueryDateFormat))
-
-		case LOGICALOP:
-			switch LOGICAL_SYMBOLS[token.Value.(string)] {
-
-			case AND:
-				toWrite = "AND "
-			case OR:
-				toWrite = "OR "
-			}
-
-		case BOOLEAN:
-			if token.Value.(bool) {
-				toWrite = "1 "
-			} else {
-				toWrite = "0 "
-			}
-
-		case VARIABLE:
-			toWrite = fmt.Sprintf("[%s] ", token.Value.(string))
-
-		case NUMERIC:
-			toWrite = fmt.Sprintf("%g ", token.Value.(float64))
-
-		case COMPARATOR:
-			switch COMPARATOR_SYMBOLS[token.Value.(string)] {
-
-			case EQ:
-				toWrite = "= "
-			case NEQ:
-				toWrite = "<> "
-			default:
-				toWrite = fmt.Sprintf("%s ", token.Value.(string))
-			}
-
-		case PREFIX:
-			toWrite = fmt.Sprintf("%s", token.Value.(string))
-		case MODIFIER:
-			toWrite = fmt.Sprintf("%s ", token.Value.(string))
-		case CLAUSE:
-			toWrite = "( "
-		case CLAUSE_CLOSE:
-			toWrite = ") "
-
-		default:
-			toWrite = fmt.Sprintf("Unrecognized query token '%s' of kind '%s'", token.Value, token.Kind)
-			return "", errors.New(toWrite)
-		}
-
-		retBuffer.WriteString(toWrite)
+	if this.evaluationStages == nil {
+		return nil, nil
 	}
 
-	// trim last space.
-	ret = retBuffer.String()
-	ret = ret[:len(ret)-1]
-
-	return ret, nil
+	if parameters != nil {
+		parameters = &sanitizedParameters{parameters}
+	}
+	return this.evaluateStage(this.evaluationStages, parameters)
 }
 
-/*
-	Returns a string representing this expression as if it were written as a Mongo query.
-*/
-func (this EvaluableExpression) ToMongoQuery() (string, error) {
+func (this EvaluableExpression) evaluateStage(stage *evaluationStage, parameters Parameters) (interface{}, error) {
 
-	var stream *tokenStream
-	var token ExpressionToken
-	var retBuffer bytes.Buffer
-	var toWrite, ret string
+	var left, right interface{}
+	var err error
 
-	stream = newTokenStream(this.tokens)
-
-	for stream.hasNext() {
-
-		token = stream.next()
-
-		switch token.Kind {
-
-		case STRING:
-			toWrite = fmt.Sprintf("\"%s\" ", token.Value.(string))
-		case TIME:
-			toWrite = fmt.Sprintf("ISODate(\"%s\") ", token.Value.(time.Time).Format(isoDateFormat))
-		case LOGICALOP:
-		case BOOLEAN:
-			if token.Value.(bool) {
-				toWrite = "true "
-			} else {
-				toWrite = "false "
-			}
-		case VARIABLE:
-			toWrite = fmt.Sprintf("%s ", token.Value.(string))
-		case NUMERIC:
-			toWrite = fmt.Sprintf("%g ", token.Value.(float64))
-		case COMPARATOR:
-		case CLAUSE:
-			fallthrough
-		case CLAUSE_CLOSE:
-			continue
-
-		case MODIFIER:
-			toWrite = fmt.Sprintf("Unable to use modifiers in Mongo queries (found '%s')", token.Kind)
-			return "", errors.New(toWrite)
-
-		default:
-			toWrite = fmt.Sprintf("Unrecognized query token '%s' of kind '%s'", token.Value, token.Kind)
-			return "", errors.New(toWrite)
+	if stage.leftStage != nil {
+		left, err = this.evaluateStage(stage.leftStage, parameters)
+		if err != nil {
+			return nil, err
 		}
-
-		retBuffer.WriteString(toWrite)
 	}
 
-	// trim last space.
-	ret = retBuffer.String()
-	ret = ret[:len(ret)-1]
+	if stage.rightStage != nil {
+		right, err = this.evaluateStage(stage.rightStage, parameters)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-	return ret, nil
+	if this.ChecksTypes {
+		if stage.typeCheck == nil {
+
+			err = typeCheck(stage.leftTypeCheck, left, stage.symbol, stage.typeErrorFormat)
+			if err != nil {
+				return nil, err
+			}
+
+			err = typeCheck(stage.rightTypeCheck, right, stage.symbol, stage.typeErrorFormat)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			// special case where the type check needs to know both sides to determine if the operator can handle it
+			if !stage.typeCheck(left, right) {
+				errorMsg := fmt.Sprintf(stage.typeErrorFormat, left, stage.symbol.String())
+				return nil, errors.New(errorMsg)
+			}
+		}
+	}
+
+	return stage.operator(left, right, parameters)
+}
+
+func typeCheck(check stageTypeCheck, value interface{}, symbol OperatorSymbol, format string) error {
+
+	if check == nil {
+		return nil
+	}
+
+	if check(value) {
+		return nil
+	}
+
+	errorMsg := fmt.Sprintf(format, value, symbol.String())
+	return errors.New(errorMsg)
 }
 
 /*
@@ -628,125 +231,15 @@ func (this EvaluableExpression) String() string {
 	return this.inputExpression
 }
 
-func sanitizeParamters(parameters map[string]interface{}) (map[string]interface{}, error) {
-
-	var ret map[string]interface{}
-	var needsSanitization bool
-	var err error
-
-	// we don't copy anything unless there is something that needs to be sanitized.
-	needsSanitization = false
-
-	for key, value := range parameters {
-
-		// make sure that the parameter is a valid type.
-		err = checkValidType(key, value)
-		if(err != nil) {
-			return nil, err
-		}
-
-		// should be converted to fixed point?
-		if isFixedPoint(value) {
-
-			// sanitize.
-			// if we haven't yet made a new map, do so and copy all keys.
-			if !needsSanitization {
-
-				ret = make(map[string]interface{}, len(parameters))
-
-				for innerKey, innerValue := range parameters {
-					ret[innerKey] = innerValue
-				}
-
-				needsSanitization = true
-			}
-
-			ret[key] = castFixedPoint(value)
+/*
+	Returns an array representing the variables contained in this EvaluableExpression.
+*/
+func (this EvaluableExpression) Vars() []string {
+	var varlist []string
+	for _, val := range this.Tokens() {
+		if val.Kind == VARIABLE {
+			varlist = append(varlist, val.Value.(string))
 		}
 	}
-
-	if needsSanitization {
-		return ret, nil
-	}
-	return parameters, nil
-}
-
-func checkValidType(key string, value interface{}) error {
-
-	switch value.(type) {
-	case complex64:
-		errorMsg := fmt.Sprintf("Parameter '%s' is a complex64 integer, which is not evaluable", key)
-		return errors.New(errorMsg)
-	case complex128:
-		errorMsg := fmt.Sprintf("Parameter '%s' is a complex128 integer, which is not evaluable", key)
-		return errors.New(errorMsg)
-	}
-
-	if reflect.ValueOf(value).Kind() == reflect.Struct {
-		errorMsg := fmt.Sprintf("Parameter '%s' is a struct, which is not evaluable", key)
-		return errors.New(errorMsg)
-	}
-
-	return nil
-}
-
-func isFixedPoint(value interface{}) bool {
-
-	switch value.(type) {
-	case uint8:
-		return true
-	case uint16:
-		return true
-	case uint32:
-		return true
-	case uint64:
-		return true
-	case int8:
-		return true
-	case int16:
-		return true
-	case int32:
-		return true
-	case int64:
-		return true
-	case int:
-		return true
-	}
-	return false
-}
-
-func castFixedPoint(value interface{}) float64 {
-	switch value.(type) {
-	case uint8:
-		return float64(value.(uint8))
-	case uint16:
-		return float64(value.(uint16))
-	case uint32:
-		return float64(value.(uint32))
-	case uint64:
-		return float64(value.(uint64))
-	case int8:
-		return float64(value.(int8))
-	case int16:
-		return float64(value.(int16))
-	case int32:
-		return float64(value.(int32))
-	case int64:
-		return float64(value.(int64))
-	case int:
-		return float64(value.(int))
-	}
-
-	return 0.0
-}
-
-func isString(value interface{}) bool {
-
-	switch value.(type) {
-	case string:
-		return true
-	default:
-		break
-	}
-	return false
+	return varlist
 }

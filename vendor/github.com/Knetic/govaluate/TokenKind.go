@@ -12,8 +12,11 @@ const (
 	NUMERIC
 	BOOLEAN
 	STRING
+	PATTERN
 	TIME
 	VARIABLE
+	FUNCTION
+	SEPARATOR
 
 	COMPARATOR
 	LOGICALOP
@@ -21,6 +24,8 @@ const (
 
 	CLAUSE
 	CLAUSE_CLOSE
+
+	TERNARY
 )
 
 /*
@@ -39,10 +44,16 @@ func GetTokenKindString(kind TokenKind) string {
 		return "BOOLEAN"
 	case STRING:
 		return "STRING"
+	case PATTERN:
+		return "PATTERN"
 	case TIME:
 		return "TIME"
 	case VARIABLE:
 		return "VARIABLE"
+	case FUNCTION:
+		return "FUNCTION"
+	case SEPARATOR:
+		return "SEPARATOR"
 	case COMPARATOR:
 		return "COMPARATOR"
 	case LOGICALOP:
@@ -53,6 +64,8 @@ func GetTokenKindString(kind TokenKind) string {
 		return "CLAUSE"
 	case CLAUSE_CLOSE:
 		return "CLAUSE_CLOSE"
+	case TERNARY:
+		return "TERNARY"
 	}
 
 	return "UNKNOWN"

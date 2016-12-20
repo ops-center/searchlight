@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	flags "github.com/appscode/go-flags"
 	"github.com/appscode/searchlight/pkg/config"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
@@ -95,7 +96,7 @@ func NewCmd() *cobra.Command {
 		Example: "",
 
 		Run: func(cmd *cobra.Command, args []string) {
-			util.EnsureFlagsSet(cmd, "host")
+			flags.EnsureRequiredFlags(cmd, "host")
 
 			parts := strings.Split(req.host, "@")
 			if len(parts) != 2 {
