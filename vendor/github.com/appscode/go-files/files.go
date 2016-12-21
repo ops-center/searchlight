@@ -1,10 +1,12 @@
 package files
 
 import (
+	"bufio"
 	"encoding/json"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func ReadFile(path string) (string, error) {
@@ -25,6 +27,36 @@ func ReadFileAs(path string, obj interface{}) error {
 		return err
 	}
 	return nil
+}
+
+/*
+ReadINIConfig loads a ini config file without any sections. Example:
+--- --- ---
+a=b
+c=d
+--- --- ---
+*/
+func ReadINIConfig(path string) (map[string]string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	mp := make(map[string]string)
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		result := strings.Split(scanner.Text(), "=")
+		if len(result) != 2 {
+			continue
+		}
+		mp[string(result[0])] = result[1]
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return mp, nil
 }
 
 func WriteFile(path string, obj interface{}) error {

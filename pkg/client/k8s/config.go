@@ -1,9 +1,8 @@
 package k8s
 
 import (
-	extclient "appscode/pkg/clients/kube/client"
-	_ "appscode/pkg/clients/kube/install"
-
+	_ "github.com/appscode/k8s-addons/api/install"
+	acs "github.com/appscode/k8s-addons/client/clientset"
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	rest "k8s.io/kubernetes/pkg/client/restclient"
 )
@@ -20,7 +19,7 @@ const (
 
 type KubeClient struct {
 	Client                  clientset.Interface
-	AppscodeExtensionClient extclient.AppsCodeExtensionInterface
+	AppscodeExtensionClient acs.AppsCodeExtensionInterface
 
 	config *rest.Config
 }

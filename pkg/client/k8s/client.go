@@ -1,11 +1,10 @@
 package k8s
 
 import (
-	extclient "appscode/pkg/clients/kube/client"
-	_ "appscode/pkg/clients/kube/install"
-
 	"github.com/appscode/errors"
 	_env "github.com/appscode/go-env"
+	_ "github.com/appscode/k8s-addons/api/install"
+	acs "github.com/appscode/k8s-addons/client/clientset"
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	rest "k8s.io/kubernetes/pkg/client/restclient"
 )
@@ -37,7 +36,7 @@ func NewClient() (*KubeClient, error) {
 		return nil, errors.New().WithCause(err).Internal()
 	}
 
-	appscodeClient, err := extclient.NewACExtensionsForConfig(config)
+	appscodeClient, err := acs.NewACExtensionsForConfig(config)
 	if err != nil {
 		return nil, errors.New().WithCause(err).Internal()
 	}

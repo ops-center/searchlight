@@ -1,23 +1,16 @@
 package: github.com/appscode/searchlight
 import:
-- package: appscode
-  repo: git@diffusion.appscode.com:appscode/43/appscode.git
-  version: kube-1.5
-  vcs: git
-  subpackages:
-  - pkg/util/logs
-  - pkg/util/versionutil
-  - pkg/clients/kube/client
-  - pkg/clients/kube/install
+- package: github.com/appscode/k8s-addons
+  version: 1.5
 - package: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
 - package: github.com/grpc-ecosystem/grpc-gateway
   repo: git@github.com:appscode/grpc-gateway.git
   vcs: git
   version: 93cde5d82c4bca62da70d631a348542eb2d44cd3
+- package: google.golang.org/grpc
+  version: v1.0.4
 - package: github.com/appscode/api
-  subpackages:
-  - kubernetes/v1beta1
 - package: github.com/appscode/client
 - package: github.com/appscode/errors
 - package: github.com/appscode/go-httpclient
@@ -25,30 +18,12 @@ import:
 - package: github.com/appscode/log
 - package: github.com/Knetic/govaluate
   version: 36d12fdf60d2eced73454479e9935c9ea8bbe46a
-  subpackages:
-  - hipchat
-  - mailgun
-  - smtp
-  - twilio
 - package: github.com/flosch/pongo2
 - package: github.com/influxdata/influxdb
-  subpackages:
-  - client
+  version: v0.11.0
 - package: github.com/prometheus/client_golang
-  subpackages:
-  - api/prometheus
 - package: github.com/prometheus/common
-  subpackages:
-  - model
 - package: github.com/spf13/cobra
 - package: github.com/vaughan0/go-ini
 - package: k8s.io/kubernetes
-  version: v1.5.1
-  repo: https://github.com/kubernetes/kubernetes.git
-  vcs: git
-  subpackages:
-  - pkg/api
-  - pkg/client/restclient
-  - pkg/labels
-  - pkg/selection
-  - pkg/util/sets
+  version: ~1.5.0

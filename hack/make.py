@@ -38,6 +38,13 @@ from os.path import expandvars
 libbuild.REPO_ROOT = expandvars('$GOPATH') + '/src/github.com/appscode/searchlight'
 BUILD_METADATA = libbuild.metadata(libbuild.REPO_ROOT)
 libbuild.BIN_MATRIX = {
+    'searchlight': {
+        'type': 'go',
+        'go_version': True,
+        'distro': {
+            'linux': ['amd64']
+        }
+    },
     'hyperalert': {
         'type': 'go',
         'go_version': True,

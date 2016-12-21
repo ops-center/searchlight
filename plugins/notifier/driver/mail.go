@@ -1,10 +1,10 @@
 package driver
 
 import (
-	"appscode/pkg/clients/kube"
 	"time"
 
 	api "github.com/appscode/api/kubernetes/v1beta1"
+	aci "github.com/appscode/k8s-addons/api"
 	"github.com/flosch/pongo2"
 )
 
@@ -51,7 +51,7 @@ func render(ctx *pongo2.Context, template string) (string, error) {
 	return body, nil
 }
 
-func RenderMail(alert *kube.Alert, req *api.IncidentNotifyRequest) (string, error) {
+func RenderMail(alert *aci.Alert, req *api.IncidentNotifyRequest) (string, error) {
 	t := time.Unix(req.Time, 0)
 
 	objectType, objectName := getObjectInfo(alert.Labels)

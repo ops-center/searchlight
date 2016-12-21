@@ -1,14 +1,15 @@
 package driver
 
 import (
-	"appscode/pkg/clients/kube"
 	"os"
+
+	aci "github.com/appscode/k8s-addons/api"
 
 	"github.com/appscode/log"
 	"github.com/appscode/searchlight/pkg/client/k8s"
 )
 
-func GetAlertInfo(namespace, alertName string) (*kube.Alert, error) {
+func GetAlertInfo(namespace, alertName string) (*aci.Alert, error) {
 	kubeClient, err := k8s.NewClient()
 	if err != nil {
 		log.Errorln(err)

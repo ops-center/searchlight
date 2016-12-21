@@ -1,11 +1,11 @@
 package driver
 
 import (
-	"appscode/pkg/clients/kube"
 	"fmt"
 	"strings"
 
 	api "github.com/appscode/api/kubernetes/v1beta1"
+	aci "github.com/appscode/k8s-addons/api"
 )
 
 const (
@@ -14,7 +14,7 @@ const (
 	EventTypeRecovery        = "RECOVERY"
 )
 
-func RenderSMS(alert *kube.Alert, req *api.IncidentNotifyRequest) (string, error) {
+func RenderSMS(alert *aci.Alert, req *api.IncidentNotifyRequest) (string, error) {
 	clusterInfo := ""
 	if req.KubernetesCluster != "" {
 		clusterInfo = fmt.Sprintf(`Cluster: %s.\n`, req.KubernetesCluster)
