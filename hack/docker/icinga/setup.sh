@@ -8,16 +8,25 @@ LIB_ROOT=$(dirname "${BASH_SOURCE}")/../../..
 source "$LIB_ROOT/hack/libbuild/common/lib.sh"
 source "$LIB_ROOT/hack/libbuild/common/public_image.sh"
 
+GOPATH=$(go env GOPATH)
 IMG=icinga
-TAG=2.4.8
-K8S_VER=1.5.1
+ICINGA_VER=2.4.8
+K8S_VER=1.5
 ICINGAWEB_VER=2.1.2
+if [ -f "$GOPATH/src/github.com/appscode/searchlight/dist/.tag" ]; then
+	export $(cat $GOPATH/src/github.com/appscode/searchlight/dist/.tag | xargs)
+fi
 
 clean() {
+    pushd $GOPATH/src/github.com/appscode/searchlight/hack/docker/icinga
 	rm -rf icingaweb2 plugins
+	popd
 }
 
 build() {
+    pushd $GOPATH/src/github.com/appscode/searchlight/hack/docker/icinga
+    detect_tag $GOPATH/src/github.com/appscode/searchlight/dist/.tag
+
 	rm -rf icingaweb2
 	clone git@diffusion.appscode.com:appscode/79/icingaweb.git icingaweb2
 	cd icingaweb2
@@ -25,20 +34,21 @@ build() {
 	cd ..
 
 	rm -rf plugins; mkdir -p plugins
-	gsutil cp gs://appscode-dev/binaries/hello_icinga/0.1.0/hello_icinga-linux-amd64 plugins/hello_icinga
-	gsutil cp gs://appscode-dev/binaries/searchlight/0.1.0/searchlight-linux-amd64 plugins/searchlight
+	gsutil cp gs://appscode-dev/binaries/hello_icinga/$TAG/hello_icinga-linux-amd64 plugins/hello_icinga
+	gsutil cp gs://appscode-dev/binaries/hyperalert/$TAG/hyperalert-linux-amd64 plugins/hyperalert
 	chmod 755 plugins/*
 
-	local cmd="docker build -t appscode/$IMG:$TAG-$K8S_VER-ac ."
+	local cmd="docker build -t appscode/$IMG:$TAG-ac ."
 	echo $cmd; $cmd
+	popd
 }
 
 docker_push() {
-	docker_up $IMG:$TAG-$K8S_VER-ac
+	docker_up $IMG:$TAG-ac
 }
 
 docker_release() {
-	local cmd="docker push appscode/$IMG:$TAG-$K8S_VER-ac"
+	local cmd="docker push appscode/$IMG:$TAG-ac"
 	echo $cmd; $cmd
 }
 
