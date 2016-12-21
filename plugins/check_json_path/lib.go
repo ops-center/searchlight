@@ -11,7 +11,7 @@ import (
 
 	flags "github.com/appscode/go-flags"
 	"github.com/appscode/go-httpclient"
-	"github.com/appscode/searchlight/pkg/config"
+	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
 	rest "k8s.io/kubernetes/pkg/client/restclient"
@@ -46,7 +46,7 @@ const (
 func getData(req *request) string {
 	httpClient := httpclient.Default().WithBaseURL(req.url)
 	if req.secret != "" {
-		kubeClient, err := config.NewKubeClient()
+		kubeClient, err := k8s.NewClient()
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
 			os.Exit(3)

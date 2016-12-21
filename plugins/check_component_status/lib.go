@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/appscode/searchlight/pkg/config"
+	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
 	kapi "k8s.io/kubernetes/pkg/api"
@@ -23,7 +23,7 @@ type serviceOutput struct {
 }
 
 func checkComponentStatus() {
-	kubeClient, err := config.NewKubeClient()
+	kubeClient, err := k8s.NewClient()
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)

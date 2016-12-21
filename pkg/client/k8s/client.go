@@ -1,4 +1,4 @@
-package config
+package k8s
 
 import (
 	extclient "appscode/pkg/clients/kube/client"
@@ -10,7 +10,7 @@ import (
 	rest "k8s.io/kubernetes/pkg/client/restclient"
 )
 
-func NewKubeClient() (*KubeClient, error) {
+func NewClient() (*KubeClient, error) {
 	var config *rest.Config
 	var err error
 

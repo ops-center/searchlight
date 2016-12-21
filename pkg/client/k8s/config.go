@@ -1,4 +1,4 @@
-package config
+package k8s
 
 import (
 	extclient "appscode/pkg/clients/kube/client"

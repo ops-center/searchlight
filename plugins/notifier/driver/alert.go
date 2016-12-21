@@ -5,11 +5,11 @@ import (
 	"os"
 
 	"github.com/appscode/log"
-	"github.com/appscode/searchlight/pkg/config"
+	"github.com/appscode/searchlight/pkg/client/k8s"
 )
 
 func GetAlertInfo(namespace, alertName string) (*kube.Alert, error) {
-	kubeClient, err := config.NewKubeClient()
+	kubeClient, err := k8s.NewClient()
 	if err != nil {
 		log.Errorln(err)
 		os.Exit(1)
