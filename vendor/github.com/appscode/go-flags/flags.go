@@ -3,10 +3,10 @@ package flags
 import (
 	"flag"
 	"fmt"
+	"os"
 	"strconv"
 	"sync"
 
-	term "github.com/appscode/go-term"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -41,7 +41,8 @@ func EnsureRequiredFlags(cmd *cobra.Command, name ...string) {
 			continue
 		}
 		if !flag.Changed {
-			term.Fatalln(fmt.Sprintf("flag [--%v] is required but not provided.", flag.Name))
+			fmt.Printf("flag [%v] is required but not provided.", flag.Name)
+			os.Exit(3) // exit code 3 required for icinga plugins to indicate UNKNOWN state
 		}
 	}
 }
@@ -63,6 +64,7 @@ func EnsureAlterableFlags(cmd *cobra.Command, name ...string) {
 		}
 	}
 	if provided == false {
-		term.Fatalln(fmt.Sprintf("One of flag [ %v ] must needs to be set.", flagNames))
+		fmt.Printf("One of flag [ %v ] must needs to be set.", flagNames)
+		os.Exit(3) // exit code 3 required for icinga plugins to indicate UNKNOWN state
 	}
 }

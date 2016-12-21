@@ -1,5 +1,5 @@
 hash: 3b359636f951f87f8b80e451955ef7d2f12e1db9d3615f8b467594b1b655aebb
-updated: 2016-12-20T22:42:47.539970883-08:00
+updated: 2016-12-21T00:17:32.180545517-08:00
 imports:
 - name: appscode
   version: 956f4e547c1456353c3677c344cabb65d5afa242
@@ -50,7 +50,7 @@ imports:
 - name: github.com/appscode/go-files
   version: e3bee84616faaefe1bf4c0a7cecc6d856f41135a
 - name: github.com/appscode/go-flags
-  version: eca760b70add626359e91255c0b9d3293ea24bd1
+  version: 43ee4befcf793ff561b7c7a869f8edec37720630
 - name: github.com/appscode/go-httpclient
   version: 2dcd1877d59cfa67148606cf5beb8f58b2f1f451
 - name: github.com/appscode/go-notify
