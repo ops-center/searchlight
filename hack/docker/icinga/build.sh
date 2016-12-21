@@ -13,8 +13,11 @@ IMG=icinga
 ICINGA_VER=2.4.8
 K8S_VER=1.5
 ICINGAWEB_VER=2.1.2
-if [ -f "$GOPATH/src/github.com/appscode/searchlight/dist/.tag" ]; then
-	export $(cat $GOPATH/src/github.com/appscode/searchlight/dist/.tag | xargs)
+
+DIST=$GOPATH/src/github.com/appscode/searchlight/dist
+mkdir -p $DIST
+if [ -f "$DIST/.tag" ]; then
+	export $(cat $DIST/.tag | xargs)
 fi
 
 clean() {
@@ -25,7 +28,7 @@ clean() {
 
 build() {
     pushd $GOPATH/src/github.com/appscode/searchlight/hack/docker/icinga
-    detect_tag $GOPATH/src/github.com/appscode/searchlight/dist/.tag
+    detect_tag $DIST/.tag
 
 	rm -rf icingaweb2
 	clone https://github.com/Icinga/icingaweb2.git
