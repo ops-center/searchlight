@@ -41,7 +41,7 @@ func EnsureRequiredFlags(cmd *cobra.Command, name ...string) {
 			continue
 		}
 		if !flag.Changed {
-			term.Fatalln(fmt.Printf("flag [--%v] is required but not provided.", flag.Name))
+			term.Fatalln(fmt.Sprintf("flag [--%v] is required but not provided.", flag.Name))
 		}
 	}
 }
@@ -63,6 +63,6 @@ func EnsureAlterableFlags(cmd *cobra.Command, name ...string) {
 		}
 	}
 	if provided == false {
-		term.Fatalln(fmt.Printf("One of flag [ %v ] must needs to be set.", flagNames))
+		term.Fatalln(fmt.Sprintf("One of flag [ %v ] must needs to be set.", flagNames))
 	}
 }

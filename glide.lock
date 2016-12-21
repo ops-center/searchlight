@@ -1,5 +1,5 @@
-hash: 2ec35b3689ad18d46842b3a827cae87e5311c776274998706dc8779cf8bd3fc3
-updated: 2016-12-20T08:49:15.221253645-08:00
+hash: 3b359636f951f87f8b80e451955ef7d2f12e1db9d3615f8b467594b1b655aebb
+updated: 2016-12-20T19:46:38.508721373-08:00
 imports:
 - name: appscode
   version: 956f4e547c1456353c3677c344cabb65d5afa242
@@ -50,7 +50,7 @@ imports:
 - name: github.com/appscode/go-files
   version: e3bee84616faaefe1bf4c0a7cecc6d856f41135a
 - name: github.com/appscode/go-flags
-  version: 39969dfe5329f717c650eee1bae718baa6899ac5
+  version: eca760b70add626359e91255c0b9d3293ea24bd1
 - name: github.com/appscode/go-httpclient
   version: 2dcd1877d59cfa67148606cf5beb8f58b2f1f451
 - name: github.com/appscode/go-notify
@@ -187,7 +187,7 @@ imports:
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/prometheus/client_golang
-  version: 575f371f7862609249a1be4c9145f429fe065e32
+  version: e51041b3fa41cece0dca035740ba6411905be473
   subpackages:
   - api/prometheus
 - name: github.com/prometheus/common
