@@ -1,5 +1,5 @@
 hash: 3b359636f951f87f8b80e451955ef7d2f12e1db9d3615f8b467594b1b655aebb
-updated: 2016-12-20T19:46:38.508721373-08:00
+updated: 2016-12-20T21:57:48.147159429-08:00
 imports:
 - name: appscode
   version: 956f4e547c1456353c3677c344cabb65d5afa242
@@ -46,7 +46,7 @@ imports:
 - name: github.com/appscode/errors
   version: f11a3c92f49a735668f44eff11293e7961849d66
 - name: github.com/appscode/go-env
-  version: 908c6e2ba02cbab6e247bb9dbd7b022f8fa75d3d
+  version: 17fde3ac1bbe90cd7d5cc78cfb6042559b669b4e
 - name: github.com/appscode/go-files
   version: e3bee84616faaefe1bf4c0a7cecc6d856f41135a
 - name: github.com/appscode/go-flags
