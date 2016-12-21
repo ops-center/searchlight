@@ -84,7 +84,7 @@ func icingaGenJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "icinga.gen.json", size: 131374, mode: os.FileMode(436), modTime: time.Unix(1453795200, 0)}
+	info := bindataFileInfo{name: "icinga.gen.json", size: 131374, mode: os.FileMode(420), modTime: time.Unix(1453795200, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -104,7 +104,7 @@ func icingaJson() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "icinga.json", size: 81436, mode: os.FileMode(436), modTime: time.Unix(1453795200, 0)}
+	info := bindataFileInfo{name: "icinga.json", size: 81436, mode: os.FileMode(420), modTime: time.Unix(1453795200, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

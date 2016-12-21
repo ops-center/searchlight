@@ -168,7 +168,7 @@ def lint():
 
 
 def gen_assets():
-    die(call('go-bindata -ignore=\\.go -ignore=\\.DS_Store -modtime=1453795200 -o bindata.go -pkg files ./...', cwd=libbuild.REPO_ROOT + '/data/files'))
+    die(call('go-bindata -ignore=\\.go -ignore=\\.DS_Store -mode=0644 -modtime=1453795200 -o bindata.go -pkg files ./...', cwd=libbuild.REPO_ROOT + '/data/files'))
 
 
 def gen_extpoints():
