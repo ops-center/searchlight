@@ -5,6 +5,7 @@ import (
 	_ "appscode/pkg/clients/kube/install"
 
 	"github.com/appscode/errors"
+	_env "github.com/appscode/go-env"
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	rest "k8s.io/kubernetes/pkg/client/restclient"
 )
@@ -12,9 +13,9 @@ import (
 func NewKubeClient() (*KubeClient, error) {
 	var config *rest.Config
 	var err error
-	// Set debugMode to "true" for testing from local
-	debugMode := true
-	if !debugMode {
+
+	debugEnabled := _env.FromHost().DebugEnabled()
+	if !debugEnabled {
 		config, err = rest.InClusterConfig()
 		if err != nil {
 			return nil, err
