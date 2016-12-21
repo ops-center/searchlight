@@ -152,7 +152,7 @@ def version():
 
 def fmt():
     die(call('goimports -w cmd data pkg plugins util'))
-    call('go fmt ./cmd/... ./data/... ./pkg/... ./plugins/... ./util/...')
+    call('gofmt -s -w cmd data pkg plugins util')
 
 
 def vet():
