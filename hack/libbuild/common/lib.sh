@@ -109,7 +109,7 @@ build() {
 docker_up() {
 	local cmd="docker tag appscode/$1 gcr.io/$GCR_PROJECT/$1"
 	echo $cmd; $cmd
-	cmd="gcloud docker push gcr.io/$GCR_PROJECT/$1"
+	cmd="gcloud docker -- push gcr.io/$GCR_PROJECT/$1"
 	echo $cmd; $cmd
 
 	local cmd="docker tag appscode/$1 docker.appscode.com/$1"
@@ -131,7 +131,7 @@ docker_pull() {
 }
 
 docker_gcr() {
-	local cmd="gcloud docker pull gcr.io/$GCR_PROJECT/$IMG:$TAG"
+	local cmd="gcloud docker -- pull gcr.io/$GCR_PROJECT/$IMG:$TAG"
 	echo $cmd; $cmd
 	cmd="docker tag gcr.io/$GCR_PROJECT/$IMG:$TAG appscode/$IMG:$TAG"
 	echo $cmd; $cmd
