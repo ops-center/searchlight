@@ -7,6 +7,7 @@ import (
 
 	flags "github.com/appscode/go-flags"
 	"github.com/appscode/searchlight/pkg/client/k8s"
+	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
 	kapi "k8s.io/kubernetes/pkg/api"
@@ -37,7 +38,7 @@ func checkPodExists(req *request, namespace, objectType, objectName string, chec
 	}
 
 	total_pod := 0
-	if objectType == k8s.TypePods {
+	if objectType == host.TypePods {
 		pod, err := kubeClient.Client.Core().Pods(namespace).Get(objectName)
 		if err != nil {
 			fmt.Fprintln(os.Stdout, util.State[3], err)
@@ -109,10 +110,10 @@ func NewCmd() *cobra.Command {
 
 			objectType := ""
 			objectName := ""
-			if name != "pod_status" {
+			if name != host.CheckCommandPodExists {
 				parts = strings.Split(name, "|")
 				if len(parts) == 1 {
-					objectType = k8s.TypePods
+					objectType = host.TypePods
 					objectName = parts[0]
 				} else if len(parts) == 2 {
 					objectType = parts[0]
