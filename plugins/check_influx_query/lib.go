@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/Knetic/govaluate"
-	flags "github.com/appscode/go-flags"
+	"github.com/appscode/go/flags"
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	influxdb "github.com/influxdata/influxdb/client"

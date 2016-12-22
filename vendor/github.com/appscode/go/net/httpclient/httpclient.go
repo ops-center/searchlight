@@ -128,7 +128,7 @@ func (c *Client) WithTimeout(timeout time.Duration) *Client {
 }
 
 // NewRequest creates an API request. A relative URL can be provided in urlStr, which will be resolved to the
-// BaseURL of the Client. Relative URLS should always be specified without a preceding slash. If specified, the
+// BaseURL of the Client. Relative UfaRLS should always be specified without a preceding slash. If specified, the
 // value pointed to by body is JSON encoded and included in as the request body.
 func (c *Client) NewRequest(method, path string, request interface{}) (*http.Request, error) {
 	var u *url.URL

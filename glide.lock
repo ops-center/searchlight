@@ -1,5 +1,5 @@
-hash: a6615468d0d51fca2efb30d3a4f4db9c2d57fe2b0fed9bcdfbd9ffb4bb5abd6d
-updated: 2016-12-21T15:30:38.941586235-08:00
+hash: 9e6949aa825e724e0d9c613a94b89e3eca57ce370c77671141b6765f92978d61
+updated: 2016-12-22T14:37:30.360125691-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -37,14 +37,16 @@ imports:
   version: 2a1d40bce2b635108dc8710c6fbd6e2c6d7ed68d
   subpackages:
   - h/log
-- name: github.com/appscode/go-env
-  version: 7362dbed51893c00d13ff942b6fcff75c0db7296
-- name: github.com/appscode/go-files
-  version: e005f0694a3968342d0ecd2a98bf4e806463b3a9
-- name: github.com/appscode/go-flags
-  version: 43ee4befcf793ff561b7c7a869f8edec37720630
-- name: github.com/appscode/go-httpclient
-  version: 2dcd1877d59cfa67148606cf5beb8f58b2f1f451
+- name: github.com/appscode/go
+  version: e4fbcc3a0701bf3d35164fb72ba2cdeda2010a5b
+  subpackages:
+  - env
+  - flags
+  - hold
+  - io
+  - net/httpclient
+  - runtime
+  - version
 - name: github.com/appscode/go-notify
   version: 4a2061d730f2bfc14600654bc325f3afe8d1b4e8
   subpackages:
@@ -69,7 +71,7 @@ imports:
 - name: github.com/blang/semver
   version: 31b736133b98f26d5e078ec9eb591666edfd091f
 - name: github.com/cenkalti/backoff
-  version: b02f2bbce11d7ea6b97f282ef1771b0fe2f65ef3
+  version: 32cd0c5b3aef12c76ed64aaf678f6c79736be7dc
 - name: github.com/coreos/go-oidc
   version: 5644a2f50e2d2d5ba0b474bc5bc55fea1925936d
   subpackages:
@@ -101,7 +103,7 @@ imports:
   - log
   - swagger
 - name: github.com/facebookgo/stack
-  version: 751773369052141c013c6e827a71e8f35c07879c
+  version: d9d227395bc3d7a635388c75b2e3b3a750e11888
 - name: github.com/flosch/pongo2
   version: 22499f94d3d56c7238591344a6902715d0b8fbbf
 - name: github.com/ghodss/yaml
@@ -143,7 +145,7 @@ imports:
   - vanity
   - vanity/command
 - name: github.com/golang/glog
-  version: 23def4e6c14b4da8ac2ed8007337bc5eb5007998
+  version: 44145f04b68cf362d9c4df2182967c2275eaefed
 - name: github.com/golang/protobuf
   version: 8ee79997227bf9b34611aee7946ae64735e6fd93
   subpackages:
@@ -152,7 +154,7 @@ imports:
   - protoc-gen-go/descriptor
   - ptypes/any
 - name: github.com/google/go-querystring
-  version: 9235644dd9e52eeae6fa48efd539fdc351a0af53
+  version: 547ef5ac979778feb2f760cdb5f4eae1a2207b86
   subpackages:
   - query
 - name: github.com/google/gofuzz
@@ -180,7 +182,7 @@ imports:
   - models
   - pkg/escape
 - name: github.com/jaytaylor/html2text
-  version: 4b9124c9b0a2279e2092c4a9aaf1c83bbd2dcffc
+  version: 52d9b785554a1918cb09909b89a1509a98b853fd
 - name: github.com/jonboulle/clockwork
   version: 72f9bd7c4e0c2a40055ab3d0f09654f730cce982
 - name: github.com/juju/ratelimit
@@ -218,9 +220,9 @@ imports:
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
 - name: github.com/spf13/cobra
-  version: b62566898a99f2db9c68ed0026aa0a052e59678d
+  version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - name: github.com/spf13/pflag
-  version: 25f8b5b07aece3207895bf19f7ab517eb3b22a40
+  version: c7e63cf4530bcd3ba943729cee0efeff2ebea63f
 - name: github.com/tbruyelle/hipchat-go
   version: 749fb9e14beb9995f677c101a754393cecb64b0f
   subpackages:
@@ -237,7 +239,7 @@ imports:
 - name: github.com/xeipuuv/gojsonreference
   version: e02fc20de94c78484cd5ffb007f8af96be030a45
 - name: github.com/xeipuuv/gojsonschema
-  version: 59f99ebfe5f712a0055e321231fc3be94e4e00b2
+  version: 93e72a773fade158921402d6a24c819b48aba29d
 - name: golang.org/x/crypto
   version: 1f22c0103821b9390939b6776727195525381532
   subpackages:
@@ -452,6 +454,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: e3a8ff8ce36581f87a15341206f205b1da467059
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert

@@ -2,16 +2,15 @@ package main
 
 import (
 	_ "net/http/pprof"
-	"os"
 
 	"github.com/appscode/errors"
 	err_logger "github.com/appscode/errors/h/log"
+	"github.com/appscode/go/hold"
+	v "github.com/appscode/go/version"
 	"github.com/appscode/log"
 	logs "github.com/appscode/log/golog"
 	"github.com/appscode/searchlight/cmd/searchlight/app"
 	"github.com/appscode/searchlight/cmd/searchlight/app/options"
-	v "github.com/appscode/searchlight/util/version"
-	"github.com/mikespook/golib/signal"
 	"github.com/spf13/pflag"
 	"k8s.io/kubernetes/pkg/util/flag"
 	"k8s.io/kubernetes/pkg/version/verflag"
@@ -61,7 +60,5 @@ func main() {
 	log.Infoln("Starting Searchlight Controller...")
 	go app.Run(config)
 
-	sig := signal.New(nil)
-	sig.Bind(os.Interrupt, func() uint { return signal.BreakExit })
-	sig.Wait()
+	hold.Hold()
 }

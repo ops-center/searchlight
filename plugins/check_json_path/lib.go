@@ -9,8 +9,8 @@ import (
 	"reflect"
 	"strings"
 
-	flags "github.com/appscode/go-flags"
-	"github.com/appscode/go-httpclient"
+	"github.com/appscode/go/flags"
+	"github.com/appscode/go/net/httpclient"
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"

@@ -3,7 +3,7 @@ package icinga
 import (
 	"fmt"
 
-	files "github.com/appscode/go-files"
+	"github.com/appscode/go/io"
 	_ "github.com/appscode/k8s-addons/api/install"
 	"github.com/appscode/k8s-addons/pkg/dns"
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
@@ -18,7 +18,7 @@ const (
 )
 
 func NewInClusterClient(kubeClient clientset.Interface) (*IcingaClient, error) {
-	m, err := files.ReadINIConfig(ConfigFile)
+	m, err := io.ReadINIConfig(ConfigFile)
 	if err != nil {
 		return nil, err
 	}

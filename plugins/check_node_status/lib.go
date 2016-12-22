@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	flags "github.com/appscode/go-flags"
+	"github.com/appscode/go/flags"
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"

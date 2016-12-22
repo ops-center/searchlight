@@ -4,9 +4,9 @@ package main
 import (
 	"os"
 
+	v "github.com/appscode/go/version"
 	logs "github.com/appscode/log/golog"
 	"github.com/appscode/searchlight/plugins/notifier"
-	v "github.com/appscode/searchlight/util/version"
 )
 
 var (

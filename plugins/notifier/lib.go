@@ -8,8 +8,8 @@ import (
 
 	api "github.com/appscode/api/kubernetes/v1beta1"
 	"github.com/appscode/client"
-	files "github.com/appscode/go-files"
-	flags "github.com/appscode/go-flags"
+	"github.com/appscode/go/flags"
+	"github.com/appscode/go/io"
 	"github.com/appscode/log"
 	logs "github.com/appscode/log/golog"
 	"github.com/appscode/searchlight/plugins/notifier/driver/extpoints"
@@ -33,13 +33,13 @@ type Secret struct {
 }
 
 func notifyViaAppsCode(req *api.IncidentNotifyRequest) error {
-	cluster_uid, err := files.ReadFile(appscodeConfigPath + "cluster-uid")
+	cluster_uid, err := io.ReadFile(appscodeConfigPath + "cluster-uid")
 	if err != nil {
 		return err
 	}
 	req.KubernetesCluster = cluster_uid
 
-	grpc_endpoint, err := files.ReadFile(appscodeConfigPath + "appscode-api-grpc-endpoint")
+	grpc_endpoint, err := io.ReadFile(appscodeConfigPath + "appscode-api-grpc-endpoint")
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func notifyViaAppsCode(req *api.IncidentNotifyRequest) error {
 	apiOptions := client.NewOption(grpc_endpoint)
 
 	var secretData Secret
-	if err := files.ReadFileAs(appscodeSecretPath+"api-token", &secretData); err != nil {
+	if err := io.ReadFileAs(appscodeSecretPath+"api-token", &secretData); err != nil {
 		return err
 	}
 
@@ -79,7 +79,7 @@ func sendNotification(req *api.IncidentNotifyRequest) {
 		os.Exit(1)
 	}
 
-	cluster_uid, err := files.ReadFile(appscodeConfigPath + "cluster-name")
+	cluster_uid, err := io.ReadFile(appscodeConfigPath + "cluster-name")
 	if err != nil {
 		cluster_uid = ""
 	}

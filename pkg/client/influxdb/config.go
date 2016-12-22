@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	files "github.com/appscode/go-files"
+	"github.com/appscode/go/io"
 	"github.com/appscode/k8s-addons/pkg/dns"
 	"github.com/influxdata/influxdb/client"
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
@@ -20,7 +20,7 @@ const (
 )
 
 func LoadConfig(kubeClient clientset.Interface) (*client.Config, error) {
-	m, err := files.ReadINIConfig(ConfigFile)
+	m, err := io.ReadINIConfig(ConfigFile)
 	if err != nil {
 		return nil, err
 	}

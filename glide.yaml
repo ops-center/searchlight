@@ -13,12 +13,13 @@ import:
 - package: github.com/appscode/api
 - package: github.com/appscode/client
 - package: github.com/appscode/errors
-- package: github.com/appscode/go-httpclient
+- package: github.com/appscode/go
 - package: github.com/appscode/go-notify
 - package: github.com/appscode/log
 - package: github.com/Knetic/govaluate
   version: 36d12fdf60d2eced73454479e9935c9ea8bbe46a
 - package: github.com/flosch/pongo2
+  version: 22499f94d3d56c7238591344a6902715d0b8fbbf
 - package: github.com/influxdata/influxdb
   version: v0.11.0
 - package: github.com/prometheus/client_golang

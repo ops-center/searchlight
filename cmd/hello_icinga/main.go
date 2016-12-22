@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 
+	v "github.com/appscode/go/version"
 	"github.com/appscode/searchlight/plugins/hello_icinga"
-	v "github.com/appscode/searchlight/util/version"
 )
 
 var (

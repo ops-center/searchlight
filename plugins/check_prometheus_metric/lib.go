@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	flags "github.com/appscode/go-flags"
+	"github.com/appscode/go/flags"
 	"github.com/appscode/searchlight/util"
 	"github.com/prometheus/client_golang/api/prometheus"
 	"github.com/prometheus/common/model"
