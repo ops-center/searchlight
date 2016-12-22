@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+# Needed for antipackage with python 2
 from __future__ import absolute_import
+
 import datetime
 import io
 import json
@@ -135,7 +137,7 @@ def to_upper_camel(lower_snake):
 # ref: https://golang.org/cmd/go/
 def go_build(name, goos, goarch, main):
     linker_opts = []
-    for k, v in metadata(REPO_ROOT, goos, goarch).iteritems():
+    for k, v in metadata(REPO_ROOT, goos, goarch).items():
         linker_opts.append('-X')
         linker_opts.append('main.' + to_upper_camel(k) + '=' + v)
 
@@ -166,13 +168,13 @@ def go_build(name, goos, goarch, main):
         main=main
     )
     die(call(cmd, cwd=REPO_ROOT))
-    print '\n'
+    print('')
 
 
 def upload_to_cloud(folder, f, version):
     write_checksum(folder, f)
     name = os.path.basename(folder)
-    if name not in BIN_MATRIX.keys():
+    if name not in BIN_MATRIX:
         return
     if ENV == 'prod' and not BIN_MATRIX[name].get('release', False):
         return
@@ -180,7 +182,7 @@ def upload_to_cloud(folder, f, version):
     buckets = BUCKET_MATRIX.get(ENV, BUCKET_MATRIX['dev'])
     if not isinstance(buckets, dict):
         buckets = {buckets: ''}
-    for bucket, region in buckets.iteritems():
+    for bucket, region in buckets.items():
         dst = "{bucket}/binaries/{name}/{version}/{file}{ext}".format(
             bucket=bucket,
             name=name,
@@ -222,7 +224,7 @@ def update_registry(version):
     lf = dist + '/latest.txt'
     write_file(lf, version)
     for name in os.listdir(dist):
-        if name not in BIN_MATRIX.keys():
+        if name not in BIN_MATRIX:
             return
         call("gsutil cp {2} {0}/binaries/{1}/latest.txt".format(bucket, name, lf), cwd=REPO_ROOT)
         if BIN_MATRIX[name].get('release', False):
