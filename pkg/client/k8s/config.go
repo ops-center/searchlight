@@ -7,16 +7,6 @@ import (
 	rest "k8s.io/kubernetes/pkg/client/restclient"
 )
 
-const (
-	TypeServices               = "services"
-	TypeReplicationcontrollers = "replicationcontrollers"
-	TypeDaemonsets             = "daemonsets"
-	TypeStatefulSet            = "statefulsets"
-	TypeReplicasets            = "replicasets"
-	TypeDeployments            = "deployments"
-	TypePods                   = "pods"
-)
-
 type KubeClient struct {
 	Client                  clientset.Interface
 	AppscodeExtensionClient acs.AppsCodeExtensionInterface

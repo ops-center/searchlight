@@ -11,3 +11,4 @@ node_modules
 kluster.json
 !hack/populate.sh
 **/tuf.log
+**/config.ini
