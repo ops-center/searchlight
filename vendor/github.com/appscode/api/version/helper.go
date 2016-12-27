@@ -3,8 +3,11 @@ package version
 import "fmt"
 
 func (m *Version) Print() {
-	fmt.Printf("Name = %v\n", m.Name)
+	if m.Name != "" {
+		fmt.Printf("Name = %v\n", m.Name)
+	}
 	fmt.Printf("Version = %v\n", m.Version)
+	fmt.Printf("VersionStrategy = %v\n", m.VersionStrategy)
 	fmt.Printf("Os = %v\n", m.Os)
 	fmt.Printf("Arch = %v\n", m.Arch)
 
