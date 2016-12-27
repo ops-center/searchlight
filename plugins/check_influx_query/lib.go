@@ -7,27 +7,13 @@ import (
 	"net/url"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/Knetic/govaluate"
 	"github.com/appscode/go/flags"
-	"github.com/appscode/searchlight/pkg/client/k8s"
+	"github.com/appscode/searchlight/pkg/client/influxdb"
 	"github.com/appscode/searchlight/util"
-	influxdb "github.com/influxdata/influxdb/client"
+	"github.com/influxdata/influxdb/client"
 	"github.com/spf13/cobra"
-	ini "github.com/vaughan0/go-ini"
-)
-
-const (
-	admin string = ".admin"
-
-	influxDBHost     string = "INFLUX_HOST"
-	influxDBDatabase string = "INFLUX_DB"
-	influxDBReadUser string = "INFLUX_READ_USER"
-	influxDBReadPass string = "INFLUX_READ_PASSWORD"
-
-	influxDBDefaultDatabase string = "k8s"
-	influxDBHostPort               = 8086
 )
 
 type request struct {
@@ -39,79 +25,21 @@ type request struct {
 	secret        string
 }
 
-type authInfo struct {
-	host     string
-	database string
-	username string
-	password string
-}
-
 func trunc(val float64) interface{} {
 	intData := int64(val * 1000)
 	return float64(intData) / 1000.0
 }
 
-func getInfluxDBSecretData(secretName string) *authInfo {
-	kubeClient, err := k8s.NewClient()
-	if err != nil {
-		fmt.Fprintln(os.Stdout, util.State[3], err)
-		os.Exit(3)
-	}
-
-	parts := strings.Split(secretName, ".")
-	name := parts[0]
-	namespace := "default"
-	if len(parts) > 1 {
-		namespace = parts[1]
-	}
-
-	secret, err := kubeClient.Client.Core().Secrets(namespace).Get(name)
-	if err != nil {
-		fmt.Fprintln(os.Stdout, util.State[3], err)
-		os.Exit(3)
-	}
-
-	authData := new(authInfo)
-	if data, found := secret.Data[admin]; found {
-		dataReader := strings.NewReader(string(data))
-		secretData, err := ini.Load(dataReader)
-		if err != nil {
-			fmt.Fprintln(os.Stdout, util.State[3], err)
-			os.Exit(3)
-		}
-
-		if host, found := secretData.Get("", influxDBHost); found {
-			authData.host = fmt.Sprintf("%s:%d", host, influxDBHostPort)
-		}
-
-		if authData.database, found = secretData.Get("", influxDBDatabase); !found {
-			authData.database = influxDBDefaultDatabase
-		}
-		if authData.username, found = secretData.Get("", influxDBReadUser); !found {
-			fmt.Fprintln(os.Stdout, util.State[3], errors.New("No InfluxDB read user found"))
-			os.Exit(3)
-		}
-		if authData.password, found = secretData.Get("", influxDBReadPass); !found {
-			fmt.Fprintln(os.Stdout, util.State[3], errors.New("No InfluxDB read password found"))
-			os.Exit(3)
-		}
-		return authData
-	}
-	fmt.Fprintln(os.Stdout, util.State[3], errors.New("Invalid InfluxDB secret"))
-	os.Exit(3)
-	return nil
-}
-
-func getInfluxDBClient(authData *authInfo) *influxdb.Client {
-	config := &influxdb.Config{
+func getInfluxDBClient(authData *influxdb.AuthInfo) *client.Client {
+	config := &client.Config{
 		URL: url.URL{
 			Scheme: "http",
-			Host:   authData.host,
+			Host:   authData.Host,
 		},
-		Username: authData.username,
-		Password: authData.password,
+		Username: authData.Username,
+		Password: authData.Password,
 	}
-	client, err := influxdb.NewClient(*config)
+	client, err := client.NewClient(*config)
 	if err != nil {
 		fmt.Fprintln(os.Stdout, util.State[3], err)
 		os.Exit(3)
@@ -119,8 +47,8 @@ func getInfluxDBClient(authData *authInfo) *influxdb.Client {
 	return client
 }
 
-func getInfluxdbData(con *influxdb.Client, command, db, queryName string) float64 {
-	q := influxdb.Query{
+func getInfluxdbData(con *client.Client, command, db, queryName string) float64 {
+	q := client.Query{
 		Command:  command,
 		Database: db,
 	}
@@ -142,7 +70,7 @@ func getInfluxdbData(con *influxdb.Client, command, db, queryName string) float6
 	return data
 }
 
-func getValue(con *influxdb.Client, db string, req *request) map[string]interface{} {
+func getValue(con *client.Client, db string, req *request) map[string]interface{} {
 
 	valMap := make(map[string]interface{})
 
@@ -198,17 +126,22 @@ func checkResult(checkQuery string, valueMap map[string]interface{}) bool {
 }
 
 func checkInfluxQuery(req *request) {
-	authData := getInfluxDBSecretData(req.secret)
-	if req.host != "" {
-		authData.host = req.host
+	authData, err := influxdb.GetInfluxDBSecretData(req.secret)
+	if err != nil {
+		fmt.Fprintln(os.Stdout, util.State[3], err)
+		os.Exit(3)
 	}
-	if authData.host == "" {
+
+	if req.host != "" {
+		authData.Host = req.host
+	}
+	if authData.Host == "" {
 		fmt.Fprintln(os.Stdout, util.State[3], errors.New("No InfluxDB host found"))
 		os.Exit(3)
 	}
 	client := getInfluxDBClient(authData)
 
-	valMap := getValue(client, authData.database, req)
+	valMap := getValue(client, authData.Database, req)
 
 	expression, err := govaluate.NewEvaluableExpression(req.r)
 	if err != nil {
