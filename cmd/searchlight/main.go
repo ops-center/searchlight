@@ -5,6 +5,7 @@ import (
 
 	"github.com/appscode/errors"
 	err_logger "github.com/appscode/errors/h/log"
+	"github.com/appscode/go/flags"
 	"github.com/appscode/go/hold"
 	v "github.com/appscode/go/version"
 	"github.com/appscode/log"
@@ -12,8 +13,6 @@ import (
 	"github.com/appscode/searchlight/cmd/searchlight/app"
 	"github.com/appscode/searchlight/cmd/searchlight/app/options"
 	"github.com/spf13/pflag"
-	"k8s.io/kubernetes/pkg/util/flag"
-	"k8s.io/kubernetes/pkg/version/verflag"
 )
 
 var (
@@ -50,12 +49,11 @@ func main() {
 	config := options.NewConfig()
 	config.AddFlags(pflag.CommandLine)
 
-	flag.InitFlags()
+	flags.InitFlags()
 	logs.InitLogs()
 	defer logs.FlushLogs()
 	errors.Handlers.Add(err_logger.LogHandler{})
-
-	verflag.PrintAndExitIfRequested()
+	flags.DumpAll()
 
 	log.Infoln("Starting Searchlight Controller...")
 	go app.Run(config)

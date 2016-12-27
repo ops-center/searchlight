@@ -2,10 +2,11 @@ package icinga
 
 import (
 	"fmt"
-	"github.com/appscode/go/io"
-	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+
+	"github.com/appscode/go/io"
+	"github.com/stretchr/testify/assert"
 )
 
 var configDataPath = os.ExpandEnv("$GOPATH") + "/src/github.com/appscode/searchlight/pkg/client/icinga/config.ini"
