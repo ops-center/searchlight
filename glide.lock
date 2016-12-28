@@ -1,5 +1,5 @@
-hash: 5524c6e27c4ddf8f4e1261583bd2a6b00c75ef894664fcc09847abf03a814ada
-updated: 2016-12-27T14:42:38.386380574+06:00
+hash: 819573e0c3b37140167e45a961868830bc5cf4f17c35c7e52b55992d4f63da24
+updated: 2016-12-27T17:52:46.984420247-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -45,6 +45,7 @@ imports:
   - flags
   - hold
   - io
+  - net
   - net/httpclient
   - runtime
   - version
@@ -110,6 +111,18 @@ imports:
   version: 22499f94d3d56c7238591344a6902715d0b8fbbf
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+- name: github.com/go-macaron/auth
+  version: d2acb206ada0d07471046b3af2e46338eb9636ab
+  repo: https://github.com/appscode/auth.git
+  vcs: git
+- name: github.com/go-macaron/inject
+  version: d8a0b8677191f4380287cfebd08e462217bac7ad
+- name: github.com/go-macaron/toolbox
+  version: 99a42f20e9e88daec5c0d7beb4e7eac134680ab0
+- name: github.com/go-ole/go-ole
+  version: 7dfdcf409020452e29b4babcbb22f984d2aa308a
+  subpackages:
+  - oleutil
 - name: github.com/go-openapi/jsonpointer
   version: 46af16f9f7b149af66e5d1bd010e3574dc06de98
 - name: github.com/go-openapi/jsonreference
@@ -210,7 +223,7 @@ imports:
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/prometheus/client_golang
-  version: c5b7fccd204277076155f10851dad72b76a49317
+  version: e51041b3fa41cece0dca035740ba6411905be473
   subpackages:
   - api/prometheus
 - name: github.com/prometheus/common
@@ -221,10 +234,25 @@ imports:
   version: 8a290539e2e8629dbc4e6bad948158f790ec31f4
 - name: github.com/PuerkitoBio/urlesc
   version: 5bd2802263f21d8788851d5305584c82a5c75d7e
+- name: github.com/shirou/gopsutil
+  version: 061b699a971e0f74834f69ef8b78643f48980d10
+  subpackages:
+  - cpu
+  - disk
+  - host
+  - internal/common
+  - load
+  - mem
+  - net
+  - process
+- name: github.com/shirou/w32
+  version: 3c9377fc6748f222729a8270fe2775d149a249ad
 - name: github.com/spf13/cobra
   version: 9c28e4bbd74e5c3ed7aacbc552b2cab7cfdfe744
 - name: github.com/spf13/pflag
   version: c7e63cf4530bcd3ba943729cee0efeff2ebea63f
+- name: github.com/StackExchange/wmi
+  version: e54cbda6595d7293a7a468ccf9525f6bc8887f99
 - name: github.com/tbruyelle/hipchat-go
   version: 749fb9e14beb9995f677c101a754393cecb64b0f
   subpackages:
@@ -234,6 +262,8 @@ imports:
   subpackages:
   - codec
   - codec/codecgen
+- name: github.com/Unknwon/com
+  version: 28b053d5a2923b87ce8c5a08f3af779894a72758
 - name: github.com/vaughan0/go-ini
   version: a98ad7ee00ec53921f08832bc06ecf7fd600e6a1
 - name: github.com/xeipuuv/gojsonpointer
@@ -320,6 +350,12 @@ imports:
   version: 81ebce5c23dfd25c6c67194b37d3dd3f338c98b1
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
+- name: gopkg.in/ini.v1
+  version: 6e4869b434bd001f6983749881c7ead3545887d8
+- name: gopkg.in/macaron.v1
+  version: ddb19a9f3e8cedd44696b9dd5854dc8a43f3dd6c
+  repo: https://github.com/go-macaron/macaron.git
+  vcs: git
 - name: gopkg.in/mgo.v2
   version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
@@ -422,7 +458,6 @@ imports:
   - pkg/util/config
   - pkg/util/diff
   - pkg/util/errors
-  - pkg/util/flag
   - pkg/util/flowcontrol
   - pkg/util/framer
   - pkg/util/homedir
@@ -442,7 +477,6 @@ imports:
   - pkg/util/wait
   - pkg/util/yaml
   - pkg/version
-  - pkg/version/verflag
   - pkg/watch
   - pkg/watch/versioned
   - plugin/pkg/client/auth
@@ -456,6 +490,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: e3a8ff8ce36581f87a15341206f205b1da467059
+  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert

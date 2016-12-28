@@ -28,3 +28,13 @@ import:
 - package: github.com/vaughan0/go-ini
 - package: k8s.io/kubernetes
   version: ~1.5.0
+- package: github.com/go-macaron/toolbox
+- package: github.com/go-macaron/auth
+  repo: https://github.com/appscode/auth.git
+  vcs: git
+- package: github.com/shirou/gopsutil
+  version: v2.16.11
+- package: gopkg.in/macaron.v1
+  version: v1.1.11
+  repo: https://github.com/go-macaron/macaron.git
+  vcs: git
