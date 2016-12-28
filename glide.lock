@@ -1,5 +1,5 @@
-hash: 819573e0c3b37140167e45a961868830bc5cf4f17c35c7e52b55992d4f63da24
-updated: 2016-12-27T17:52:46.984420247-08:00
+hash: 121426e47ad244c978c92d2b5f964222052319212ee1f643a953b155b9d8ca82
+updated: 2016-12-28T12:24:51.345170365-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: dbcff6f142efa34dbbfe4c7a2bd2595239b528d7
+  version: 5b805621848c90957938b7df584890934965fb74
   subpackages:
   - artifactory/v1beta1
   - auth/v1beta1
@@ -112,9 +112,7 @@ imports:
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-macaron/auth
-  version: d2acb206ada0d07471046b3af2e46338eb9636ab
-  repo: https://github.com/appscode/auth.git
-  vcs: git
+  version: 884c0e6c9b92ceebf12101d6cf1417fe0f61bcac
 - name: github.com/go-macaron/inject
   version: d8a0b8677191f4380287cfebd08e462217bac7ad
 - name: github.com/go-macaron/toolbox
@@ -248,9 +246,9 @@ imports:
 - name: github.com/shirou/w32
   version: 3c9377fc6748f222729a8270fe2775d149a249ad
 - name: github.com/spf13/cobra
-  version: 9c28e4bbd74e5c3ed7aacbc552b2cab7cfdfe744
+  version: f62e98d28ab7ad31d707ba837a966378465c7b57
 - name: github.com/spf13/pflag
-  version: c7e63cf4530bcd3ba943729cee0efeff2ebea63f
+  version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/StackExchange/wmi
   version: e54cbda6595d7293a7a468ccf9525f6bc8887f99
 - name: github.com/tbruyelle/hipchat-go

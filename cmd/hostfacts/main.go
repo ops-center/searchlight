@@ -114,10 +114,10 @@ func main() {
 		log.Fatalln(srv.ListenAndServe())
 	} else {
 		/*
-		Ref:
-		 - https://blog.cloudflare.com/exposing-go-on-the-internet/
-		 - http://www.bite-code.com/2015/06/25/tls-mutual-auth-in-golang/
-		 - http://www.hydrogen18.com/blog/your-own-pki-tls-golang.html
+			Ref:
+			 - https://blog.cloudflare.com/exposing-go-on-the-internet/
+			 - http://www.bite-code.com/2015/06/25/tls-mutual-auth-in-golang/
+			 - http://www.hydrogen18.com/blog/your-own-pki-tls-golang.html
 		*/
 		caCert, err := ioutil.ReadFile(*caCertFile)
 		if err != nil {
@@ -128,8 +128,8 @@ func main() {
 
 		tlsConfig := &tls.Config{
 			PreferServerCipherSuites: true,
-			MinVersion: tls.VersionTLS12,
-			SessionTicketsDisabled: true,
+			MinVersion:               tls.VersionTLS12,
+			SessionTicketsDisabled:   true,
 			CipherSuites: []uint16{
 				tls.TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
 				tls.TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
@@ -138,7 +138,7 @@ func main() {
 				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 			},
-			ClientCAs: caCertPool,
+			ClientCAs:  caCertPool,
 			ClientAuth: tls.VerifyClientCertIfGiven,
 		}
 		tlsConfig.BuildNameToCertificate()
