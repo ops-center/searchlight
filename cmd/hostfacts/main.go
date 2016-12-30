@@ -119,13 +119,6 @@ func main() {
 			 - http://www.bite-code.com/2015/06/25/tls-mutual-auth-in-golang/
 			 - http://www.hydrogen18.com/blog/your-own-pki-tls-golang.html
 		*/
-		caCert, err := ioutil.ReadFile(*caCertFile)
-		if err != nil {
-			log.Fatal(err)
-		}
-		caCertPool := x509.NewCertPool()
-		caCertPool.AppendCertsFromPEM(caCert)
-
 		tlsConfig := &tls.Config{
 			PreferServerCipherSuites: true,
 			MinVersion:               tls.VersionTLS12,
@@ -138,8 +131,16 @@ func main() {
 				tls.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
 				tls.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
 			},
-			ClientCAs:  caCertPool,
 			ClientAuth: tls.VerifyClientCertIfGiven,
+		}
+		if *caCertFile != "" {
+			caCert, err := ioutil.ReadFile(*caCertFile)
+			if err != nil {
+				log.Fatal(err)
+			}
+			caCertPool := x509.NewCertPool()
+			caCertPool.AppendCertsFromPEM(caCert)
+			tlsConfig.ClientCAs = caCertPool
 		}
 		tlsConfig.BuildNameToCertificate()
 
