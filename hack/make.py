@@ -57,6 +57,7 @@ libbuild.BIN_MATRIX = {
     'hyperalert': {
         'type': 'go',
         'go_version': True,
+        'release': True,
         'distro': {
             'linux': ['amd64']
         }
