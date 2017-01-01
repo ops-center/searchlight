@@ -135,6 +135,7 @@ libbuild.BIN_MATRIX = {
     'hello_icinga': {
         'type': 'go',
         'go_version': True,
+        'release': True,
         'distro': {
             'linux': ['amd64']
         }
