@@ -32,7 +32,7 @@ func fixServiceSpec(serviceSpec api.ServiceSpec) api.ServiceSpec {
 	}
 	if len(serviceSpec.Ports) == 0 {
 		serviceSpec.Ports = []api.ServicePort{
-			api.ServicePort{
+			{
 				Port: 80,
 			},
 		}
@@ -43,7 +43,7 @@ func fixServiceSpec(serviceSpec api.ServiceSpec) api.ServiceSpec {
 func fixPodSpec(podSpec api.PodSpec) api.PodSpec {
 	if len(podSpec.Containers) == 0 {
 		podSpec.Containers = []api.Container{
-			api.Container{
+			{
 				Name:    rand.WithUniqSuffix("container"),
 				Image:   Image,
 				Command: []string{"sleep", "3600"},

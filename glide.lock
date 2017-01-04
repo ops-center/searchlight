@@ -1,5 +1,5 @@
-hash: 121426e47ad244c978c92d2b5f964222052319212ee1f643a953b155b9d8ca82
-updated: 2016-12-28T12:24:51.345170365-08:00
+hash: e6b7226208980689160fb993d7219cba77d947bd0a9acf8465e473f28f3d19dd
+updated: 2017-01-04T05:25:06.336262994-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: 5b805621848c90957938b7df584890934965fb74
+  version: e1983c384f6f9beb112fcdca5d1b8a79c130b2ee
   subpackages:
   - artifactory/v1beta1
   - auth/v1beta1
@@ -29,16 +29,16 @@ imports:
   - ssh/v1beta1
   - version
 - name: github.com/appscode/client
-  version: fa6cea0c22970ca7b2347219b2ac23594d920d9b
+  version: 84ffe285d8a366cd7bdf01b7b28c0119f53910ca
   subpackages:
   - credential
   - util
 - name: github.com/appscode/errors
-  version: 2a1d40bce2b635108dc8710c6fbd6e2c6d7ed68d
+  version: 6a668ba07d02064c06707b7d8b0f5239db707045
   subpackages:
   - h/log
 - name: github.com/appscode/go
-  version: 7995bcb0419b6ed977ca66d4482c3a625847270e
+  version: a7f716de7a1373d1e8a5b31728166ada8e7595c6
   subpackages:
   - crypto/rand
   - env
@@ -50,14 +50,14 @@ imports:
   - runtime
   - version
 - name: github.com/appscode/go-notify
-  version: 4a2061d730f2bfc14600654bc325f3afe8d1b4e8
+  version: 293f40652089c70c7e90180095ef698b9bbc305e
   subpackages:
   - hipchat
   - mailgun
   - smtp
   - twilio
 - name: github.com/appscode/k8s-addons
-  version: 05da01ad537cf3fbc57257425a71908ac249b2a8
+  version: 33355decdcfd7223715907341bac88c2106834a9
   subpackages:
   - api
   - api/install
@@ -68,7 +68,7 @@ imports:
   - pkg/testing
   - pkg/watcher
 - name: github.com/appscode/log
-  version: 3f1acdeb89863d101e1d5fc0fefb478b1e990b28
+  version: 68e0e42e42c01371f3950571fc87c2298a51dd8f
   subpackages:
   - golog
 - name: github.com/blang/semver
@@ -246,9 +246,9 @@ imports:
 - name: github.com/shirou/w32
   version: 3c9377fc6748f222729a8270fe2775d149a249ad
 - name: github.com/spf13/cobra
-  version: f62e98d28ab7ad31d707ba837a966378465c7b57
+  version: 9c28e4bbd74e5c3ed7aacbc552b2cab7cfdfe744
 - name: github.com/spf13/pflag
-  version: 5ccb023bc27df288a957c5e994cd44fd19619465
+  version: c7e63cf4530bcd3ba943729cee0efeff2ebea63f
 - name: github.com/StackExchange/wmi
   version: e54cbda6595d7293a7a468ccf9525f6bc8887f99
 - name: github.com/tbruyelle/hipchat-go

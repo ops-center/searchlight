@@ -11,13 +11,13 @@ import (
 const Uid = "smtp"
 
 type Options struct {
-	Host               string   `envconfig:"HOST" required:"true"`
-	Port               int      `envconfig:"PORT" required:"true"`
-	InsecureSkipVerify bool     `envconfig:"INSECURE_SKIP_VERIFY"`
-	Username           string   `envconfig:"USERNAME" required:"true"`
-	Password           string   `envconfig:"PASSWORD" required:"true"`
-	From               string   `envconfig:"FROM" required:"true"`
-	To                 []string `envconfig:"TO" required:"true"`
+	Host               string   `json:"host" envconfig:"HOST" required:"true" form:"smtp_host"`
+	Port               int      `json:"port" envconfig:"PORT" required:"true" form:"smtp_port"`
+	InsecureSkipVerify bool     `json:"insecure_skip_verify" envconfig:"INSECURE_SKIP_VERIFY" form:"smtp_insecure_skip_verify"`
+	Username           string   `json:"username" envconfig:"USERNAME" required:"true" form:"smtp_username"`
+	Password           string   `json:"password" envconfig:"PASSWORD" required:"true" form:"smtp_password"`
+	From               string   `json:"from" envconfig:"FROM" required:"true" form:"smtp_from"`
+	To                 []string `json:"to" envconfig:"TO" required:"true" form:"smtp_to"`
 }
 
 type client struct {

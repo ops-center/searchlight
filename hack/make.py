@@ -169,6 +169,7 @@ def version():
 
 
 def fmt():
+    libbuild.ungroup_go_imports('cmd', 'data', 'pkg', 'plugins', 'util')
     die(call('goimports -w cmd data pkg plugins util'))
     call('gofmt -s -w cmd data pkg plugins util')
 

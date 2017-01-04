@@ -4,7 +4,6 @@ import (
 	"os"
 
 	aci "github.com/appscode/k8s-addons/api"
-
 	"github.com/appscode/log"
 	"github.com/appscode/searchlight/pkg/client/k8s"
 )
