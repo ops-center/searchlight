@@ -7,6 +7,6 @@ import (
 )
 
 type Context struct {
-	KubeClient              *k8s.KubeClient
-	IcingaClient            *icinga.IcingaClient
+	KubeClient   *k8s.KubeClient
+	IcingaClient *icinga.IcingaClient
 }

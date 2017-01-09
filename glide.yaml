@@ -9,9 +9,11 @@ import:
   vcs: git
   version: master
 - package: google.golang.org/grpc
-  version: v1.0.4
+  version: v1.0.5
 - package: github.com/appscode/api
+  version: master
 - package: github.com/appscode/client
+  version: master
 - package: github.com/appscode/errors
 - package: github.com/appscode/go
 - package: github.com/appscode/go-notify
@@ -36,3 +38,6 @@ import:
   version: v1.1.11
   repo: https://github.com/go-macaron/macaron.git
   vcs: git
+testImport:
+- package: github.com/stretchr/testify
+  version: v1.1.4
