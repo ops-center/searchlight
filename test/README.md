@@ -1,22 +1,11 @@
 # Test Icinga2 Custom Plugins
 
 ### Configure Kubernetes Client
-Provide  kubernetes cluster host address and auth information
 
-Write `config.ini` file in `pkg/client/k8s/` directory
-
-Example:
-
-> config.ini
-
-    host=https://127.0.0.1:6443/
-    username=admin@kubernetes-cluster.com
-    password=123456789
+It reads local `~/.kube/config` data and uses `current-context` for cluster and auth information.
 
 Note:
 
-* Do note use leading, trailing space with key and value
-* Client will load `config.ini` from `"$GOPATH/src/github.com/appscode/searchlight/pkg/client/k8s/config.ini"`
 * Set ENV `APPSCODE_ENV` to `dev` or make it empty
 
 
@@ -56,3 +45,21 @@ Run following command to test
 * __pod_status__
 
         go test -v github.com/appscode/searchlight/test -run ^TestPodStatus$
+
+
+### Configure Icinga2 Client
+
+* Set ENV `E2E_ICINGA_SECRET` to kubernetes `secret` name
+* Set ENV `E2E_ICINGA_URL` to Icinga2 API url [default: Service LoadBalancer.Ingress]
+
+Following information will be collected from secret:
+
+1. ICINGA_SERVICE
+2. ICINGA_API_USER
+3. ICINGA_API_PASSWORD
+
+`ICINGA_SERVICE` will be used to get `LoadBalancer.Ingress` if `E2E_ICINGA_URL` ENV is not set
+
+#### __General Test__
+
+    go test -v github.com/appscode/searchlight/test -run ^TestGeneralAlert$

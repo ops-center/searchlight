@@ -266,7 +266,8 @@ func checkPodVolumeStat(req *request) {
 	for _, volume := range pod.Spec.Volumes {
 		if volume.Name == name {
 			if volume.PersistentVolumeClaim != nil {
-				claim, err := kubeClient.Client.Core().PersistentVolumeClaims(namespace).Get(volume.PersistentVolumeClaim.ClaimName)
+				claim, err := kubeClient.Client.Core().
+					PersistentVolumeClaims(namespace).Get(volume.PersistentVolumeClaim.ClaimName)
 				if err != nil {
 					fmt.Fprintln(os.Stdout, util.State[3], err)
 					os.Exit(3)

@@ -17,8 +17,8 @@ const (
 func GetKubeObjectInfo(hostname string) (objectType string, objectName string, namespace string) {
 	parts := strings.Split(hostname, "@")
 	if len(parts) != 2 {
-		Fatalln(errors.New("Invalid icinga host.name"))
-
+		fmt.Println(errors.New("Invalid icinga host.name"))
+		os.Exit(1)
 	}
 	name := parts[0]
 	namespace = parts[1]
@@ -34,15 +34,9 @@ func GetKubeObjectInfo(hostname string) (objectType string, objectName string, n
 			objectType = parts[0]
 			objectName = parts[1]
 		} else {
-			Fatalln(errors.New("Invalid icinga host.name"))
+			fmt.Println(errors.New("Invalid icinga host.name"))
+			os.Exit(1)
 		}
 	}
 	return
-}
-
-func Fatalln(i interface{}) {
-	if i != nil {
-		fmt.Println(i)
-		os.Exit(1)
-	}
 }

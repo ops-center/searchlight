@@ -1,6 +1,9 @@
 package pod_status
 
 import (
+	"fmt"
+	"os"
+
 	config "github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/test/plugin"
@@ -15,7 +18,10 @@ func GetStatusCodeForPodStatus(kubeClient *config.KubeClient, hostname string) i
 	var err error
 	if objectType == host.TypePods {
 		pod, err := kubeClient.Client.Core().Pods(namespace).Get(objectName)
-		plugin.Fatalln(err)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 		if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {
 			return plugin.CRITICAL
 		}
@@ -24,11 +30,17 @@ func GetStatusCodeForPodStatus(kubeClient *config.KubeClient, hostname string) i
 		labelSelector := labels.Everything()
 		if objectType != "" {
 			labelSelector, err = util.GetLabels(kubeClient, namespace, objectType, objectName)
-			plugin.Fatalln(err)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 		var podList *kapi.PodList
 		podList, err = kubeClient.Client.Core().Pods(namespace).List(kapi.ListOptions{LabelSelector: labelSelector})
-		plugin.Fatalln(err)
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 
 		for _, pod := range podList.Items {
 			if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {

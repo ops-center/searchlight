@@ -17,15 +17,15 @@ type Watcher struct {
 
 func (watch *Watcher) Run() {
 	watch.Storage = &stash.Storage{}
-	watch.Pod()
+	watch.Service()
 	watch.StatefulSet()
 	watch.DaemonSet()
 	watch.ReplicaSet()
 	watch.Namespace()
 	watch.Node()
-	watch.Service()
 	watch.RC()
 	watch.Endpoint()
+	watch.Pod()
 
 	watch.ExtendedIngress()
 	watch.Ingress()

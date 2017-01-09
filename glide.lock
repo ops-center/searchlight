@@ -1,5 +1,5 @@
 hash: e6b7226208980689160fb993d7219cba77d947bd0a9acf8465e473f28f3d19dd
-updated: 2017-01-04T05:25:06.336262994-08:00
+updated: 2017-01-05T15:08:39.89128963+06:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: e1983c384f6f9beb112fcdca5d1b8a79c130b2ee
+  version: fb744902203d2350b67c926b9d7de6851932b894
   subpackages:
   - artifactory/v1beta1
   - auth/v1beta1
@@ -488,6 +488,6 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/stretchr/testify
-  version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
+  version: e3a8ff8ce36581f87a15341206f205b1da467059
   subpackages:
   - assert

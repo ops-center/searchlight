@@ -3,15 +3,18 @@ package e2e
 import (
 	"errors"
 	"fmt"
+	"os"
 
+	"github.com/appscode/go/crypto/rand"
+	aci "github.com/appscode/k8s-addons/api"
 	"github.com/appscode/k8s-addons/pkg/testing"
+	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/pkg/controller/host"
-	"github.com/appscode/searchlight/test/plugin"
 	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/apis/apps"
 	ext "k8s.io/kubernetes/pkg/apis/extensions"
-	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/labels"
+	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 )
 
 const (
@@ -20,7 +23,7 @@ const (
 	DefaultNamespace string = "default"
 )
 
-type DataConfig struct {
+type dataConfig struct {
 	ObjectType   string
 	CheckCommand string
 	Namespace    string
@@ -139,29 +142,52 @@ func getKubernetesObjectData(kubeClient clientset.Interface, objectType, namespa
 	return
 }
 
-func GetTestData(kubeClient clientset.Interface, dataConfig *DataConfig) (name string, count int32) {
+func getTestData(kubeClient *k8s.KubeClient, dataConfig *dataConfig) (name string, count int32) {
 	var err error
 	if dataConfig.ObjectType == host.TypeCluster {
-		name, count, err = getClusterCheckData(kubeClient, dataConfig.CheckCommand, dataConfig.Namespace)
-		plugin.Fatalln(err)
+		name, count, err = getClusterCheckData(kubeClient.Client, dataConfig.CheckCommand, dataConfig.Namespace)
 	} else {
-		name, count, err = getKubernetesObjectData(kubeClient, dataConfig.ObjectType, dataConfig.Namespace)
-		plugin.Fatalln(err)
+		name, count, err = getKubernetesObjectData(kubeClient.Client, dataConfig.ObjectType, dataConfig.Namespace)
+	}
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 	return
 }
 
-func CreateNewNamespace(kubeClient clientset.Interface, name string) {
+func createNewNamespace(kubeClient *k8s.KubeClient, name string) {
 	ns := &kapi.Namespace{
 		ObjectMeta: kapi.ObjectMeta{
 			Name: name,
 		},
 	}
-	_, err := kubeClient.Core().Namespaces().Create(ns)
-	plugin.Fatalln(err)
+	_, err := kubeClient.Client.Core().Namespaces().Create(ns)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
 
-func deleteNewNamespace(kubeClient clientset.Interface, name string) {
-	err := kubeClient.Core().Namespaces().Delete(name, nil)
-	plugin.Fatalln(err)
+func deleteNewNamespace(kubeClient *k8s.KubeClient, name string) {
+	err := kubeClient.Client.Core().Namespaces().Delete(name, nil)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func createAlertObject(kubeClient *k8s.KubeClient, alert *aci.Alert) (err error) {
+	if alert.Name == "" {
+		alert.Name = rand.WithUniqSuffix("e2e-alert")
+	}
+
+	alert, err = kubeClient.AppscodeExtensionClient.Alert(fixNamespace(alert.Namespace)).Create(alert)
+	return
+}
+
+func deleteAlertObject(kubeClient *k8s.KubeClient, alert *aci.Alert) (err error) {
+	// delete alert
+	err = kubeClient.AppscodeExtensionClient.Alert(alert.Namespace).Delete(alert.Name, nil)
+	return
 }

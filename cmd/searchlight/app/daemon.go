@@ -31,11 +31,15 @@ func Run(config *options.Config) {
 			SyncPeriod:              time.Minute * 2,
 		},
 	}
-	icingaClient, err := icinga.NewInClusterClient(w.Client)
-	if err != nil {
-		log.Errorln(err)
+	if config.IcingaSecretName != "" {
+		icingaClient, err := icinga.NewInClusterIcingaClient(w.Client, config.IcingaSecretName)
+		if err != nil {
+			log.Fatalln(err)
+		}
+		w.IcingaClient = icingaClient
+	} else {
+		log.Fatalln("Missing icinga secret")
 	}
-	w.IcingaClient = icingaClient
 
 	log.Infoln("configuration loadded, running watcher")
 	go w.Run()
