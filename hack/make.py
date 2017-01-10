@@ -132,6 +132,13 @@ libbuild.BIN_MATRIX = {
             'linux': ['amd64']
         }
     },
+    'check_kube_exec': {
+        'type': 'go',
+        'go_version': True,
+        'distro': {
+            'linux': ['amd64']
+        }
+    },
     'notifier': {
         'type': 'go',
         'go_version': True,

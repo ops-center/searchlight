@@ -5,6 +5,7 @@ import (
 	"github.com/appscode/searchlight/plugins/check_influx_query"
 	"github.com/appscode/searchlight/plugins/check_json_path"
 	"github.com/appscode/searchlight/plugins/check_kube_event"
+	"github.com/appscode/searchlight/plugins/check_kube_exec"
 	"github.com/appscode/searchlight/plugins/check_node_count"
 	"github.com/appscode/searchlight/plugins/check_node_status"
 	"github.com/appscode/searchlight/plugins/check_pod_exists"
@@ -35,6 +36,7 @@ func NewCmd() *cobra.Command {
 	c.AddCommand(check_prometheus_metric.NewCmd())
 	c.AddCommand(check_volume.NewCmd())
 	c.AddCommand(check_kube_event.NewCmd())
+	c.AddCommand(check_kube_exec.NewCmd())
 	c.AddCommand(notifier.NewCmd())
 	return c
 }
