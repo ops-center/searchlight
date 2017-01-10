@@ -581,6 +581,100 @@
       ]
     },
     {
+      "description": "This is used to check Kubernetes events. This plugin checks for all Warning events happened in last 'c' seconds. Icinga check_interval is provided as 'c'.",
+      "name": "kube_event",
+      "envs": [
+        "onebox",
+        "prod",
+        "qa",
+        "dev"
+      ],
+      "object_to_host": {
+        "cluster": "localhost"
+      },
+      "vars": [
+        {
+          "description": "Clock skew in Duration. [Default: 30s]. This time is added with check_interval while checking events",
+          "flag": {
+            "short": "s",
+            "long": "clock_skew"
+          },
+          "name": "clock_skew",
+          "type": "STRING",
+          "parameterized": false,
+          "visibility": true,
+          "optional": true
+        }
+      ],
+      "states": [
+        "OK",
+        "WARNING",
+        "UNKNOWN"
+      ]
+    },
+    {
+      "description": "This is used to check Kubernetes exec command. Returns OK if exit code is zero, otherwise, returns CRITICAL",
+      "name": "kube_exec",
+      "envs": [
+        "onebox",
+        "prod",
+        "qa",
+        "dev"
+      ],
+      "object_to_host": {
+        "services": "pod",
+        "replicationcontrollers": "pod",
+        "petsets": "pod",
+        "replicasets": "pod",
+        "daemonsets": "pod",
+        "deployments": "pod",
+        "pods": "pod"
+      },
+      "vars": [
+        {
+          "description": "Kubernetes container name in a pod",
+          "flag": {
+            "short": "C",
+            "long": "container"
+          },
+          "name": "container",
+          "type": "STRING",
+          "parameterized": false,
+          "visibility": true,
+          "optional": true
+        },
+        {
+          "description": "Exec command. [Default: '/bin/sh']",
+          "flag": {
+            "short": "c",
+            "long": "command"
+          },
+          "name": "command",
+          "type": "STRING",
+          "parameterized": false,
+          "visibility": true,
+          "optional": true
+        },
+        {
+          "description": "Exec command arguments. [Format: 'arg; arg; arg']",
+          "flag": {
+            "short": "a",
+            "long": "arg"
+          },
+          "name": "arg",
+          "type": "STRING",
+          "parameterized": false,
+          "visibility": true,
+          "optional": false
+        }
+      ],
+      "states": [
+        "OK",
+        "CRITICAL",
+        "UNKNOWN"
+      ]
+    },
+    {
       "description": "This is used to test various stuff",
       "name": "hello_icinga",
       "envs": [
