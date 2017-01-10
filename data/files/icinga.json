@@ -647,9 +647,9 @@
           "description": "Exec command. [Default: '/bin/sh']",
           "flag": {
             "short": "c",
-            "long": "command"
+            "long": "cmd"
           },
-          "name": "command",
+          "name": "cmd",
           "type": "STRING",
           "parameterized": false,
           "visibility": true,
@@ -659,9 +659,9 @@
           "description": "Exec command arguments. [Format: 'arg; arg; arg']",
           "flag": {
             "short": "a",
-            "long": "arg"
+            "long": "argv"
           },
-          "name": "arg",
+          "name": "argv",
           "type": "STRING",
           "parameterized": false,
           "visibility": true,

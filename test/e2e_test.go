@@ -2,6 +2,7 @@ package e2e
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"syscall"
@@ -13,11 +14,14 @@ import (
 	testing_lib "github.com/appscode/k8s-addons/pkg/testing"
 	acw "github.com/appscode/k8s-addons/pkg/watcher"
 	"github.com/appscode/searchlight/cmd/searchlight/app"
+	"github.com/appscode/searchlight/pkg/client"
 	"github.com/appscode/searchlight/pkg/client/icinga"
 	config "github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/test/general"
+	"github.com/appscode/searchlight/test/plugin"
 	"github.com/appscode/searchlight/test/plugin/component_status"
+	"github.com/appscode/searchlight/test/plugin/kube_event"
 	"github.com/appscode/searchlight/test/plugin/node_count"
 	"github.com/appscode/searchlight/test/plugin/node_status"
 	"github.com/appscode/searchlight/test/plugin/pod_status"
@@ -25,7 +29,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	kapi "k8s.io/kubernetes/pkg/api"
 	ext "k8s.io/kubernetes/pkg/apis/extensions"
-	"github.com/appscode/searchlight/pkg/client"
 )
 
 type testData struct {
@@ -376,6 +379,101 @@ func TestPodStatus(t *testing.T) {
 	fmt.Println()
 }
 
+func TestKubeEvent(t *testing.T) {
+	fmt.Println("== Testing >", host.CheckCommandKubeEvent)
+
+	kubeClient := getKubernetesClient()
+
+	checkInterval, _ := time.ParseDuration("30s")
+	clockSkew, _ := time.ParseDuration("0s")
+	exitCode := kube_event.GetStatusCodeForEventCount(kubeClient, checkInterval, clockSkew)
+
+	testDataList := []testData{
+		testData{
+			data: map[string]interface{}{
+				"check_interval": checkInterval,
+			},
+			expectedCode: exitCode,
+		},
+	}
+	for _, testData := range testDataList {
+		argList := []string{
+			"check_kube_event",
+		}
+		for key, val := range testData.data {
+			argList = append(argList, fmt.Sprintf("--%s=%v", key, val))
+		}
+		statusCode := execCheckCommand("hyperalert", argList...)
+		assert.EqualValues(t, testData.expectedCode, statusCode)
+	}
+}
+
+func TestKubeExec(t *testing.T) {
+	fmt.Println("== Testing >", host.CheckCommandKubeExec)
+
+	kubeClient := getKubernetesClient()
+
+	testkubeExec := func(dataConfig *dataConfig) {
+		// This will create object & return icinga_host name
+		name, _ := getTestData(kubeClient, dataConfig)
+		time.Sleep(time.Second * 30)
+
+		objectType, objectName, namespace := plugin.GetKubeObjectInfo(name)
+		objectList, err := host.GetObjectList(kubeClient.Client, host.CheckCommandKubeExec, host.HostTypePod, namespace, objectType, objectName, "")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		testDataList := make([]testData, 0)
+
+		for _, object := range objectList {
+			testDataList = append(testDataList, testData{
+				data: map[string]interface{}{
+					"host": object.Name,
+					"arg":  "exit 0",
+				},
+				expectedCode: 0,
+			})
+			testDataList = append(testDataList, testData{
+				data: map[string]interface{}{
+					"host": object.Name,
+					"arg":  "exit 5",
+				},
+				expectedCode: 2,
+			})
+		}
+
+		for _, testData := range testDataList {
+			argList := []string{
+				"check_kube_exec",
+			}
+			for key, val := range testData.data {
+				argList = append(argList, fmt.Sprintf("--%s=%v", key, val))
+			}
+			statusCode := execCheckCommand("hyperalert", argList...)
+			assert.EqualValues(t, testData.expectedCode, statusCode)
+		}
+	}
+
+	ns := "e2e-1"
+	dataConfig := &dataConfig{
+		Namespace: ns,
+	}
+
+	fmt.Println(">> Creating namespace", ns)
+	createNewNamespace(kubeClient, ns)
+	fmt.Println()
+
+	fmt.Println(">> Testing plugings for", host.TypeReplicationcontrollers)
+	dataConfig.ObjectType = host.TypeReplicationcontrollers
+	testkubeExec(dataConfig)
+
+	fmt.Println(">> Deleting namespace", ns)
+	deleteNewNamespace(kubeClient, ns)
+
+	fmt.Println()
+}
+
 func TestGeneralAlert(t *testing.T) {
 	var err error
 	context := &client.Context{}
@@ -422,12 +520,12 @@ func TestGeneralAlert(t *testing.T) {
 		},
 	}
 
-	fmt.Println("--> Creating alert on replicaSet:", alert.Name)
 	err = createAlertObject(kubeClient, alert)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+	fmt.Println("--> Creating alert on replicaSet:", alert.Name)
 
 	time.Sleep(time.Minute * 1)
 

@@ -1,7 +1,7 @@
 package k8s
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/appscode/errors"
 	_ "github.com/appscode/k8s-addons/api/install"
@@ -16,7 +16,7 @@ func NewClient() (*KubeClient, error) {
 	if err != nil {
 		return nil, errors.New().WithCause(err).Internal()
 	}
-	fmt.Println("Using cluster:", config.Host)
+	log.Println("Using cluster:", config.Host)
 
 	client, err := clientset.NewForConfig(config)
 	if err != nil {

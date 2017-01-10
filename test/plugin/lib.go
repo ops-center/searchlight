@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	CRITICAL int = 2
 	OK       int = 0
+	WARNING  int = 1
+	CRITICAL int = 2
 )
 
 func GetKubeObjectInfo(hostname string) (objectType string, objectName string, namespace string) {

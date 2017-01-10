@@ -158,7 +158,7 @@ func NewCmd() *cobra.Command {
 
 	c.Flags().StringVarP(&host, "host", "H", "", "Icinga host name")
 	c.Flags().StringVarP(&req.container, "container", "C", "", "Container name in specified pod")
-	c.Flags().StringVarP(&req.command, "command", "c", "/bin/sh", "Exec command. [Default: /bin/sh]")
-	c.Flags().StringVarP(&req.arg, "arg", "a", "", "Arguments for exec command. [Format: 'arg; arg; arg']")
+	c.Flags().StringVarP(&req.command, "cmd", "c", "/bin/sh", "Exec command. [Default: /bin/sh]")
+	c.Flags().StringVarP(&req.arg, "argv", "a", "", "Arguments for exec command. [Format: 'arg; arg; arg']")
 	return c
 }
