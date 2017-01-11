@@ -11,6 +11,8 @@ import (
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 )
 
+const AcknowledgeTimestamp string = "acknowledgement_timestamp"
+
 type IcingaData struct {
 	HostType map[string]string
 	VarInfo  map[string]data.CommandVar
@@ -40,4 +42,10 @@ type KubeOptions struct {
 type Ancestors struct {
 	Type  string   `json:"type,omitempty"`
 	Names []string `json:"names,omitempty"`
+}
+
+type AlertEventMessage struct {
+	IncidentEventId string `json:"incident_event_id,omitempty"`
+	Comment         string `json:"comment,omitempty"`
+	UserName        string `json:"username,omitempty"`
 }

@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/appscode/searchlight/data"
-	"github.com/appscode/searchlight/pkg/controller/host"
 	aci "github.com/appscode/k8s-addons/api"
+	"github.com/appscode/searchlight/data"
 	"github.com/appscode/searchlight/pkg/client"
+	"github.com/appscode/searchlight/pkg/controller/host"
 )
 
 func GetIcingaHostType(commandName, objectType string) (string, error) {
@@ -54,7 +54,6 @@ func CountAlertService(context *client.Context, alert *aci.Alert, expectZero boo
 	if err != nil {
 		return err
 	}
-
 
 	serviceName := strings.Replace(alert.Name, "_", "-", -1)
 	serviceName = strings.Replace(serviceName, ".", "-", -1)

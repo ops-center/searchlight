@@ -21,15 +21,11 @@ func (watch *Watcher) Run() {
 	watch.StatefulSet()
 	watch.DaemonSet()
 	watch.ReplicaSet()
-	watch.Namespace()
-	watch.Node()
 	watch.RC()
-	watch.Endpoint()
 	watch.Pod()
-
-	watch.ExtendedIngress()
-	watch.Ingress()
 	watch.Alert()
+	watch.AlertEvent()
+	watch.Node()
 }
 
 func (w *Watcher) Dispatch(e *events.Event) error {
@@ -37,7 +33,8 @@ func (w *Watcher) Dispatch(e *events.Event) error {
 		return nil
 	}
 	log.Debugln("Dispatching event with resource", e.ResourceType, "event", e.EventType)
-	if e.ResourceType == events.Alert || e.ResourceType == events.Node || e.ResourceType == events.Pod || e.ResourceType == events.Service {
+	if e.ResourceType == events.Alert || e.ResourceType == events.Node ||
+		e.ResourceType == events.Pod || e.ResourceType == events.Service || e.ResourceType == events.AlertEvent {
 		return controller.New(w.Client, w.IcingaClient, w.AppsCodeExtensionClient, w.Storage).Handle(e)
 	}
 	return nil

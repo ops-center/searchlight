@@ -55,6 +55,8 @@ func (b *IcingaController) Handle(e *events.Event) error {
 		err = b.handleNode(e)
 	case events.Service:
 		err = b.handleService(e)
+	case events.AlertEvent:
+		err = b.handleAlertEvent(e)
 	}
 
 	if err != nil {
@@ -289,6 +291,42 @@ func (b *IcingaController) handleService(e *events.Event) error {
 			endpoint := fmt.Sprintf("https://%v:5665/v1", service.Spec.ClusterIP)
 			b.ctx.IcingaClient = b.ctx.IcingaClient.SetEndpoint(endpoint)
 		}
+	}
+	return nil
+}
+
+func (b *IcingaController) handleAlertEvent(e *events.Event) error {
+	var alertEvents []interface{}
+	if e.ResourceType == events.AlertEvent {
+		alertEvents = e.RuntimeObj
+	}
+
+	if e.EventType.IsAdded() {
+		if len(alertEvents) == 0 {
+			return errors.New().WithMessage("Missing event data").NotFound()
+		}
+		alertEvent := alertEvents[0].(*kapi.Event)
+
+		if _, found := alertEvent.Annotations[types.AcknowledgeTimestamp]; found {
+			return errors.New().WithMessage("Event is already handled").NotFound()
+		}
+
+		eventRefObjKind := alertEvent.InvolvedObject.Kind
+
+		if eventRefObjKind != events.ObjectKindAlert.String() {
+			return errors.New().WithMessage("For acknowledgement, Reference object should be Alert").InvalidData()
+		}
+
+		eventRefObjNamespace := alertEvent.InvolvedObject.Namespace
+		eventRefObjName := alertEvent.InvolvedObject.Name
+
+		alert, err := b.ctx.AppsCodeExtensionClient.Alert(eventRefObjNamespace).Get(eventRefObjName)
+		if err != nil {
+			return errors.New().WithCause(err).Internal()
+		}
+
+		b.ctx.Resource = alert
+		return b.Acknowledge(alertEvent)
 	}
 	return nil
 }

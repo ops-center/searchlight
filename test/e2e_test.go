@@ -11,6 +11,7 @@ import (
 
 	"github.com/appscode/go/crypto/rand"
 	aci "github.com/appscode/k8s-addons/api"
+	"github.com/appscode/k8s-addons/pkg/events"
 	testing_lib "github.com/appscode/k8s-addons/pkg/testing"
 	acw "github.com/appscode/k8s-addons/pkg/watcher"
 	"github.com/appscode/searchlight/cmd/searchlight/app"
@@ -18,6 +19,7 @@ import (
 	"github.com/appscode/searchlight/pkg/client/icinga"
 	config "github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/pkg/controller/host"
+	"github.com/appscode/searchlight/pkg/controller/types"
 	"github.com/appscode/searchlight/test/general"
 	"github.com/appscode/searchlight/test/plugin"
 	"github.com/appscode/searchlight/test/plugin/component_status"
@@ -27,7 +29,9 @@ import (
 	"github.com/appscode/searchlight/test/plugin/pod_status"
 	"github.com/appscode/searchlight/test/util"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/square/go-jose.v1/json"
 	kapi "k8s.io/kubernetes/pkg/api"
+	"k8s.io/kubernetes/pkg/api/unversioned"
 	ext "k8s.io/kubernetes/pkg/apis/extensions"
 )
 
@@ -75,6 +79,25 @@ func runKubeD(context *client.Context) {
 
 	w.Watcher.Dispatch = w.Dispatch
 	w.Run()
+}
+
+func TestKubeD(t *testing.T) {
+	os.Setenv("E2E_ICINGA_SECRET", "appscode-icinga.kube-system")
+
+	context := &client.Context{}
+	kubeClient := getKubernetesClient()
+	context.KubeClient = kubeClient
+
+	icingaClient, err := icinga.NewIcingaClient(kubeClient.Client)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	context.IcingaClient = icingaClient
+
+	go runKubeD(context)
+
+	time.Sleep(time.Minute * 5)
 }
 
 func TestComponentStatus(t *testing.T) {
@@ -568,4 +591,105 @@ func TestGeneralAlert(t *testing.T) {
 
 	fmt.Println(">> Deleting namespace", ns)
 	deleteNewNamespace(kubeClient, ns)
+}
+
+func TestAcknowledge(t *testing.T) {
+	os.Setenv("E2E_ICINGA_SECRET", "appscode-icinga.kube-system")
+
+	context := &client.Context{}
+	kubeClient := getKubernetesClient()
+	context.KubeClient = kubeClient
+
+	icingaClient, err := icinga.NewIcingaClient(kubeClient.Client)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	context.IcingaClient = icingaClient
+
+	go runKubeD(context)
+
+	ns := rand.WithUniqSuffix("e2e")
+	fmt.Println(">> Creating namespace", ns)
+	createNewNamespace(kubeClient, ns)
+	fmt.Println()
+
+	alert := &aci.Alert{
+		ObjectMeta: kapi.ObjectMeta{
+			Namespace: ns,
+			Labels: map[string]string{
+				"alert.appscode.com/objectType": host.TypeCluster,
+			},
+		},
+		Spec: aci.AlertSpec{
+			CheckCommand: host.CheckNodeCount,
+			IcingaParam: &aci.IcingaParam{
+				CheckIntervalSec: 30,
+			},
+			Vars: map[string]interface{}{
+				"count": 0,
+			},
+		},
+	}
+
+	err = createAlertObject(kubeClient, alert)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	fmt.Println(">> Creating Alert", alert.Name)
+	fmt.Println(">> Waiting to detect problem in Icinga")
+	time.Sleep(time.Minute * 2)
+
+	message := &types.AlertEventMessage{
+		Comment:  "Acknowledged by Event",
+		UserName: "shahriar",
+	}
+	messageByte, err := json.Marshal(message)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	timestamp := unversioned.NewTime(time.Now().UTC())
+	event := &kapi.Event{
+		ObjectMeta: kapi.ObjectMeta{
+			Name:      "acknowledgement",
+			Namespace: ns,
+		},
+		InvolvedObject: kapi.ObjectReference{
+			Kind:      events.ObjectKindAlert.String(),
+			Namespace: ns,
+			Name:      alert.Name,
+		},
+		Source: kapi.EventSource{
+			Component: "searchlight",
+			Host:      "node_count@" + ns,
+		},
+		Reason:  events.EventReasonAlertAcknowledgement.String(),
+		Message: string(messageByte),
+		Type:    kapi.EventTypeNormal,
+
+		Count:          1,
+		FirstTimestamp: timestamp,
+		LastTimestamp:  timestamp,
+	}
+
+	fmt.Println(">> Creating event to acknowledge")
+	_, err = kubeClient.Client.Core().Events(ns).Create(event)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	time.Sleep(time.Minute * 1)
+
+	objectList := []*host.KubeObjectInfo{{Name: "node_count@" + ns, IP: "127.0.0.1"}}
+	in := host.IcingaServiceSearchQuery(alert.Name, objectList)
+	var respService host.ResponseObject
+	if _, err := icingaClient.Objects().Service("").Get([]string{}, in).Do().Into(&respService); err != nil {
+		log.Fatalln(err)
+	}
+
+	if len(respService.Results) == 0 {
+		log.Fatalln("No Icinga Service found")
+	}
+
+	assert.NotEqual(t, 0.0, respService.Results[0].Attrs.Acknowledgement)
 }
