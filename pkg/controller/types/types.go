@@ -45,7 +45,7 @@ type Ancestors struct {
 }
 
 type AlertEventMessage struct {
-	IncidentEventId string `json:"incident_event_id,omitempty"`
+	IncidentEventId int64  `json:"incident_event_id,omitempty"`
 	Comment         string `json:"comment,omitempty"`
 	UserName        string `json:"username,omitempty"`
 }
