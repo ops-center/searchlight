@@ -11,7 +11,37 @@ import (
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 )
 
-const AcknowledgeTimestamp string = "acknowledgement_timestamp"
+type EventReason string
+
+const (
+	// Icinga objects create event list
+	CreatingIcingaObjects       EventReason = "Creating"
+	FailedToCreateIcingaObjects EventReason = "FailedToCreate"
+	CreatedIcingaObjects        EventReason = "Created"
+
+	// Icinga objects update event list
+	UpdatingIcingaObjects       EventReason = "Updating"
+	FailedToUpdateIcingaObjects EventReason = "FailedToUpdate"
+	UpdatedIcingaObjects        EventReason = "Updated"
+
+	// Icinga objects delete event list
+	DeletingIcingaObjects       EventReason = "Deleting"
+	FailedToDeleteIcingaObjects EventReason = "FailedToDelete"
+	DeletedIcingaObjects        EventReason = "Deleted"
+
+	// Icinga objects sync event list
+	SyncIcingaObjects         EventReason = "Sync"
+	FailedToSyncIcingaObjects EventReason = "FailedToSync"
+	SyncedIcingaObjects       EventReason = "Synced"
+)
+
+func (r EventReason) String() string {
+	return string(r)
+}
+
+const (
+	AcknowledgeTimestamp string = "acknowledgement_timestamp"
+)
 
 type IcingaData struct {
 	HostType map[string]string
