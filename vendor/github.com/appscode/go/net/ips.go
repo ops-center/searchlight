@@ -2,8 +2,10 @@ package net
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"net"
+	"net/http"
 	"regexp"
 )
 
@@ -33,50 +35,7 @@ func IsPrivateIP(ip net.IP) bool {
 
 var (
 	knownLocalBridges = regexp.MustCompile(`^(docker|cbr|cni)[0-9]+$`)
-)
 
-func routableIPs() []net.IP {
-	result := make([]net.IP, 0, 2)
-	ifaces, err := net.Interfaces()
-	if err != nil {
-		return result
-	}
-	for _, iface := range ifaces {
-		if iface.Flags&net.FlagUp == 0 {
-			continue // interface down
-		}
-		if iface.Flags&net.FlagLoopback != 0 {
-			continue // loopback interface
-		}
-		if knownLocalBridges.MatchString(iface.Name) {
-			continue
-		}
-		addrs, err := iface.Addrs()
-		if err != nil {
-			continue
-		}
-		for _, addr := range addrs {
-			var ip net.IP
-			switch v := addr.(type) {
-			case *net.IPNet:
-				ip = v.IP
-			case *net.IPAddr:
-				ip = v.IP
-			}
-			if ip == nil || ip.IsLoopback() {
-				continue
-			}
-			ip = ip.To4()
-			if ip == nil {
-				continue // not an ipv4 address
-			}
-			result = append(result, ip)
-		}
-	}
-	return result
-}
-
-var (
 	InterfaceDownErr       = errors.New("Interface down")
 	LoopbackInterfaceErr   = errors.New("Loopback interface")
 	KnownLocalInterfaceErr = errors.New("Known local interface")
@@ -174,23 +133,79 @@ func NodeIP(interfaceName ...string) (string, net.IP, error) {
 	}
 }
 
-func GetInternalIP() string {
-	ips := routableIPs()
-	for _, ip := range ips {
-		if IsPrivateIP(ip) {
-			return ip.String()
+func hostIPs(routable bool) ([]net.IP, []net.IP, error) {
+	internalIPs := make([]net.IP, 0)
+	externalIPs := make([]net.IP, 0)
+
+	ifaces, _ := net.Interfaces()
+	for _, iface := range ifaces {
+		if iface.Flags&net.FlagUp == 0 {
+			continue // interface down
+		}
+		if iface.Flags&net.FlagLoopback != 0 {
+			continue // loopback interface
+		}
+		if knownLocalBridges.MatchString(iface.Name) {
+			continue
+		}
+		addrs, err := iface.Addrs()
+		if err != nil {
+			continue
+		}
+		for _, addr := range addrs {
+			var ip net.IP
+			switch v := addr.(type) {
+			case *net.IPNet:
+				ip = v.IP
+			case *net.IPAddr:
+				ip = v.IP
+			}
+			if ip == nil || ip.IsLoopback() {
+				continue
+			}
+			ip = ip.To4()
+			if ip == nil {
+				continue // not an ipv4 address
+			}
+			if IsPrivateIP(ip) {
+				internalIPs = append(internalIPs, ip)
+			} else {
+				externalIPs = append(externalIPs, ip)
+			}
 		}
 	}
-	return ""
+	// If host is not assigned public IP directly, detect IP based on client ip
+	if len(externalIPs) == 0 && routable {
+		resp, err := http.Get("https://my-ip.space/index.json")
+		if err == nil {
+			defer resp.Body.Close()
+			decoder := json.NewDecoder(resp.Body)
+			var data map[string]string
+			err = decoder.Decode(data)
+			if err == nil {
+				ip := net.ParseIP(data["ip"])
+				if ip != nil {
+					ip = ip.To4()
+				}
+				if ip != nil {
+					externalIPs = append(externalIPs, ip)
+				}
+			}
+		}
+	}
+	if len(internalIPs)+len(externalIPs) == 0 {
+		return nil, nil, NotFoundErr
+	}
+	return externalIPs, internalIPs, nil
 }
 
-func GetExternalIPs() []string {
-	ret := make([]string, 0)
-	ips := routableIPs()
-	for _, ip := range ips {
-		if !IsPrivateIP(ip) {
-			ret = append(ret, ip.String())
-		}
-	}
-	return ret
+// RoutableIPs returns routable public and private IPs associated with current host.
+// It will also use https://my-ip.space/index.json to detect public IP, if no public IP is assigned to a host interface.
+func RoutableIPs() ([]net.IP, []net.IP, error) {
+	return hostIPs(true)
+}
+
+// HostIPs returns public and private IPs assigned to various interfaces on current host.
+func HostIPs() ([]net.IP, []net.IP, error) {
+	return hostIPs(false)
 }

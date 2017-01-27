@@ -24,18 +24,21 @@ import (
 )
 
 func main() {
-	selfIP := net.GetInternalIP()
-	if selfIP == "" {
-		// may be peers are running in HostNetwork mode and host only has public IP
-		selfIP = net.GetExternalIPs()[0]
+	_, nodeIP, err := net.NodeIP()
+	if err != nil {
+		log.Fatalln(err)
 	}
-	log.Println("Detected IP for hostfacts server:", selfIP)
+	log.Println("Detected IP for hostfacts server:", nodeIP.String())
 
-	host := flag.String("host", selfIP, "Http server ip address")
+	host := flag.String("host", nodeIP.String(), "Http server ip address")
 	port := flag.Int("port", 56977, "Http server port")
 	caCertFile := flag.String("caCertFile", "", "File containing CA certificate")
 	certFile := flag.String("certFile", "", "File container server TLS certificate")
 	keyFile := flag.String("keyFile", "", "File containing server TLS private key")
+
+	username := flag.String("username", os.Getenv("HOSTFACTS_AUTH_USERNAME"), "Username used for basic authentication")
+	password := flag.String("password", os.Getenv("HOSTFACTS_AUTH_PASSWORD"), "Password used for basic authentication")
+	token := flag.String("token", os.Getenv("HOSTFACTS_AUTH_TOKEN"), "Token used for bearer authentication")
 
 	flags.InitFlags()
 	flags.DumpAll()
@@ -45,13 +48,10 @@ func main() {
 	m.Use(macaron.Recovery())
 
 	// auth
-	username := os.Getenv("AUTH_USERNAME")
-	password := os.Getenv("AUTH_PASSWORD")
-	token := os.Getenv("AUTH_TOKEN")
-	if username != "" && password != "" {
-		m.Use(auth.Basic(username, password))
-	} else if token != "" {
-		m.Use(auth.Bearer(token))
+	if *username != "" && *password != "" {
+		m.Use(auth.Basic(*username, *password))
+	} else if *token != "" {
+		m.Use(auth.Bearer(*token))
 	}
 
 	m.Use(toolbox.Toolboxer(m))

@@ -1,5 +1,5 @@
 hash: e4b74732134c9a8a049c47376ebebec5530aef323faa81165e3d358a016c8008
-updated: 2017-01-19T03:06:50.725212162-08:00
+updated: 2017-01-27T01:10:39.388247156-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: cf671fb833a346e4ccb9cc8f26c31e3b514f18f5
+  version: a0aa24b5b48454245292967b3ec7195722c30648
   subpackages:
   - artifactory/v1beta1
   - auth/v1beta1
@@ -36,7 +36,7 @@ imports:
   subpackages:
   - h/log
 - name: github.com/appscode/go
-  version: 10a1572c8fec8c70fe11a05cf6cf2d0034c3ea2a
+  version: 2b10f748f0201d9d077ef7dedaf39669c0029fc9
   subpackages:
   - crypto/rand
   - env
