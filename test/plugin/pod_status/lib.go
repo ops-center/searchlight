@@ -1,10 +1,7 @@
 package pod_status
 
 import (
-	"fmt"
-	"os"
-
-	config "github.com/appscode/searchlight/pkg/client/k8s"
+	"github.com/appscode/searchlight/cmd/searchlight/app"
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/test/plugin"
 	"github.com/appscode/searchlight/util"
@@ -12,41 +9,54 @@ import (
 	"k8s.io/kubernetes/pkg/labels"
 )
 
-func GetStatusCodeForPodStatus(kubeClient *config.KubeClient, hostname string) int {
-	objectType, objectName, namespace := plugin.GetKubeObjectInfo(hostname)
-
+func getStatusCodeForPodStatus(watcher *app.Watcher, objectType, objectName, namespace string) (util.IcingaState, error) {
 	var err error
 	if objectType == host.TypePods {
-		pod, err := kubeClient.Client.Core().Pods(namespace).Get(objectName)
+		pod, err := watcher.Storage.PodStore.Pods(namespace).Get(objectName)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			return util.Unknown, err
 		}
 		if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {
-			return plugin.CRITICAL
+			return util.Critical, nil
 		}
 
 	} else {
 		labelSelector := labels.Everything()
 		if objectType != "" {
-			labelSelector, err = util.GetLabels(kubeClient, namespace, objectType, objectName)
+			labelSelector, err = util.GetLabels(watcher.Client, namespace, objectType, objectName)
 			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
+				return util.Unknown, err
 			}
 		}
-		var podList *kapi.PodList
-		podList, err = kubeClient.Client.Core().Pods(namespace).List(kapi.ListOptions{LabelSelector: labelSelector})
+
+		podList, err := watcher.Storage.PodStore.Pods(namespace).List(labelSelector)
 		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			return util.Unknown, err
 		}
 
-		for _, pod := range podList.Items {
+		for _, pod := range podList {
 			if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {
-				return plugin.CRITICAL
+				return util.Critical, nil
 			}
 		}
 	}
-	return plugin.OK
+	return util.Ok, nil
+}
+
+func GetTestData(watcher *app.Watcher, objectType, objectName, namespace string) ([]plugin.TestData, error) {
+	expectedStatusCode, err := getStatusCodeForPodStatus(watcher, objectType, objectName, namespace)
+	if err != nil {
+		return nil, err
+	}
+	testDataList := []plugin.TestData{
+		plugin.TestData{
+			Data: map[string]interface{}{
+				"ObjectType": objectType,
+				"ObjectName": objectName,
+				"Namespace":  namespace,
+			},
+			ExpectedIcingaState: expectedStatusCode,
+		},
+	}
+	return testDataList, nil
 }

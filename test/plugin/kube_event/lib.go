@@ -3,16 +3,33 @@ package kube_event
 import (
 	"time"
 
-	"fmt"
+	"github.com/appscode/go/crypto/rand"
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/test/plugin"
+	"github.com/appscode/searchlight/util"
 	kapi "k8s.io/kubernetes/pkg/api"
+	"k8s.io/kubernetes/pkg/api/unversioned"
 	"k8s.io/kubernetes/pkg/fields"
-	"k8s.io/kubernetes/pkg/labels"
-	"os"
 )
 
-func GetStatusCodeForEventCount(kubeClient *k8s.KubeClient, checkInterval, clockSkew time.Duration) int {
+func getStatusCodeForEventCount(kubeClient *k8s.KubeClient, checkInterval, clockSkew time.Duration) (util.IcingaState, error) {
+
+	now := time.Now()
+	// Create some fake event
+	for i := 0; i < 5; i++ {
+		_, err := kubeClient.Client.Core().Events(kapi.NamespaceDefault).Create(&kapi.Event{
+			ObjectMeta: kapi.ObjectMeta{
+				Name: rand.WithUniqSuffix("event"),
+			},
+			Type:           kapi.EventTypeWarning,
+			FirstTimestamp: unversioned.NewTime(now),
+			LastTimestamp:  unversioned.NewTime(now),
+		})
+		if err != nil {
+			return util.Unknown, err
+		}
+	}
+
 	count := 0
 	field := fields.OneTermEqualSelector(kapi.EventTypeField, kapi.EventTypeWarning)
 	checkTime := time.Now().Add(-(checkInterval + clockSkew))
@@ -22,8 +39,7 @@ func GetStatusCodeForEventCount(kubeClient *k8s.KubeClient, checkInterval, clock
 		},
 	)
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return util.Unknown, err
 	}
 
 	for _, event := range eventList.Items {
@@ -33,8 +49,25 @@ func GetStatusCodeForEventCount(kubeClient *k8s.KubeClient, checkInterval, clock
 	}
 
 	if count > 0 {
-		return plugin.WARNING
+		return util.Warning, nil
+	}
+	return util.Ok, nil
+}
+
+func GetTestData(kubeClient *k8s.KubeClient, checkInterval, clockSkew time.Duration) ([]plugin.TestData, error) {
+	expectedIcingaState, err := getStatusCodeForEventCount(kubeClient, checkInterval, clockSkew)
+	if err != nil {
+		return nil, err
+	}
+	testDataList := []plugin.TestData{
+		plugin.TestData{
+			Data: map[string]interface{}{
+				"CheckInterval": checkInterval,
+				"ClockSkew":     clockSkew,
+			},
+			ExpectedIcingaState: expectedIcingaState,
+		},
 	}
 
-	return plugin.OK
+	return testDataList, nil
 }
