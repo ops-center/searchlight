@@ -9,17 +9,12 @@ import (
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/util"
 	kapi "k8s.io/kubernetes/pkg/api"
+	"k8s.io/kubernetes/pkg/api/unversioned"
 	"k8s.io/kubernetes/pkg/apis/extensions"
 	"k8s.io/kubernetes/pkg/labels"
 )
 
-func CreateReplicaSet(watcher *app.Watcher, namespace string) (*extensions.ReplicaSet, error) {
-	replicaSet := &extensions.ReplicaSet{}
-	replicaSet.Namespace = namespace
-	if err := testing.CreateKubernetesObject(watcher.Client, replicaSet); err != nil {
-		return nil, err
-	}
-
+func checkReplicaSet(watcher *app.Watcher, replicaSet *extensions.ReplicaSet) (*extensions.ReplicaSet, error) {
 	check := 0
 	for {
 		time.Sleep(time.Second * 10)
@@ -28,7 +23,7 @@ func CreateReplicaSet(watcher *app.Watcher, namespace string) (*extensions.Repli
 			return nil, err
 		}
 		if nReplicaset.Status.ReadyReplicas == nReplicaset.Status.Replicas {
-			break
+			return nReplicaset, nil
 		}
 
 		if check > 6 {
@@ -36,11 +31,36 @@ func CreateReplicaSet(watcher *app.Watcher, namespace string) (*extensions.Repli
 		}
 		check++
 	}
-
-	return replicaSet, nil
 }
 
-func GetSinglePod(watcher *app.Watcher, replicaSet *extensions.ReplicaSet) (*kapi.Pod, error) {
+func CreateReplicaSet(watcher *app.Watcher, namespace string) (*extensions.ReplicaSet, error) {
+	replicaSet := &extensions.ReplicaSet{}
+	replicaSet.Namespace = namespace
+	if err := testing.CreateKubernetesObject(watcher.Client, replicaSet); err != nil {
+		return nil, err
+	}
+
+	return checkReplicaSet(watcher, replicaSet)
+}
+
+func ReCreateReplicaSet(watcher *app.Watcher, replicaSet *extensions.ReplicaSet) (*extensions.ReplicaSet, error) {
+	newReplicaSet := &extensions.ReplicaSet{
+		ObjectMeta: kapi.ObjectMeta{
+			Name:      replicaSet.Name,
+			Namespace: replicaSet.Namespace,
+		},
+		Spec: extensions.ReplicaSetSpec{
+			Replicas: replicaSet.Spec.Replicas,
+		},
+	}
+	if err := testing.CreateKubernetesObject(watcher.Client, newReplicaSet); err != nil {
+		return nil, err
+	}
+
+	return checkReplicaSet(watcher, newReplicaSet)
+}
+
+func GetLastReplica(watcher *app.Watcher, replicaSet *extensions.ReplicaSet) (*kapi.Pod, error) {
 	podList, err := watcher.Storage.PodStore.List(labels.Set(replicaSet.Spec.Selector.MatchLabels).AsSelector())
 	if err != nil {
 		return nil, err
@@ -49,7 +69,17 @@ func GetSinglePod(watcher *app.Watcher, replicaSet *extensions.ReplicaSet) (*kap
 		return nil, errors.New("Pod Not Fount")
 	}
 
-	return podList[0], nil
+	var lastCreationTime unversioned.Time
+	var lastPod *kapi.Pod
+
+	for _, pod := range podList {
+		if lastCreationTime.Before(pod.CreationTimestamp) {
+			lastCreationTime = pod.CreationTimestamp
+			lastPod = pod
+		}
+
+	}
+	return lastPod, nil
 }
 
 func DeleteReplicaSet(watcher *app.Watcher, replicaSet *extensions.ReplicaSet) error {
@@ -86,4 +116,27 @@ func DeleteReplicaSet(watcher *app.Watcher, replicaSet *extensions.ReplicaSet) e
 		return err
 	}
 	return nil
+}
+
+func UpdateReplicaSet(watcher *app.Watcher, replicaSet *extensions.ReplicaSet) (*extensions.ReplicaSet, error) {
+	if _, err := watcher.Client.Extensions().ReplicaSets(replicaSet.Namespace).Update(replicaSet); err != nil {
+		return nil, err
+	}
+
+	check := 0
+	for {
+		time.Sleep(time.Second * 10)
+		nReplicaset, err := watcher.Storage.ReplicaSetStore.ReplicaSets(replicaSet.Namespace).Get(replicaSet.Name)
+		if err != nil {
+			return nil, err
+		}
+		if nReplicaset.Status.ReadyReplicas == nReplicaset.Status.Replicas {
+			return nReplicaset, nil
+		}
+
+		if check > 6 {
+			return nil, errors.New("Fail to create ReplicaSet")
+		}
+		check++
+	}
 }
