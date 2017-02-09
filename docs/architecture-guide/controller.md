@@ -109,6 +109,8 @@ Controller detects following ResourceEventType:
     4. Controller determines which Icinga2 objects should be created for each Alert.
     5. Controller will then create related Icinga2 objects for this pod.
 
+        > Note: Pod itself is considered as its ancestor. It allows applying alerts while recreating pod with same name.
+
 * #### EventType `DELETED`
     1. When pod is deleted, Searchlight Controller detects it.
     2. Controller finds out its ancestors such as services, replicasets, daemonsets, etc.
@@ -116,6 +118,7 @@ Controller detects following ResourceEventType:
     4. Controller determines which Icinga2 objects should be deleted for each Alert.
     5. Controller will then delete related Icinga2 objects for this pod.
 
+        > Note: Any alert directly applied to a pod is left intact, when the pod is deleted. If a new pod is created with same name, alert will be reapplied.
 
 ### Resource `Node`
 <img src="workflow-pods.png">
