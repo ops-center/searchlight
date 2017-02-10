@@ -197,7 +197,7 @@ func getUsage(authInfo *authInfo, hostIP, path string) (*usageStat, error) {
 		scheme = "https"
 		httpClient.WithBasicAuth(authInfo.username, authInfo.password).
 			WithBearerToken(authInfo.authToken).
-		        WithTLSConfig(authInfo.ca, authInfo.crt, authInfo.key)
+			WithTLSConfig(authInfo.ca, authInfo.crt, authInfo.key)
 	}
 
 	urlStr := fmt.Sprintf("%v://%v:%v/du?p=%v", scheme, hostIP, hostFactPort, path)
