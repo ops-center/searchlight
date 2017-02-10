@@ -1,16 +1,13 @@
 package check_volume
 
 import (
-	"crypto/tls"
-	"crypto/x509"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/http"
 	"strings"
 
 	"github.com/appscode/go/flags"
+	"github.com/appscode/go/net/httpclient"
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
@@ -147,9 +144,9 @@ type usageStat struct {
 }
 
 type authInfo struct {
-	ca        string
-	key       string
-	crt       string
+	ca        []byte
+	key       []byte
+	crt       []byte
 	authToken string
 	username  string
 	password  string
@@ -182,9 +179,9 @@ func getHostfactsSecretData(kubeClient *k8s.KubeClient, secretName string) *auth
 	}
 
 	authData := &authInfo{
-		ca:        string(secret.Data[ca]),
-		key:       string(secret.Data[key]),
-		crt:       string(secret.Data[crt]),
+		ca:        secret.Data[ca],
+		key:       secret.Data[key],
+		crt:       secret.Data[crt],
 		authToken: string(secret.Data[authToken]),
 		username:  string(secret.Data[username]),
 		password:  string(secret.Data[password]),
@@ -194,58 +191,19 @@ func getHostfactsSecretData(kubeClient *k8s.KubeClient, secretName string) *auth
 }
 
 func getUsage(authInfo *authInfo, hostIP, path string) (*usageStat, error) {
-	protocol := "http"
-	if authInfo != nil {
-		protocol = "https"
+	scheme := "http"
+	httpClient := httpclient.Default()
+	if authInfo != nil && authInfo.ca != nil {
+		scheme = "https"
+		httpClient.WithBasicAuth(authInfo.username, authInfo.password).
+			WithBearerToken(authInfo.authToken).
+		        WithTLSConfig(authInfo.ca, authInfo.crt, authInfo.key)
 	}
 
-	urlStr := fmt.Sprintf("%v://%v:%v/du?p=%v", protocol, hostIP, hostFactPort, path)
-	req, err := http.NewRequest(http.MethodGet, urlStr, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	mTLSConfig := &tls.Config{}
-
-	if authInfo != nil {
-		if authInfo.username != "" && authInfo.password != "" {
-			req.SetBasicAuth(authInfo.username, authInfo.password)
-		} else if authInfo.authToken != "" {
-			req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", authInfo.authToken))
-		}
-
-		if authInfo.ca != "" {
-			certs := x509.NewCertPool()
-			certs.AppendCertsFromPEM([]byte(authInfo.ca))
-			mTLSConfig.RootCAs = certs
-			if authInfo.crt != "" && authInfo.key != "" {
-				cert, err := tls.X509KeyPair([]byte(authInfo.crt), []byte(authInfo.key))
-				if err == nil {
-					mTLSConfig.Certificates = []tls.Certificate{cert}
-				}
-			}
-		} else {
-			mTLSConfig.InsecureSkipVerify = true
-		}
-	}
-
-	tr := &http.Transport{
-		TLSClientConfig: mTLSConfig,
-	}
-	client := &http.Client{Transport: tr}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	respData, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, err
-	}
-
+	urlStr := fmt.Sprintf("%v://%v:%v/du?p=%v", scheme, hostIP, hostFactPort, path)
 	usages := make([]*usageStat, 1)
-	if err = json.Unmarshal(respData, &usages); err != nil {
+	_, err := httpClient.Call(http.MethodGet, urlStr, nil, &usages, true)
+	if err != nil {
 		return nil, err
 	}
 
