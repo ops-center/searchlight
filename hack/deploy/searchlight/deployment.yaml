@@ -18,6 +18,6 @@ spec:
       containers:
       - args:
         - --icinga-secret=appscode-icinga.kube-system
-        image: appscode/searchlight:1.5.0
+        image: appscode/searchlight:1.5.1
         imagePullPolicy: Always
         name: appscode-searchlight
