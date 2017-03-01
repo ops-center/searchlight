@@ -17,6 +17,7 @@ import:
 - package: github.com/appscode/errors
 - package: github.com/appscode/go
 - package: github.com/appscode/go-notify
+  version: master
 - package: github.com/appscode/log
 - package: github.com/Knetic/govaluate
   version: 36d12fdf60d2eced73454479e9935c9ea8bbe46a

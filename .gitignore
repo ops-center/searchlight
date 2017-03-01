@@ -29,7 +29,7 @@ _testmain.go
 *.out
 
 # external packages folder
-vendor/
 .idea/
 dist/
 *.pyc
+*.DS_Store

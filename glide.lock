@@ -1,5 +1,5 @@
-hash: e4b74732134c9a8a049c47376ebebec5530aef323faa81165e3d358a016c8008
-updated: 2017-02-22T22:36:26.85983937-08:00
+hash: 15afec3306dd3b899c65efc38672efc98e70c7eeb7d1c4f9d01ff59f17916adb
+updated: 2017-02-28T21:34:55.775658208-08:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,9 +7,9 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: 1bf348c58851e4c6a79b8e908fd00a02b527414d
+  version: 7a6bdeb40b3e0f8c9fad5932270d55460bbe5cd1
   subpackages:
-  - artifactory/v1beta1
+  - attic/v1beta1
   - auth/v1beta1
   - certificate/v1beta1
   - ci/v1beta1
@@ -26,7 +26,7 @@ imports:
   - ssh/v1beta1
   - version
 - name: github.com/appscode/client
-  version: 5b8552c9798513d75b0f6b51125a4e9b440738e0
+  version: 2282519d7aed06ca0698e3ee9ab675c4ceca8437
   subpackages:
   - credential
   - util
@@ -47,15 +47,16 @@ imports:
   - runtime
   - version
 - name: github.com/appscode/go-notify
-  version: ad6069b3ac6eaf5afea580ae8257d3aeeff6286c
+  version: 7ba08878d7d32835a686bbbcd94c81708b7add95
   subpackages:
   - hipchat
   - mailgun
+  - plivo
   - slack
   - smtp
   - twilio
 - name: github.com/appscode/k8s-addons
-  version: 6c456dc8cb1c02a834c55d910330176569bfb62a
+  version: efc6a8ade8d4d0378480277dc561c87730acf3c7
   subpackages:
   - api
   - api/install
@@ -126,9 +127,9 @@ imports:
   - log
   - swagger
 - name: github.com/facebookgo/stack
-  version: d9d227395bc3d7a635388c75b2e3b3a750e11888
+  version: 751773369052141c013c6e827a71e8f35c07879c
 - name: github.com/flosch/pongo2
-  version: 17d7c034174b22592c187661011b02fd7e7c3a83
+  version: 1d0f0d3af150c4a65dfd424d742f7374819e7d29
 - name: github.com/ghodss/yaml
   version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
 - name: github.com/go-macaron/auth
@@ -187,7 +188,7 @@ imports:
   - protoc-gen-go/descriptor
   - ptypes/any
 - name: github.com/google/go-querystring
-  version: 547ef5ac979778feb2f760cdb5f4eae1a2207b86
+  version: 53e6ce116135b80d037921a7fdd5138cf32d7a8a
   subpackages:
   - query
 - name: github.com/google/gofuzz
@@ -215,7 +216,7 @@ imports:
   - models
   - pkg/escape
 - name: github.com/jaytaylor/html2text
-  version: 52d9b785554a1918cb09909b89a1509a98b853fd
+  version: 24f9b0f63599c6bbecc3b773636b54f8d302db67
 - name: github.com/jonboulle/clockwork
   version: 72f9bd7c4e0c2a40055ab3d0f09654f730cce982
 - name: github.com/juju/errors
@@ -274,9 +275,9 @@ imports:
 - name: github.com/Sirupsen/logrus
   version: 51fe59aca108dc5680109e7b2051cbdcfa5a253c
 - name: github.com/spf13/cobra
-  version: 9c28e4bbd74e5c3ed7aacbc552b2cab7cfdfe744
+  version: fcd0c5a1df88f5d6784cb4feead962c3f3d0b66c
 - name: github.com/spf13/pflag
-  version: c7e63cf4530bcd3ba943729cee0efeff2ebea63f
+  version: 5ccb023bc27df288a957c5e994cd44fd19619465
 - name: github.com/StackExchange/wmi
   version: e542ed97d15e640bdc14b5c12162d59e8fc67324
 - name: github.com/tbruyelle/hipchat-go
@@ -289,7 +290,7 @@ imports:
   - codec
   - codec/codecgen
 - name: github.com/Unknwon/com
-  version: 28b053d5a2923b87ce8c5a08f3af779894a72758
+  version: 0db4a625e949e956314d7d1adea9bf82384cc10c
 - name: github.com/vaughan0/go-ini
   version: a98ad7ee00ec53921f08832bc06ecf7fd600e6a1
 - name: github.com/xeipuuv/gojsonpointer
@@ -379,7 +380,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/ini.v1
-  version: 6e4869b434bd001f6983749881c7ead3545887d8
+  version: 74bdc99692c3408cb103221e38675ce8fda0a718
 - name: gopkg.in/macaron.v1
   version: ddb19a9f3e8cedd44696b9dd5854dc8a43f3dd6c
   repo: https://github.com/go-macaron/macaron.git
