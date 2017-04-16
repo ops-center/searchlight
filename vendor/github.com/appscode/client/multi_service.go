@@ -63,8 +63,7 @@ func newMultiClientService(conn *grpc.ClientConn) multiClientInterface {
 			},
 		},
 		nsClient: &nsService{
-			teamClient:    namespace.NewTeamsClient(conn),
-			billingClient: namespace.NewBillingClient(conn),
+			teamClient: namespace.NewTeamsClient(conn),
 		},
 	}
 }
@@ -140,16 +139,11 @@ func (a *ciService) Metadata() ci.MetadataClient {
 }
 
 type nsService struct {
-	teamClient    namespace.TeamsClient
-	billingClient namespace.BillingClient
+	teamClient namespace.TeamsClient
 }
 
 func (b *nsService) Team() namespace.TeamsClient {
 	return b.teamClient
-}
-
-func (b *nsService) Billing() namespace.BillingClient {
-	return b.billingClient
 }
 
 type caService struct {

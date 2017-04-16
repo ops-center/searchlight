@@ -2,6 +2,19 @@
 // source: team.proto
 // DO NOT EDIT!
 
+/*
+Package v1beta1 is a generated protocol buffer package.
+
+It is generated from these files:
+	team.proto
+
+It has these top-level messages:
+	CreateRequest
+	CreateResponse
+	GetRequest
+	GetResponse
+	IsAvailableRequest
+*/
 package v1beta1
 
 import proto "github.com/golang/protobuf/proto"
@@ -21,6 +34,12 @@ var _ = proto.Marshal
 var _ = fmt.Errorf
 var _ = math.Inf
 
+// This is a compile-time assertion to ensure that this generated file
+// is compatible with the proto package it is being compiled against.
+// A compilation error at this line likely means your copy of the
+// proto package needs to be updated.
+const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
+
 type CreateRequest struct {
 	Name               string            `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
 	DisplayName        string            `protobuf:"bytes,2,opt,name=display_name,json=displayName" json:"display_name,omitempty"`
@@ -37,7 +56,7 @@ type CreateRequest struct {
 func (m *CreateRequest) Reset()                    { *m = CreateRequest{} }
 func (m *CreateRequest) String() string            { return proto.CompactTextString(m) }
 func (*CreateRequest) ProtoMessage()               {}
-func (*CreateRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{0} }
+func (*CreateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
 func (m *CreateRequest) GetName() string {
 	if m != nil {
@@ -116,7 +135,7 @@ type CreateResponse struct {
 func (m *CreateResponse) Reset()                    { *m = CreateResponse{} }
 func (m *CreateResponse) String() string            { return proto.CompactTextString(m) }
 func (*CreateResponse) ProtoMessage()               {}
-func (*CreateResponse) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{1} }
+func (*CreateResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
 func (m *CreateResponse) GetStatus() *appscode_dtypes.Status {
 	if m != nil {
@@ -132,7 +151,7 @@ type GetRequest struct {
 func (m *GetRequest) Reset()                    { *m = GetRequest{} }
 func (m *GetRequest) String() string            { return proto.CompactTextString(m) }
 func (*GetRequest) ProtoMessage()               {}
-func (*GetRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{2} }
+func (*GetRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
 func (m *GetRequest) GetName() string {
 	if m != nil {
@@ -149,7 +168,7 @@ type GetResponse struct {
 func (m *GetResponse) Reset()                    { *m = GetResponse{} }
 func (m *GetResponse) String() string            { return proto.CompactTextString(m) }
 func (*GetResponse) ProtoMessage()               {}
-func (*GetResponse) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{3} }
+func (*GetResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
 
 func (m *GetResponse) GetStatus() *appscode_dtypes.Status {
 	if m != nil {
@@ -172,7 +191,7 @@ type IsAvailableRequest struct {
 func (m *IsAvailableRequest) Reset()                    { *m = IsAvailableRequest{} }
 func (m *IsAvailableRequest) String() string            { return proto.CompactTextString(m) }
 func (*IsAvailableRequest) ProtoMessage()               {}
-func (*IsAvailableRequest) Descriptor() ([]byte, []int) { return fileDescriptor1, []int{4} }
+func (*IsAvailableRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func (m *IsAvailableRequest) GetName() string {
 	if m != nil {
@@ -333,9 +352,9 @@ var _Teams_serviceDesc = grpc.ServiceDesc{
 	Metadata: "team.proto",
 }
 
-func init() { proto.RegisterFile("team.proto", fileDescriptor1) }
+func init() { proto.RegisterFile("team.proto", fileDescriptor0) }
 
-var fileDescriptor1 = []byte{
+var fileDescriptor0 = []byte{
 	// 615 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x9c, 0x94, 0xdf, 0x6e, 0xd3, 0x3e,
 	0x14, 0xc7, 0x95, 0x66, 0xeb, 0xda, 0xd3, 0xed, 0xa7, 0xfd, 0xac, 0x49, 0x44, 0xe1, 0x5f, 0x09,

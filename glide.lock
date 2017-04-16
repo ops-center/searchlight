@@ -1,5 +1,5 @@
-hash: bf795aa2ed1b3a07a2f9d2ed37fb0b92385981873127ad0e2487b341da2de423
-updated: 2017-04-04T12:53:24.058647552-07:00
+hash: b54995d7829d925d56225fc081d1e757b14f8977fd1dd17b9c21a863f13e57ae
+updated: 2017-04-16T07:06:08.282179525-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: 129c39789632fd2777e5ecc57741e06158524a2a
+  version: 3af1620ade6fe8672bcbdc45ea46e0d2b75147a6
   subpackages:
   - attic/v1beta1
   - auth/v1beta1
@@ -24,16 +24,16 @@ imports:
   - ssh/v1beta1
   - version
 - name: github.com/appscode/client
-  version: ced84f59e742453cf8de2f68d639fd1ee79d9def
+  version: 29445827267d3e5b2cfb527c225a1319fc0cc580
   subpackages:
   - credential
   - util
 - name: github.com/appscode/errors
-  version: 6a668ba07d02064c06707b7d8b0f5239db707045
+  version: 87fb529db75df5295ccccd15cb038587cd5a9dd2
   subpackages:
   - h/log
 - name: github.com/appscode/go
-  version: f93bc4868b8391271b7796f2f16dd99585cc400c
+  version: bd371af23fb2398b60c065a9e07df5084422d6ad
   subpackages:
   - crypto/rand
   - env
@@ -192,7 +192,7 @@ imports:
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 0105e1c52e9b941244cf1840be2dad9c971fa534
+  version: 0e676c3b0e4440ef1434c621068aae02f30e81dd
   repo: https://github.com/appscode/grpc-gateway.git
   vcs: git
   subpackages:
@@ -241,7 +241,7 @@ imports:
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/nlopes/slack
-  version: 72c9c0c37730e1a2b404bb5f02277e0bec7fcb19
+  version: 5bdec13b7f814e15f59a846bcbc2f64cd71f7888
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/prometheus/client_golang
@@ -357,7 +357,7 @@ imports:
   subpackages:
   - googleapis/api/annotations
 - name: google.golang.org/grpc
-  version: cdee119ee21e61eef7093a41ba148fa83585e143
+  version: 8050b9cbc271307e5a716a9d782803d09b0d6f2d
   subpackages:
   - codes
   - credentials

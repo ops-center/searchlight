@@ -48,6 +48,7 @@ It has these top-level messages:
 	CreateRequest
 	UpdateRequest
 	DeleteRequest
+	Raw
 	LoadBalancer
 	Spec
 	Status

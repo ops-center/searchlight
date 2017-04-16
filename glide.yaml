@@ -9,7 +9,7 @@ import:
   vcs: git
   version: master
 - package: google.golang.org/grpc
-  version: v1.2.0
+  version: v1.2.1
 - package: github.com/appscode/api
   version: master
 - package: github.com/appscode/client
