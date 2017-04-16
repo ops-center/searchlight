@@ -19,6 +19,6 @@ spec:
       - args:
         - --icinga-secret-name=appscode-icinga
         - --icinga-secret-namespace=kube-system
-        image: appscode/searchlight:1.5.3
+        image: appscode/searchlight:1.5.4
         imagePullPolicy: Always
         name: appscode-searchlight
