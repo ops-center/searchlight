@@ -23,7 +23,7 @@ spec:
           name: api
           protocol: TCP
         - containerPort: 60006
-          name: tcp
+          name: web
           protocol: TCP
         volumeMounts:
           - name: data-volume

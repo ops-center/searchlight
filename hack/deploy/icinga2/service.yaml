@@ -9,7 +9,7 @@ spec:
   ports:
     - name: web
       port: 80
-      targetPort: tcp
+      targetPort: web
     - name: api
       port: 5665
       targetPort: api

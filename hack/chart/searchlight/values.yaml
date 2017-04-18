@@ -1,6 +1,6 @@
 appscodeicinga:
 
-## Ihinga configaration
+## Icinga configaration
 ## https://github.com/appscode/searchlight/blob/master/docs/user-guide/icinga2/deployment.md#create-deployment
 ##
 
@@ -18,11 +18,8 @@ appscodeicinga:
     ICINGA_IDO_PASSWORD=12345678
     ICINGA_API_USER=icingaapi
     ICINGA_API_PASSWORD=12345678
+    # ICINGA_ADDRESS=<icinga-service-name>.<namespace>
 
-## Use <icinga-service-name>.<namespace> in ICINGA_ADDRESS
-##
-
-    ICINGA_ADDRESS=my-release-searchlight-appscode-icinga.default
 # caCrt:
 # icingaKey:
 # icingaCrt:
@@ -89,7 +86,7 @@ appscodeicinga:
     image: appscode/icinga
     imageTag: 1.5.4-k8s
     apiPort: 5665
-    tcpPort: 80
+    webPort: 60006
 
 ## Postgress configaration
 ##
@@ -107,7 +104,7 @@ appscodeicinga:
 ##
 
   apiTargetPort: 5665
-  webTargetPort: 60006
+  webTargetPort: 80
 
 ## Search light configaration
 ##
@@ -117,11 +114,6 @@ appscodesearchlight:
 ## Searchlight image
 ##
   image: appscode/searchlight
-
-## Searchlight image pull policy
-##
-
-  imagePullPolicy: Always
 
 ## Searchlight image tag
 ##
