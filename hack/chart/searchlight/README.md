@@ -41,7 +41,7 @@ The following tables lists the configurable parameters of the Searchlight chart 
 | Parameter                             | Description                          | Default                   |
 | -----------------------               | ----------------------------------   | --------------------------|
 | `appscodeicinga.icinga.image`         |  Icinga container image to run       | `appscode/icinga`         |
-| `appscodeicinga.icinga.imageTag`      |  Icinga container image tag to run   | `1.5.4-k8s`               |
+| `appscodeicinga.icinga.imageTag`      |  Icinga container image tag to run   | `1.5.5-k8s`               |
 | `appscodeicinga.icinga.apiPort`       |  api port for Icinga container       | `5665`                    |
 | `appscodeicinga.icinga.webPort`       |  web port for Icinga container       | `60006`                   |
 | `appscodeicinga.ido.image`            |  ido container image to run          | `appscode/postgress`      |
@@ -52,4 +52,4 @@ The following tables lists the configurable parameters of the Searchlight chart 
 | `appscodeicinga.webTargetPort`        |  Icinga service target port for web  | `80`                      |
 | `appscodesearchlight.image`           |  Searchlight image to run            | `appscode/searchlight`    |
 | `appscodesearchlight.imagePullPolicy` |  Searchlight image pull policy       | `Always`                  |
-| `appscodesearchlight.imageTag`        |  Searchlight image tag to run        | `1.5.4`                   |
+| `appscodesearchlight.imageTag`        |  Searchlight image tag to run        | `1.5.5`                   |

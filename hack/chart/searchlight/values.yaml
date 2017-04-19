@@ -84,7 +84,7 @@ appscodeicinga:
 
   icinga:
     image: appscode/icinga
-    imageTag: 1.5.4-k8s
+    imageTag: 1.5.5-k8s
     apiPort: 5665
     webPort: 60006
 
@@ -118,4 +118,4 @@ appscodesearchlight:
 ## Searchlight image tag
 ##
 
-  imageTag: 1.5.4
+  imageTag: 1.5.5
