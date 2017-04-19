@@ -1,5 +1,5 @@
 hash: b54995d7829d925d56225fc081d1e757b14f8977fd1dd17b9c21a863f13e57ae
-updated: 2017-04-16T07:06:08.282179525-07:00
+updated: 2017-04-19T01:20:43.619858959-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: 3af1620ade6fe8672bcbdc45ea46e0d2b75147a6
+  version: a130b46749171992f73ebf16349a4cf1fdc5295e
   subpackages:
   - attic/v1beta1
   - auth/v1beta1
@@ -24,7 +24,7 @@ imports:
   - ssh/v1beta1
   - version
 - name: github.com/appscode/client
-  version: 29445827267d3e5b2cfb527c225a1319fc0cc580
+  version: 24d9ff98e3215ee585c6d43699c8ff01aa1521bc
   subpackages:
   - credential
   - util
@@ -54,7 +54,7 @@ imports:
   - smtp
   - twilio
 - name: github.com/appscode/k8s-addons
-  version: 2feea95b0d62ad215bef8d0789978be7c9d58d06
+  version: 3e80e94240b591fcb80f354fb77fdb3085f38675
   subpackages:
   - api
   - api/install
@@ -192,7 +192,7 @@ imports:
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 0e676c3b0e4440ef1434c621068aae02f30e81dd
+  version: c5404aec15f65a822be621c29f98bfd14a046494
   repo: https://github.com/appscode/grpc-gateway.git
   vcs: git
   subpackages:
@@ -241,7 +241,7 @@ imports:
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/nlopes/slack
-  version: 5bdec13b7f814e15f59a846bcbc2f64cd71f7888
+  version: 8c25eff4976762d1a090aeae6f49174a37a1d710
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/prometheus/client_golang
