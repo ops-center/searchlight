@@ -1,5 +1,5 @@
-hash: b54995d7829d925d56225fc081d1e757b14f8977fd1dd17b9c21a863f13e57ae
-updated: 2017-04-19T01:20:43.619858959-07:00
+hash: 1a4bacdc0d5dec7495373c372afa5855a2ebdcba71da2f98edffb94a5e44ab9f
+updated: 2017-04-20T01:54:20.470230125-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: a130b46749171992f73ebf16349a4cf1fdc5295e
+  version: 2653ff310b43b1e2d655d7e381f79803bf10dc64
   subpackages:
   - attic/v1beta1
   - auth/v1beta1
@@ -54,7 +54,7 @@ imports:
   - smtp
   - twilio
 - name: github.com/appscode/k8s-addons
-  version: 3e80e94240b591fcb80f354fb77fdb3085f38675
+  version: e21b7bb435f4ae4bc34782322110951a3261fa83
   subpackages:
   - api
   - api/install
@@ -245,7 +245,7 @@ imports:
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/prometheus/client_golang
-  version: c5b7fccd204277076155f10851dad72b76a49317
+  version: e51041b3fa41cece0dca035740ba6411905be473
   subpackages:
   - api/prometheus
 - name: github.com/prometheus/common
@@ -272,9 +272,9 @@ imports:
 - name: github.com/Sirupsen/logrus
   version: 51fe59aca108dc5680109e7b2051cbdcfa5a253c
 - name: github.com/spf13/cobra
-  version: 9c28e4bbd74e5c3ed7aacbc552b2cab7cfdfe744
+  version: b6cb3958937245a12d4d7728be080a6c758f4136
 - name: github.com/spf13/pflag
-  version: c7e63cf4530bcd3ba943729cee0efeff2ebea63f
+  version: 2300d0f8576fe575f71aaa5b9bbe4e1b0dc2eb51
 - name: github.com/StackExchange/wmi
   version: e54cbda6595d7293a7a468ccf9525f6bc8887f99
 - name: github.com/tbruyelle/hipchat-go
