@@ -51,5 +51,4 @@ The following tables lists the configurable parameters of the Searchlight chart 
 | `icinga.apiTargetPort`        |  Icinga service target port for api  | `5665`                    |
 | `icinga.webTargetPort`        |  Icinga service target port for web  | `80`                      |
 | `searchlight.image`           |  Searchlight image to run            | `appscode/searchlight`    |
-| `searchlight.imagePullPolicy` |  Searchlight image pull policy       | `Always`                  |
 | `searchlight.imageTag`        |  Searchlight image tag to run        | `1.5.5`                   |
