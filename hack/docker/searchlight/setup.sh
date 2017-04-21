@@ -4,41 +4,39 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-LIB_ROOT=$(dirname "${BASH_SOURCE}")/../..
-source "$LIB_ROOT/libbuild/common/lib.sh"
-source "$LIB_ROOT/libbuild/common/public_image.sh"
-
 GOPATH=$(go env GOPATH)
 SRC=$GOPATH/src
 BIN=$GOPATH/bin
 ROOT=$GOPATH
+REPO_ROOT=$GOPATH/src/github.com/appscode/searchlight
+
+source "$REPO_ROOT/hack/libbuild/common/public_image.sh"
 
 APPSCODE_ENV=${APPSCODE_ENV:-dev}
 IMG=searchlight
 
-DIST=$GOPATH/src/github.com/appscode/searchlight/dist
-mkdir -p $DIST
-if [ -f "$DIST/.tag" ]; then
-	export $(cat $DIST/.tag | xargs)
+mkdir -p $REPO_ROOT/dist
+if [ -f "$REPO_ROOT/dist/.tag" ]; then
+	export $(cat $REPO_ROOT/dist/.tag | xargs)
 fi
 
 clean() {
-    pushd $GOPATH/src/github.com/appscode/searchlight/hack/docker/searchlight
-	rm -rf searchlight
-	popd
+    pushd $REPO_ROOT/hack/docker/searchlight
+    rm -rf searchlight
+    popd
 }
 
 build_binary() {
-	pushd $GOPATH/src/github.com/appscode/searchlight
-	./hack/builddeps.sh
+    pushd $REPO_ROOT
+    ./hack/builddeps.sh
     ./hack/make.py build searchlight
-	detect_tag $DIST/.tag
-	popd
+    detect_tag $REPO_ROOT/dist/.tag
+    popd
 }
 
 build_docker() {
-	pushd $GOPATH/src/github.com/appscode/searchlight/hack/docker/searchlight
-	cp $DIST/searchlight/searchlight-linux-amd64 searchlight
+	pushd $REPO_ROOT/hack/docker/searchlight
+	cp $REPO_ROOT/dist/searchlight/searchlight-linux-amd64 searchlight
 	chmod 755 searchlight
 
 	cat >Dockerfile <<EOL
@@ -65,29 +63,27 @@ build() {
 }
 
 docker_push() {
-	if [ "$APPSCODE_ENV" = "prod" ]; then
-		echo "Nothing to do in prod env. Are you trying to 'release' binaries to prod?"
-		exit 0
-	fi
-
-    if [[ "$(docker images -q appscode/$IMG:$TAG 2> /dev/null)" != "" ]]; then
-        docker_up $IMG:$TAG
+    if [ "$APPSCODE_ENV" = "prod" ]; then
+        echo "Nothing to do in prod env. Are you trying to 'release' binaries to prod?"
+        exit 1
     fi
+    if [ "$TAG_STRATEGY" = "git_tag" ]; then
+        echo "Are you trying to 'release' binaries to prod?"
+        exit 1
+    fi
+    hub_canary
 }
 
 docker_release() {
-	if [ "$APPSCODE_ENV" != "prod" ]; then
-		echo "'release' only works in PROD env."
-		exit 1
-	fi
-	if [ "$TAG_STRATEGY" != "git_tag" ]; then
-		echo "'apply_tag' to release binaries and/or docker images."
-		exit 1
-	fi
-
-    if [[ "$(docker images -q appscode/$IMG:$TAG 2> /dev/null)" != "" ]]; then
-        docker push appscode/$IMG:$TAG
+    if [ "$APPSCODE_ENV" != "prod" ]; then
+        echo "'release' only works in PROD env."
+        exit 1
     fi
+    if [ "$TAG_STRATEGY" != "git_tag" ]; then
+        echo "'apply_tag' to release binaries and/or docker images."
+        exit 1
+    fi
+    hub_up
 }
 
 source_repo $@

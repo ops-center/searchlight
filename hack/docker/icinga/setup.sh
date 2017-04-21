@@ -4,31 +4,30 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-LIB_ROOT=$(dirname "${BASH_SOURCE}")/../../..
-source "$LIB_ROOT/hack/libbuild/common/lib.sh"
-source "$LIB_ROOT/hack/libbuild/common/public_image.sh"
-
 GOPATH=$(go env GOPATH)
+REPO_ROOT=$GOPATH/src/github.com/appscode/searchlight
+
+source "$REPO_ROOT/hack/libbuild/common/public_image.sh"
+
 IMG=icinga
 ICINGA_VER=2.4.8
 K8S_VER=1.5
 ICINGAWEB_VER=2.1.2
 
-DIST=$GOPATH/src/github.com/appscode/searchlight/dist
-mkdir -p $DIST
-if [ -f "$DIST/.tag" ]; then
-	export $(cat $DIST/.tag | xargs)
+mkdir -p $REPO_ROOT/dist
+if [ -f "$REPO_ROOT/dist/.tag" ]; then
+	export $(cat $REPO_ROOT/dist/.tag | xargs)
 fi
 
 clean() {
-    pushd $GOPATH/src/github.com/appscode/searchlight/hack/docker/icinga
+    pushd $REPO_ROOT/hack/docker/icinga
 	rm -rf icingaweb2 plugins
 	popd
 }
 
 build() {
-    pushd $GOPATH/src/github.com/appscode/searchlight/hack/docker/icinga
-    detect_tag $DIST/.tag
+    pushd $REPO_ROOT/hack/docker/icinga
+    detect_tag $REPO_ROOT/dist/.tag
 
 	rm -rf icingaweb2
 	clone git@diffusion.appscode.com:appscode/79/icingaweb.git icingaweb2
@@ -46,12 +45,11 @@ build() {
 }
 
 docker_push() {
-	docker_up $IMG:$TAG-ac
+	TAG="$TAG-ac" attic_up
 }
 
 docker_release() {
-	local cmd="docker push appscode/$IMG:$TAG-ac"
-	echo $cmd; $cmd
+    TAG="$TAG-ac" hub_up
 }
 
 binary_repo $@
