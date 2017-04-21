@@ -1,4 +1,4 @@
-appscodeicinga:
+icinga:
 
 ## Icinga configaration
 ## https://github.com/appscode/searchlight/blob/master/docs/user-guide/icinga2/deployment.md#create-deployment
@@ -18,11 +18,18 @@ appscodeicinga:
     ICINGA_IDO_PASSWORD=12345678
     ICINGA_API_USER=icingaapi
     ICINGA_API_PASSWORD=12345678
-    # ICINGA_ADDRESS=<icinga-service-name>.<namespace>
+
+## user must provide caCrt, icingaKey, icingaCrt
+## Details https://github.com/appscode/searchlight/blob/master/docs/user-guide/icinga2/certificate.md
+##
 
 # caCrt:
 # icingaKey:
 # icingaCrt:
+
+##
+## Add notifyVia example: https://github.com/appscode/searchlight/blob/master/docs/user-guide/notifier/mailgun.md#configure
+
 # notifyVia:
 
 ## Hipchat notifier
@@ -109,7 +116,7 @@ appscodeicinga:
 ## Search light configaration
 ##
 
-appscodesearchlight:
+searchlight:
 
 ## Searchlight image
 ##
