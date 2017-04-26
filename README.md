@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/appscode/searchlight)](https://goreportcard.com/report/github.com/appscode/searchlight)
+
 # searchlight
 
 <img src="cover.jpg">
