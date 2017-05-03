@@ -20,5 +20,5 @@ spec:
         - --icinga-secret-name=appscode-icinga
         - --icinga-secret-namespace=kube-system
         - --v=3
-        image: appscode/searchlight:1.5.6
+        image: appscode/searchlight:1.5.7
         name: appscode-searchlight
