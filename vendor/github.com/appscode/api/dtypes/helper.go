@@ -1,48 +1,59 @@
 package dtypes
 
 import (
+	"strings"
+
 	"github.com/appscode/errors"
 	_env "github.com/appscode/go/env"
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/any"
 	"github.com/xeipuuv/gojsonschema"
-	"google.golang.org/genproto/googleapis/rpc/code"
 	spb "google.golang.org/genproto/googleapis/rpc/status"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
 
-func grpcStatus(c code.Code, err error) *spb.Status {
+func statusErr(c codes.Code, err error) error {
+	// if already a statusError, just return it (ignore c)
+	if gs, ok := status.FromError(err); ok {
+		return gs.Err()
+	}
 	e := errors.FromErr(err)
+	// if the cause of traceable error is a statusError, just return it (ignore c)
+	if e2 := e.Cause(); e2 != nil {
+		if gs, ok := status.FromError(e2); ok {
+			return gs.Err()
+		}
+	}
+	// Well, we got to create a new statusError
 	s := &spb.Status{
 		Code:    int32(c),
 		Message: e.Message(),
 	}
-	if e.Trace() != nil {
-		if !_env.FromHost().IsPublic() {
-			details := &ErrorDetails{
-				RequestedResource: e.Error(),
-				Stacktrace:        e.TraceString(),
-			}
-			data, err := proto.Marshal(details)
-			if err == nil {
-				s.Details = []*any.Any{{
-					TypeUrl: proto.MessageName(details),
-					Value:   data,
-				}}
-			}
+	var details ErrorDetails
+	if e.Cause() != nil {
+		details.Cause = e.Cause().Error()
+	}
+	if !_env.FromHost().IsPublic() && e.Trace() != nil {
+		details.StackTrace = &ErrorDetails_StackTrace{
+			Frames: strings.Split(e.Trace().String(), "\n"),
 		}
 	}
-	return s
+	data, err := proto.Marshal(&details)
+	if err == nil {
+		s.Details = []*any.Any{{
+			TypeUrl: proto.MessageName(&details),
+			Value:   data,
+		}}
+	}
+	return status.FromProto(s).Err()
 }
 
 // The operation was cancelled, typically by the caller.
 //
 // HTTP Mapping: 499 Client Closed Request
 func Cancelled(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_CANCELLED, err))
+	return statusErr(codes.Canceled, err)
 }
 
 // Unknown error.  For example, this error may be returned when
@@ -53,10 +64,7 @@ func Cancelled(err error) error {
 //
 // HTTP Mapping: 500 Internal Server Error
 func Unknown(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_UNKNOWN, err))
+	return statusErr(codes.Unknown, err)
 }
 
 // The client specified an invalid argument.  Note that this differs
@@ -66,10 +74,7 @@ func Unknown(err error) error {
 //
 // HTTP Mapping: 400 Bad Request
 func InvalidArgument(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_INVALID_ARGUMENT, err))
+	return statusErr(codes.InvalidArgument, err)
 }
 
 // The deadline expired before the operation could complete. For operations
@@ -80,10 +85,7 @@ func InvalidArgument(err error) error {
 //
 // HTTP Mapping: 504 Gateway Timeout
 func DeadlineExceeded(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_DEADLINE_EXCEEDED, err))
+	return statusErr(codes.DeadlineExceeded, err)
 }
 
 // Some requested entity (e.g., file or directory) was not found.
@@ -93,10 +95,7 @@ func DeadlineExceeded(err error) error {
 //
 // HTTP Mapping: 404 Not Found
 func NotFound(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_NOT_FOUND, err))
+	return statusErr(codes.NotFound, err)
 }
 
 // The entity that a client attempted to create (e.g., file or directory)
@@ -104,10 +103,7 @@ func NotFound(err error) error {
 //
 // HTTP Mapping: 409 Conflict
 func AlreadyExists(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_ALREADY_EXISTS, err))
+	return statusErr(codes.AlreadyExists, err)
 }
 
 // The caller does not have permission to execute the specified
@@ -119,10 +115,7 @@ func AlreadyExists(err error) error {
 //
 // HTTP Mapping: 403 Forbidden
 func PermissionDenied(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_PERMISSION_DENIED, err))
+	return statusErr(codes.PermissionDenied, err)
 }
 
 // The request does not have valid authentication credentials for the
@@ -130,10 +123,7 @@ func PermissionDenied(err error) error {
 //
 // HTTP Mapping: 401 Unauthorized
 func Unauthenticated(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_UNAUTHENTICATED, err))
+	return statusErr(codes.Unauthenticated, err)
 }
 
 // Some resource has been exhausted, perhaps a per-user quota, or
@@ -141,10 +131,7 @@ func Unauthenticated(err error) error {
 //
 // HTTP Mapping: 429 Too Many Requests
 func ResourceExhausted(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_RESOURCE_EXHAUSTED, err))
+	return statusErr(codes.ResourceExhausted, err)
 }
 
 // The operation was rejected because the system is not in a state
@@ -165,10 +152,7 @@ func ResourceExhausted(err error) error {
 //
 // HTTP Mapping: 400 Bad Request
 func FailedPrecondition(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_FAILED_PRECONDITION, err))
+	return statusErr(codes.FailedPrecondition, err)
 }
 
 // The operation was aborted, typically due to a concurrency issue such as
@@ -179,10 +163,7 @@ func FailedPrecondition(err error) error {
 //
 // HTTP Mapping: 409 Conflict
 func Aborted(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_ABORTED, err))
+	return statusErr(codes.Aborted, err)
 }
 
 // The operation was attempted past the valid range.  E.g., seeking or
@@ -203,10 +184,7 @@ func Aborted(err error) error {
 //
 // HTTP Mapping: 400 Bad Request
 func OutOfRange(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_OUT_OF_RANGE, err))
+	return statusErr(codes.OutOfRange, err)
 }
 
 // The operation is not implemented or is not supported/enabled in this
@@ -214,10 +192,7 @@ func OutOfRange(err error) error {
 //
 // HTTP Mapping: 501 Not Implemented
 func Unimplemented(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_UNIMPLEMENTED, err))
+	return statusErr(codes.Unimplemented, err)
 }
 
 // Internal errors.  This means that some invariants expected by the
@@ -226,10 +201,7 @@ func Unimplemented(err error) error {
 //
 // HTTP Mapping: 500 Internal Server Error
 func Internal(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_INTERNAL, err))
+	return statusErr(codes.Internal, err)
 }
 
 // The service is currently unavailable.  This is most likely a
@@ -241,20 +213,14 @@ func Internal(err error) error {
 //
 // HTTP Mapping: 503 Service Unavailable
 func Unavailable(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_UNAVAILABLE, err))
+	return statusErr(codes.Unavailable, err)
 }
 
 // Unrecoverable data loss or corruption.
 //
 // HTTP Mapping: 500 Internal Server Error
 func DataLoss(err error) error {
-	if err == nil {
-		return nil
-	}
-	return status.ErrorProto(grpcStatus(code.Code_DATA_LOSS, err))
+	return statusErr(codes.DataLoss, err)
 }
 
 // Ideally schema.py should generate the functions below, but it can't do it today.

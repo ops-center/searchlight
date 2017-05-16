@@ -1,5 +1,5 @@
-hash: c0834371a6b369adfb4fb51e66ea68606b80bc6caaf9120d9863e254d1bad746
-updated: 2017-05-10T08:36:15.176923231-07:00
+hash: ff156f353331e2a20fc8a7f850851bb509139c73f3a5b8b38628dce9cf2439b5
+updated: 2017-05-15T17:21:08.401884915-07:00
 imports:
 - name: cloud.google.com/go
   version: 3b1ae45394a234c385be014e9a488f2bb6eef821
@@ -7,7 +7,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: 50fcce42b236af3765b08b020219744b782a2dba
+  version: 51b2051bda2f3b346d6abd37953322fb90b6c35c
   subpackages:
   - attic/v1beta1
   - auth/v1beta1
@@ -24,7 +24,7 @@ imports:
   - ssh/v1beta1
   - version
 - name: github.com/appscode/client
-  version: 20d7326eb64ea8e8a0296cd86b2085b672229ab9
+  version: 0d74954b633628967f83891d55a839db440c5d9e
   subpackages:
   - credential
   - util
@@ -54,7 +54,7 @@ imports:
   - smtp
   - twilio
 - name: github.com/appscode/k8s-addons
-  version: 8861b7938c5626baa96ebeb5c4146342806cd591
+  version: a710ffd2f413cb9fb766ee5a71c835fca23f9ca0
   subpackages:
   - api
   - api/install
@@ -192,7 +192,7 @@ imports:
 - name: github.com/google/gofuzz
   version: bbcb9da2d746f8bdbd6a936686a0a6067ada0ec5
 - name: github.com/grpc-ecosystem/grpc-gateway
-  version: 6c3de148e0ee58664e370c84dfc6bb082de03cd6
+  version: 8d7be3463c01d76c6fd60a2c1cd14bebfabf0b2e
   repo: https://github.com/appscode/grpc-gateway.git
   vcs: git
   subpackages:
@@ -245,7 +245,7 @@ imports:
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/prometheus/client_golang
-  version: e51041b3fa41cece0dca035740ba6411905be473
+  version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
   - api/prometheus
 - name: github.com/prometheus/common
@@ -272,7 +272,7 @@ imports:
 - name: github.com/Sirupsen/logrus
   version: 51fe59aca108dc5680109e7b2051cbdcfa5a253c
 - name: github.com/spf13/cobra
-  version: 1362f95a8d6fe330d00a64380d6e0b65f4992c72
+  version: 4cdb38c072b86bf795d2c81de50784d9fdd6eb77
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/StackExchange/wmi
@@ -356,7 +356,6 @@ imports:
   version: 411e09b969b1170a9f0c467558eb4c4c110d9c77
   subpackages:
   - googleapis/api/annotations
-  - googleapis/rpc/code
   - googleapis/rpc/status
 - name: google.golang.org/grpc
   version: d2e1b51f33ff8c5e4a15560ff049d200e83726c5

@@ -15,9 +15,9 @@ import:
 - package: google.golang.org/grpc
   version: v1.3.0
 - package: github.com/appscode/api
-  version: fix-status
+  version: master
 - package: github.com/appscode/client
-  version: fix-status
+  version: master
 - package: github.com/appscode/errors
   version: v2
 - package: github.com/appscode/go

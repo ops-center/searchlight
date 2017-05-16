@@ -430,37 +430,28 @@ func stripFlags(args []string, c *Command) []string {
 	c.mergePersistentFlags()
 
 	commands := []string{}
-	inQuote := false
 	flags := c.Flags()
 
 Loop:
 	for len(args) > 0 {
 		s := args[0]
 		args = args[1:]
-		if !inQuote {
-			switch {
-			case strings.HasPrefix(s, "\"") || strings.Contains(s, "=\""):
-				inQuote = true
-			case strings.HasPrefix(s, "--") && !strings.Contains(s, "=") && !hasNoOptDefVal(s[2:], flags):
-				// If '--flag arg' then
-				// delete arg from args.
-				fallthrough // (do the same as below)
-			case strings.HasPrefix(s, "-") && !strings.Contains(s, "=") && len(s) == 2 && !shortHasNoOptDefVal(s[1:], flags):
-				// If '-f arg' then
-				// delete 'arg' from args or break the loop if len(args) <= 1.
-				if len(args) <= 1 {
-					break Loop
-				} else {
-					args = args[1:]
-					continue
-				}
-			case s != "" && !strings.HasPrefix(s, "-"):
-				commands = append(commands, s)
+		switch {
+		case strings.HasPrefix(s, "--") && !strings.Contains(s, "=") && !hasNoOptDefVal(s[2:], flags):
+			// If '--flag arg' then
+			// delete arg from args.
+			fallthrough // (do the same as below)
+		case strings.HasPrefix(s, "-") && !strings.Contains(s, "=") && len(s) == 2 && !shortHasNoOptDefVal(s[1:], flags):
+			// If '-f arg' then
+			// delete 'arg' from args or break the loop if len(args) <= 1.
+			if len(args) <= 1 {
+				break Loop
+			} else {
+				args = args[1:]
+				continue
 			}
-		}
-
-		if strings.HasSuffix(s, "\"") && !strings.HasSuffix(s, "\\\"") {
-			inQuote = false
+		case s != "" && !strings.HasPrefix(s, "-"):
+			commands = append(commands, s)
 		}
 	}
 
@@ -1275,8 +1266,8 @@ func (c *Command) Parent() *Command {
 // mergePersistentFlags merges c.PersistentFlags() to c.Flags()
 // and adds missing persistent flags of all parents.
 func (c *Command) mergePersistentFlags() {
-	c.Flags().AddFlagSet(c.PersistentFlags())
 	c.updateParentsPflags()
+	c.Flags().AddFlagSet(c.PersistentFlags())
 	c.Flags().AddFlagSet(c.parentsPflags)
 }
 
