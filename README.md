@@ -17,7 +17,7 @@ Following resources are used in Searchlight
 | Icingaweb2             | 2.1.2     |
 | Monitoring Plugins     | 2.1.2     |
 | Postgres               | 9.5       |
-| Searchlight Controller | 1.5.7     |
+| Searchlight Controller | 1.5.8     |
 
 ## Features
 
