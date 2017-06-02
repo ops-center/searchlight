@@ -57,7 +57,7 @@ metadata:
   name: check-kube-event
   namespace: default
   labels:
-    monitoring.appscode.com/objectType: cluster
+    alert.appscode.com/objectType: cluster
 spec:
   CheckCommand: kube_event
   IcingaParam:

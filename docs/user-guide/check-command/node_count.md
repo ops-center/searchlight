@@ -36,7 +36,7 @@ metadata:
   name: check-node-count
   namespace: default
   labels:
-    monitoring.appscode.com/objectType: cluster
+    alert.appscode.com/objectType: cluster
 spec:
   CheckCommand: node_count
   IcingaParam:

@@ -43,7 +43,7 @@ metadata:
   name: check-api-health
   namespace: default
   labels:
-    monitoring.appscode.com/objectType: cluster
+    alert.appscode.com/objectType: cluster
 spec:
   CheckCommand: json_path
   IcingaParam:

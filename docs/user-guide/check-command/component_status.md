@@ -33,7 +33,7 @@ metadata:
   name: check-component-status
   namespace: default
   labels:
-    monitoring.appscode.com/objectType: cluster
+    alert.appscode.com/objectType: cluster
 spec:
   CheckCommand: component_status
   IcingaParam:

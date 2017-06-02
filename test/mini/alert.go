@@ -81,7 +81,7 @@ func getAlert(namespace string) *aci.Alert {
 			Name:      rand.WithUniqSuffix("alert"),
 			Namespace: namespace,
 			Labels: map[string]string{
-				"monitoring.appscode.com/objectType": "cluster",
+				"alert.appscode.com/objectType": "cluster",
 			},
 		},
 		Spec: aci.AlertSpec{},
