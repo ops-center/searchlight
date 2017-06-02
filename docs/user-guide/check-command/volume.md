@@ -57,14 +57,14 @@ See Hostfacts [deployment guide](../hostfacts/deployment.md)
 
 ##### Configure Alert Object
 ```yaml
-apiVersion: appscode.com/v1beta1
+apiVersion: monitoring.appscode.com/v1beta1
 kind: Alert
 metadata:
   name: check-pod-volume-1
   namespace: kube-system
   labels:
-    alert.appscode.com/objectType: services
-    alert.appscode.com/objectName: monitoring-influxdb
+    monitoring.appscode.com/objectType: services
+    monitoring.appscode.com/objectName: monitoring-influxdb
 spec:
   CheckCommand: volume
   IcingaParam:

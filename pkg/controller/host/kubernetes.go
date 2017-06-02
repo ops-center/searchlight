@@ -4,10 +4,10 @@ import (
 	"os"
 
 	"github.com/appscode/errors"
-	aci "github.com/appscode/k8s-addons/api"
-	acs "github.com/appscode/k8s-addons/client/clientset"
-	"github.com/appscode/k8s-addons/pkg/events"
+	aci "github.com/appscode/searchlight/api"
+	acs "github.com/appscode/searchlight/client/clientset"
 	"github.com/appscode/searchlight/pkg/controller/types"
+	"github.com/appscode/searchlight/pkg/events"
 	kapi "k8s.io/kubernetes/pkg/api"
 	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
 	"k8s.io/kubernetes/pkg/labels"
@@ -150,7 +150,7 @@ func GetNode(client clientset.Interface, nodeName, alertNamespace string) ([]*Ku
 	return nodeList, nil
 }
 
-func GetAlertList(acExtClient acs.AppsCodeExtensionInterface, kubeClient clientset.Interface, namespace string, ls labels.Selector) ([]aci.Alert, error) {
+func GetAlertList(acExtClient acs.ExtensionInterface, kubeClient clientset.Interface, namespace string, ls labels.Selector) ([]aci.Alert, error) {
 	alerts := make([]aci.Alert, 0)
 	if namespace != "" {
 		alertList, err := acExtClient.Alert(namespace).List(kapi.ListOptions{LabelSelector: ls})
@@ -173,13 +173,13 @@ func GetAlertList(acExtClient acs.AppsCodeExtensionInterface, kubeClient clients
 	return alerts, nil
 }
 
-func GetAlert(acExtClient acs.AppsCodeExtensionInterface, namespace, name string) (*aci.Alert, error) {
+func GetAlert(acExtClient acs.ExtensionInterface, namespace, name string) (*aci.Alert, error) {
 	return acExtClient.Alert(namespace).Get(name)
 }
 
 const (
-	ObjectType = "alert.appscode.com/objectType"
-	ObjectName = "alert.appscode.com/objectName"
+	ObjectType = "monitoring.appscode.com/objectType"
+	ObjectName = "monitoring.appscode.com/objectName"
 )
 
 func GetLabelSelector(objectType, objectName string) (labels.Selector, error) {

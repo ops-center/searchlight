@@ -42,13 +42,13 @@ See Hostfacts [deployment guide](../hostfacts/deployment.md)
 
 ##### Configure Alert Object
 ```yaml
-apiVersion: appscode.com/v1beta1
+apiVersion: monitoring.appscode.com/v1beta1
 kind: Alert
 metadata:
   name: check-node-disk
   namespace: default
   labels:
-    alert.appscode.com/objectType: cluster
+    monitoring.appscode.com/objectType: cluster
 spec:
   CheckCommand: node_disk
   IcingaParam:
@@ -61,6 +61,6 @@ spec:
 
 # To set alert on specific node, set following labels
 # labels:
-#   alert.appscode.com/objectType: nodes
-#   alert.appscode.com/objectName: ip-172-20-0-9.ec2.internal
+#   monitoring.appscode.com/objectType: nodes
+#   monitoring.appscode.com/objectName: ip-172-20-0-9.ec2.internal
 ```

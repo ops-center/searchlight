@@ -29,13 +29,13 @@ OK: Node is Ready
 ##### Configure Alert Object
 ```yaml
 # This alert will be set to all nodes individually
-apiVersion: appscode.com/v1beta1
+apiVersion: monitoring.appscode.com/v1beta1
 kind: Alert
 metadata:
   name: check-node-status
   namespace: default
   labels:
-    alert.appscode.com/objectType: cluster
+    monitoring.appscode.com/objectType: cluster
 spec:
   CheckCommand: node_status
   IcingaParam:
@@ -48,6 +48,6 @@ spec:
 
 # To set alert on specific node, set following labels
 # labels:
-#   alert.appscode.com/objectType: nodes
-#   alert.appscode.com/objectName: ip-172-20-0-9.ec2.internal
+#   monitoring.appscode.com/objectType: nodes
+#   monitoring.appscode.com/objectName: ip-172-20-0-9.ec2.internal
 ```

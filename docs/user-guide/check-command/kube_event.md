@@ -51,13 +51,13 @@ WARNING: {
 
 ##### Configure Alert Object
 ```yaml
-apiVersion: appscode.com/v1beta1
+apiVersion: monitoring.appscode.com/v1beta1
 kind: Alert
 metadata:
   name: check-kube-event
   namespace: default
   labels:
-    alert.appscode.com/objectType: cluster
+    monitoring.appscode.com/objectType: cluster
 spec:
   CheckCommand: kube_event
   IcingaParam:

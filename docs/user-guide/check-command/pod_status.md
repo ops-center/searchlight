@@ -49,13 +49,13 @@ CRITICAL: {
 ##### Configure Alert Object
 ```yaml
 # This will check all pod status in default namespace
-apiVersion: appscode.com/v1beta1
+apiVersion: monitoring.appscode.com/v1beta1
 kind: Alert
 metadata:
   name: check-pod-status
   namespace: default
   labels:
-    alert.appscode.com/objectType: cluster
+    monitoring.appscode.com/objectType: cluster
 spec:
   CheckCommand: pod_status
   IcingaParam:
@@ -69,6 +69,6 @@ spec:
 
 # To check for others kubernetes objects, set following labels
 # labels:
-#   alert.appscode.com/objectType: services
-#   alert.appscode.com/objectName: elasticsearch-logging
+#   monitoring.appscode.com/objectType: services
+#   monitoring.appscode.com/objectName: elasticsearch-logging
 ```

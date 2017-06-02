@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/appscode/go/crypto/rand"
-	aci "github.com/appscode/k8s-addons/api"
+	aci "github.com/appscode/searchlight/api"
 	"github.com/appscode/searchlight/cmd/searchlight/app"
 	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/api/unversioned"
@@ -23,7 +23,7 @@ var alertResource = alertThirdPartyResource{}
 func createAlertThirdPartyResource(watcher *app.Watcher) (err error) {
 	alertResource.once.Do(
 		func() {
-			_, err = watcher.Client.Extensions().ThirdPartyResources().Get("alert.appscode.com")
+			_, err = watcher.Client.Extensions().ThirdPartyResources().Get("alert.monitoring.appscode.com")
 			if err == nil {
 				return
 			}
@@ -35,7 +35,7 @@ func createAlertThirdPartyResource(watcher *app.Watcher) (err error) {
 					Kind:       "ThirdPartyResource",
 				},
 				ObjectMeta: kapi.ObjectMeta{
-					Name: "alert.appscode.com",
+					Name: "alert.monitoring.appscode.com",
 				},
 				Versions: []extensions.APIVersion{
 					{
@@ -50,7 +50,7 @@ func createAlertThirdPartyResource(watcher *app.Watcher) (err error) {
 
 			try := 0
 			for {
-				_, err = watcher.AppsCodeExtensionClient.Alert(kapi.NamespaceDefault).
+				_, err = watcher.ExtClient.Alert(kapi.NamespaceDefault).
 					List(kapi.ListOptions{LabelSelector: labels.Everything()})
 
 				if err != nil {
@@ -75,13 +75,13 @@ func getAlert(namespace string) *aci.Alert {
 	fakeAlert := &aci.Alert{
 		TypeMeta: unversioned.TypeMeta{
 			Kind:       "Alert",
-			APIVersion: "appscode.com/v1beta1",
+			APIVersion: "monitoring.appscode.com/v1beta1",
 		},
 		ObjectMeta: kapi.ObjectMeta{
 			Name:      rand.WithUniqSuffix("alert"),
 			Namespace: namespace,
 			Labels: map[string]string{
-				"alert.appscode.com/objectType": "cluster",
+				"monitoring.appscode.com/objectType": "cluster",
 			},
 		},
 		Spec: aci.AlertSpec{},
@@ -104,11 +104,11 @@ func CreateAlert(watcher *app.Watcher, namespace string, labelMap map[string]str
 	}
 
 	for key, val := range labelMap {
-		alert.ObjectMeta.Labels[fmt.Sprintf("alert.appscode.com/%s", key)] = val
+		alert.ObjectMeta.Labels[fmt.Sprintf("monitoring.appscode.com/%s", key)] = val
 	}
 
 	// Create Fake 1st Alert
-	if _, err := watcher.AppsCodeExtensionClient.Alert(alert.Namespace).Create(alert); err != nil {
+	if _, err := watcher.ExtClient.Alert(alert.Namespace).Create(alert); err != nil {
 		return nil, err
 	}
 
@@ -117,7 +117,7 @@ func CreateAlert(watcher *app.Watcher, namespace string, labelMap map[string]str
 
 func DeleteAlert(watcher *app.Watcher, alert *aci.Alert) error {
 	// Delete Alert
-	if err := watcher.AppsCodeExtensionClient.Alert(alert.Namespace).Delete(alert.Name); err != nil {
+	if err := watcher.ExtClient.Alert(alert.Namespace).Delete(alert.Name); err != nil {
 		return err
 	}
 	return nil

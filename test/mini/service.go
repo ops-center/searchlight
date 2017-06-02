@@ -1,8 +1,8 @@
 package mini
 
 import (
-	"github.com/appscode/k8s-addons/pkg/testing"
 	"github.com/appscode/searchlight/cmd/searchlight/app"
+	"github.com/appscode/searchlight/pkg/testing"
 	kapi "k8s.io/kubernetes/pkg/api"
 )
 

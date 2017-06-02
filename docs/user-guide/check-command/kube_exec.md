@@ -39,14 +39,14 @@ CRITICAL: Exit Code: 2
 
 ##### Configure Alert Object
 ```yaml
-apiVersion: appscode.com/v1beta1
+apiVersion: monitoring.appscode.com/v1beta1
 kind: Alert
 metadata:
   name: check-kube-exec
   namespace: kube-system
   labels:
-    alert.appscode.com/objectType: pods
-    alert.appscode.com/objectName: monitoring-influxdb-0.12.2-n3lo2
+    monitoring.appscode.com/objectType: pods
+    monitoring.appscode.com/objectName: monitoring-influxdb-0.12.2-n3lo2
 spec:
   CheckCommand: kube_exec
   IcingaParam:

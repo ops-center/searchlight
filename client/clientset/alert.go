@@ -1,7 +1,7 @@
 package clientset
 
 import (
-	aci "github.com/appscode/k8s-addons/api"
+	aci "github.com/appscode/searchlight/api"
 	"k8s.io/kubernetes/pkg/api"
 	rest "k8s.io/kubernetes/pkg/client/restclient"
 	"k8s.io/kubernetes/pkg/watch"
@@ -26,7 +26,9 @@ type AlertImpl struct {
 	ns string
 }
 
-func newAlert(c *AppsCodeExtensionsClient, namespace string) *AlertImpl {
+var _ AlertInterface = &AlertImpl{}
+
+func newAlert(c *ExtensionClient, namespace string) *AlertImpl {
 	return &AlertImpl{c.restClient, namespace}
 }
 

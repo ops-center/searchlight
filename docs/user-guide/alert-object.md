@@ -8,14 +8,14 @@ Before we can create an Alert object, we must create the `Third Party Resource` 
 ##### Alert Object
 
 ```yaml
-apiVersion: appscode.com/v1beta1
+apiVersion: monitoring.appscode.com/v1beta1
 kind: Alert
 metadata:
   name: check-es-logging-volume
   namespace: kube-system
   labels:
-    alert.appscode.com/objectType: replicationcontrollers
-    alert.appscode.com/objectName: elasticsearch-logging-v1
+    monitoring.appscode.com/objectType: replicationcontrollers
+    monitoring.appscode.com/objectName: elasticsearch-logging-v1
 spec:
   CheckCommand: volume
   IcingaParam:
@@ -65,8 +65,8 @@ This object will do the followings:
 > `NotifierParams` is only used when notification is sent via `AppsCode`.
 
 #### Metadata Labels
-* alert.appscode.com/objectType - The Kubernetes object type
-* alert.appscode.com/objectName - The Kubernetes object name
+* monitoring.appscode.com/objectType - The Kubernetes object type
+* monitoring.appscode.com/objectName - The Kubernetes object name
 
 #### CheckCommand
 
