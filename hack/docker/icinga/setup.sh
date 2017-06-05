@@ -32,7 +32,7 @@ build() {
 	rm -rf icingaweb2
 	clone git@diffusion.appscode.com:appscode/79/icingaweb.git icingaweb2
 	cd icingaweb2
-	checkout apicss
+	checkout 2.1.2-ac
 	cd ..
 
 	rm -rf plugins; mkdir -p plugins
