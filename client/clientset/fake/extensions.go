@@ -34,16 +34,8 @@ func NewFakeExtensionClient(objects ...runtime.Object) *FakeExtensionClient {
 	return &FakeExtensionClient{&fakePtr}
 }
 
-func (a *FakeExtensionClient) Ingress(namespace string) clientset.IngressInterface {
-	return &FakeIngress{a.Fake, namespace}
-}
-
 func (a *FakeExtensionClient) Alert(namespace string) clientset.AlertInterface {
 	return &FakeAlert{a.Fake, namespace}
-}
-
-func (m *FakeExtensionClient) Certificate(ns string) clientset.CertificateInterface {
-	return &FakeCertificate{m.Fake, ns}
 }
 
 // RESTClient returns a RESTClient that is used to communicate
