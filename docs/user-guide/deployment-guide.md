@@ -26,7 +26,7 @@ versions:
 
 ```sh
 # Create Third Party Resource
-kubectl apply -f https://raw.githubusercontent.com/appscode/k8s-addons/master/api/extensions/alert.yaml
+kubectl apply -f https://raw.githubusercontent.com/appscode/searchlight/master/api/extensions/alert.yaml
 ```
 
 #### Deploy Icinga2
