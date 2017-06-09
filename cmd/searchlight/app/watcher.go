@@ -44,7 +44,7 @@ func (w *Watcher) setup() {
 }
 
 func (w *Watcher) ensureThirdPartyResource() error {
-	resourceName := "alert" + "." + aci.V1beta1SchemeGroupVersion.Group
+	resourceName := "alert" + "." + aci.V1alpha1SchemeGroupVersion.Group
 
 	_, err := w.Client.Extensions().ThirdPartyResources().Get(resourceName)
 	if !errors.IsNotFound(err) {
@@ -61,7 +61,7 @@ func (w *Watcher) ensureThirdPartyResource() error {
 		},
 		Versions: []extensions.APIVersion{
 			{
-				Name: aci.V1beta1SchemeGroupVersion.Version,
+				Name: aci.V1alpha1SchemeGroupVersion.Version,
 			},
 		},
 	}

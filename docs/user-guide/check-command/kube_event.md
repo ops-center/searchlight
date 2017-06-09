@@ -51,7 +51,7 @@ WARNING: {
 
 ##### Configure Alert Object
 ```yaml
-apiVersion: monitoring.appscode.com/v1beta1
+apiVersion: monitoring.appscode.com/v1alpha1
 kind: Alert
 metadata:
   name: check-kube-event

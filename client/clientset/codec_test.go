@@ -21,13 +21,13 @@ func TestDefaultGroupVersion(t *testing.T) {
 		},
 	}
 
-	gv, err := unversioned.ParseGroupVersion("monitoring.appscode.com/v1beta1")
+	gv, err := unversioned.ParseGroupVersion("monitoring.appscode.com/v1alpha1")
 	if err != nil {
 		fmt.Println(err)
 	}
-	// if monitoring.appscode.com/v1beta1 is not enabled, return an error
+	// if monitoring.appscode.com/v1alpha1 is not enabled, return an error
 	if !registered.IsEnabledVersion(gv) {
-		fmt.Println("monitoring.appscode.com/v1beta1 is not enabled")
+		fmt.Println("monitoring.appscode.com/v1alpha1 is not enabled")
 	}
 
 	fmt.Println(*i)
@@ -35,8 +35,8 @@ func TestDefaultGroupVersion(t *testing.T) {
 
 func TestSetDefault(t *testing.T) {
 	metadata := &unversioned.TypeMeta{
-		Kind:       "Ingress",
-		APIVersion: "monitoring.appscode.com/v1beta1",
+		Kind:       "Alert",
+		APIVersion: "monitoring.appscode.com/v1alpha1",
 	}
 	var obj runtime.Object
 

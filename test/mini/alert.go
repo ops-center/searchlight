@@ -39,7 +39,7 @@ func createAlertThirdPartyResource(watcher *app.Watcher) (err error) {
 				},
 				Versions: []extensions.APIVersion{
 					{
-						Name: "v1beta1",
+						Name: aci.V1alpha1SchemeGroupVersion.Version,
 					},
 				},
 			}
@@ -75,7 +75,7 @@ func getAlert(namespace string) *aci.Alert {
 	fakeAlert := &aci.Alert{
 		TypeMeta: unversioned.TypeMeta{
 			Kind:       "Alert",
-			APIVersion: "monitoring.appscode.com/v1beta1",
+			APIVersion: "monitoring.appscode.com/v1alpha1",
 		},
 		ObjectMeta: kapi.ObjectMeta{
 			Name:      rand.WithUniqSuffix("alert"),
