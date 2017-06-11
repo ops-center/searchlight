@@ -4,16 +4,16 @@ import (
 	"errors"
 	"time"
 
-	"github.com/appscode/searchlight/cmd/searchlight/app"
 	"github.com/appscode/searchlight/pkg/testing"
+	"github.com/appscode/searchlight/pkg/watcher"
 	kapi "k8s.io/kubernetes/pkg/api"
 )
 
-func checkPod(watcher *app.Watcher, pod *kapi.Pod) (*kapi.Pod, error) {
+func checkPod(w *watcher.Watcher, pod *kapi.Pod) (*kapi.Pod, error) {
 	check := 0
 	for {
 		time.Sleep(time.Second * 30)
-		nPod, err := watcher.Storage.PodStore.Pods(pod.Namespace).Get(pod.Name)
+		nPod, err := w.Storage.PodStore.Pods(pod.Namespace).Get(pod.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -28,33 +28,33 @@ func checkPod(watcher *app.Watcher, pod *kapi.Pod) (*kapi.Pod, error) {
 	}
 }
 
-func CreatePod(watcher *app.Watcher, namespace string) (*kapi.Pod, error) {
+func CreatePod(w *watcher.Watcher, namespace string) (*kapi.Pod, error) {
 	pod := &kapi.Pod{}
 	pod.Namespace = namespace
-	if err := testing.CreateKubernetesObject(watcher.Client, pod); err != nil {
+	if err := testing.CreateKubernetesObject(w.KubeClient, pod); err != nil {
 		return nil, err
 	}
 
-	return checkPod(watcher, pod)
+	return checkPod(w, pod)
 }
 
-func ReCreatePod(watcher *app.Watcher, pod *kapi.Pod) (*kapi.Pod, error) {
+func ReCreatePod(w *watcher.Watcher, pod *kapi.Pod) (*kapi.Pod, error) {
 	newPod := &kapi.Pod{
 		ObjectMeta: kapi.ObjectMeta{
 			Name:      pod.Name,
 			Namespace: pod.Namespace,
 		},
 	}
-	if err := testing.CreateKubernetesObject(watcher.Client, newPod); err != nil {
+	if err := testing.CreateKubernetesObject(w.KubeClient, newPod); err != nil {
 		return nil, err
 	}
 
-	return checkPod(watcher, newPod)
+	return checkPod(w, newPod)
 }
 
-func DeletePod(watcher *app.Watcher, pod *kapi.Pod) error {
+func DeletePod(w *watcher.Watcher, pod *kapi.Pod) error {
 	// Delete Pod
-	if err := watcher.Client.Core().Pods(pod.Namespace).Delete(pod.Name, nil); err != nil {
+	if err := w.KubeClient.Core().Pods(pod.Namespace).Delete(pod.Name, nil); err != nil {
 		return err
 	}
 	return nil

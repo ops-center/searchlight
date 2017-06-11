@@ -7,7 +7,7 @@ import (
 
 	"github.com/appscode/go/crypto/rand"
 	aci "github.com/appscode/searchlight/api"
-	"github.com/appscode/searchlight/cmd/searchlight/app"
+	"github.com/appscode/searchlight/pkg/watcher"
 	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/api/unversioned"
 	"k8s.io/kubernetes/pkg/apis/extensions"
@@ -20,10 +20,10 @@ type alertThirdPartyResource struct {
 
 var alertResource = alertThirdPartyResource{}
 
-func createAlertThirdPartyResource(watcher *app.Watcher) (err error) {
+func createAlertThirdPartyResource(w *watcher.Watcher) (err error) {
 	alertResource.once.Do(
 		func() {
-			_, err = watcher.Client.Extensions().ThirdPartyResources().Get("alert.monitoring.appscode.com")
+			_, err = w.KubeClient.Extensions().ThirdPartyResources().Get("alert.monitoring.appscode.com")
 			if err == nil {
 				return
 			}
@@ -43,14 +43,14 @@ func createAlertThirdPartyResource(watcher *app.Watcher) (err error) {
 					},
 				},
 			}
-			_, err = watcher.Client.Extensions().ThirdPartyResources().Create(thirdPartyResource)
+			_, err = w.KubeClient.Extensions().ThirdPartyResources().Create(thirdPartyResource)
 			if err != nil {
 				return
 			}
 
 			try := 0
 			for {
-				_, err = watcher.ExtClient.Alert(kapi.NamespaceDefault).
+				_, err = w.ExtClient.Alert(kapi.NamespaceDefault).
 					List(kapi.ListOptions{LabelSelector: labels.Everything()})
 
 				if err != nil {
@@ -89,7 +89,7 @@ func getAlert(namespace string) *aci.Alert {
 	return fakeAlert
 }
 
-func CreateAlert(watcher *app.Watcher, namespace string, labelMap map[string]string, checkCommand string) (*aci.Alert, error) {
+func CreateAlert(watcher *watcher.Watcher, namespace string, labelMap map[string]string, checkCommand string) (*aci.Alert, error) {
 	// Add Alert ThirdPartyResource
 	if err := createAlertThirdPartyResource(watcher); err != nil {
 		return nil, err
@@ -115,7 +115,7 @@ func CreateAlert(watcher *app.Watcher, namespace string, labelMap map[string]str
 	return alert, nil
 }
 
-func DeleteAlert(watcher *app.Watcher, alert *aci.Alert) error {
+func DeleteAlert(watcher *watcher.Watcher, alert *aci.Alert) error {
 	// Delete Alert
 	if err := watcher.ExtClient.Alert(alert.Namespace).Delete(alert.Name); err != nil {
 		return err

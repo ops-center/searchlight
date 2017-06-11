@@ -4,24 +4,24 @@ import (
 	"errors"
 	"time"
 
-	"github.com/appscode/searchlight/cmd/searchlight/app"
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/pkg/testing"
+	"github.com/appscode/searchlight/pkg/watcher"
 	"github.com/appscode/searchlight/util"
 	kapi "k8s.io/kubernetes/pkg/api"
 )
 
-func CreateReplicationController(watcher *app.Watcher, namespace string) (*kapi.ReplicationController, error) {
+func CreateReplicationController(w *watcher.Watcher, namespace string) (*kapi.ReplicationController, error) {
 	replicationController := &kapi.ReplicationController{}
 	replicationController.Namespace = namespace
-	if err := testing.CreateKubernetesObject(watcher.Client, replicationController); err != nil {
+	if err := testing.CreateKubernetesObject(w.KubeClient, replicationController); err != nil {
 		return nil, err
 	}
 
 	check := 0
 	for {
 		time.Sleep(time.Second * 30)
-		nReplicationController, err := watcher.Storage.RcStore.ReplicationControllers(replicationController.Namespace).Get(replicationController.Name)
+		nReplicationController, err := w.Storage.RcStore.ReplicationControllers(replicationController.Namespace).Get(replicationController.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -38,18 +38,18 @@ func CreateReplicationController(watcher *app.Watcher, namespace string) (*kapi.
 	return replicationController, nil
 }
 
-func DeleteReplicationController(watcher *app.Watcher, replicationController *kapi.ReplicationController) error {
-	replicationController, err := watcher.Client.Core().ReplicationControllers(replicationController.Namespace).Get(replicationController.Name)
+func DeleteReplicationController(w *watcher.Watcher, replicationController *kapi.ReplicationController) error {
+	replicationController, err := w.KubeClient.Core().ReplicationControllers(replicationController.Namespace).Get(replicationController.Name)
 	if err != nil {
 		return err
 	}
 	// Update ReplicationController
 	replicationController.Spec.Replicas = 0
-	if _, err := watcher.Client.Core().ReplicationControllers(replicationController.Namespace).Update(replicationController); err != nil {
+	if _, err := w.KubeClient.Core().ReplicationControllers(replicationController.Namespace).Update(replicationController); err != nil {
 		return err
 	}
 
-	labelSelector, err := util.GetLabels(watcher.Client, replicationController.Namespace, host.TypeReplicationcontrollers, replicationController.Name)
+	labelSelector, err := util.GetLabels(w.KubeClient, replicationController.Namespace, host.TypeReplicationcontrollers, replicationController.Name)
 	if err != nil {
 		return err
 	}
@@ -57,7 +57,7 @@ func DeleteReplicationController(watcher *app.Watcher, replicationController *ka
 	check := 0
 	for {
 		time.Sleep(time.Second * 30)
-		podList, err := watcher.Storage.PodStore.List(labelSelector)
+		podList, err := w.Storage.PodStore.List(labelSelector)
 		if err != nil {
 			return err
 		}
@@ -72,7 +72,7 @@ func DeleteReplicationController(watcher *app.Watcher, replicationController *ka
 	}
 
 	// Delete ReplicationController
-	if err := watcher.Client.Core().ReplicationControllers(replicationController.Namespace).Delete(replicationController.Name, nil); err != nil {
+	if err := w.KubeClient.Core().ReplicationControllers(replicationController.Namespace).Delete(replicationController.Name, nil); err != nil {
 		return err
 	}
 	return nil

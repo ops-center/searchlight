@@ -4,24 +4,24 @@ import (
 	"errors"
 	"time"
 
-	"github.com/appscode/searchlight/cmd/searchlight/app"
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/pkg/testing"
+	"github.com/appscode/searchlight/pkg/watcher"
 	"github.com/appscode/searchlight/util"
 	"k8s.io/kubernetes/pkg/apis/extensions"
 )
 
-func CreateDeployment(watcher *app.Watcher, namespace string) (*extensions.Deployment, error) {
+func CreateDeployment(w *watcher.Watcher, namespace string) (*extensions.Deployment, error) {
 	deployment := &extensions.Deployment{}
 	deployment.Namespace = namespace
-	if err := testing.CreateKubernetesObject(watcher.Client, deployment); err != nil {
+	if err := testing.CreateKubernetesObject(w.KubeClient, deployment); err != nil {
 		return nil, err
 	}
 
 	check := 0
 	for {
 		time.Sleep(time.Second * 30)
-		nDeployment, err := watcher.Storage.DeploymentStore.Deployments(deployment.Namespace).Get(deployment.Name)
+		nDeployment, err := w.Storage.DeploymentStore.Deployments(deployment.Namespace).Get(deployment.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -37,18 +37,18 @@ func CreateDeployment(watcher *app.Watcher, namespace string) (*extensions.Deplo
 	}
 }
 
-func DeleteDeployment(watcher *app.Watcher, deployment *extensions.Deployment) error {
-	deployment, err := watcher.Client.Extensions().Deployments(deployment.Namespace).Get(deployment.Name)
+func DeleteDeployment(w *watcher.Watcher, deployment *extensions.Deployment) error {
+	deployment, err := w.KubeClient.Extensions().Deployments(deployment.Namespace).Get(deployment.Name)
 	if err != nil {
 		return err
 	}
 	// Update Deployment
 	deployment.Spec.Replicas = 0
-	if _, err := watcher.Client.Extensions().Deployments(deployment.Namespace).Update(deployment); err != nil {
+	if _, err := w.KubeClient.Extensions().Deployments(deployment.Namespace).Update(deployment); err != nil {
 		return err
 	}
 
-	labelSelector, err := util.GetLabels(watcher.Client, deployment.Namespace, host.TypeDeployments, deployment.Name)
+	labelSelector, err := util.GetLabels(w.KubeClient, deployment.Namespace, host.TypeDeployments, deployment.Name)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func DeleteDeployment(watcher *app.Watcher, deployment *extensions.Deployment) e
 	check := 0
 	for {
 		time.Sleep(time.Second * 30)
-		podList, err := watcher.Storage.PodStore.List(labelSelector)
+		podList, err := w.Storage.PodStore.List(labelSelector)
 		if err != nil {
 			return err
 		}
@@ -71,7 +71,7 @@ func DeleteDeployment(watcher *app.Watcher, deployment *extensions.Deployment) e
 	}
 
 	// Delete Deployment
-	if err := watcher.Client.Extensions().Deployments(deployment.Namespace).Delete(deployment.Name, nil); err != nil {
+	if err := w.KubeClient.Extensions().Deployments(deployment.Namespace).Delete(deployment.Name, nil); err != nil {
 		return err
 	}
 	return nil

@@ -4,17 +4,17 @@ import (
 	"errors"
 	"time"
 
-	"github.com/appscode/searchlight/cmd/searchlight/app"
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/pkg/testing"
+	"github.com/appscode/searchlight/pkg/watcher"
 	"github.com/appscode/searchlight/util"
 	kapi "k8s.io/kubernetes/pkg/api"
 	"k8s.io/kubernetes/pkg/apis/apps"
 )
 
-func CreateStatefulSet(watcher *app.Watcher, namespace string) (*apps.StatefulSet, error) {
+func CreateStatefulSet(w *watcher.Watcher, namespace string) (*apps.StatefulSet, error) {
 	// Create Service
-	service, err := CreateService(watcher, namespace, nil)
+	service, err := CreateService(w, namespace, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -28,14 +28,14 @@ func CreateStatefulSet(watcher *app.Watcher, namespace string) (*apps.StatefulSe
 		},
 	}
 
-	if err := testing.CreateKubernetesObject(watcher.Client, statefulSet); err != nil {
+	if err := testing.CreateKubernetesObject(w.KubeClient, statefulSet); err != nil {
 		return nil, err
 	}
 
 	check := 0
 	for {
 		time.Sleep(time.Second * 30)
-		nStatefulSet, exists, err := watcher.Storage.StatefulSetStore.Get(statefulSet)
+		nStatefulSet, exists, err := w.Storage.StatefulSetStore.Get(statefulSet)
 		if err != nil {
 			return nil, err
 		}
@@ -54,18 +54,18 @@ func CreateStatefulSet(watcher *app.Watcher, namespace string) (*apps.StatefulSe
 	}
 }
 
-func DeleteStatefulSet(watcher *app.Watcher, statefulSet *apps.StatefulSet) error {
-	statefulSet, err := watcher.Client.Apps().StatefulSets(statefulSet.Namespace).Get(statefulSet.Name)
+func DeleteStatefulSet(w *watcher.Watcher, statefulSet *apps.StatefulSet) error {
+	statefulSet, err := w.KubeClient.Apps().StatefulSets(statefulSet.Namespace).Get(statefulSet.Name)
 	if err != nil {
 		return err
 	}
 	// Update StatefulSet
 	statefulSet.Spec.Replicas = 0
-	if _, err := watcher.Client.Apps().StatefulSets(statefulSet.Namespace).Update(statefulSet); err != nil {
+	if _, err := w.KubeClient.Apps().StatefulSets(statefulSet.Namespace).Update(statefulSet); err != nil {
 		return err
 	}
 
-	labelSelector, err := util.GetLabels(watcher.Client, statefulSet.Namespace, host.TypeStatefulSet, statefulSet.Name)
+	labelSelector, err := util.GetLabels(w.KubeClient, statefulSet.Namespace, host.TypeStatefulSet, statefulSet.Name)
 	if err != nil {
 		return err
 	}
@@ -73,7 +73,7 @@ func DeleteStatefulSet(watcher *app.Watcher, statefulSet *apps.StatefulSet) erro
 	check := 0
 	for {
 		time.Sleep(time.Second * 30)
-		podList, err := watcher.Storage.PodStore.List(labelSelector)
+		podList, err := w.Storage.PodStore.List(labelSelector)
 		if err != nil {
 			return err
 		}
@@ -88,11 +88,11 @@ func DeleteStatefulSet(watcher *app.Watcher, statefulSet *apps.StatefulSet) erro
 	}
 
 	// Delete StatefulSet
-	if err := watcher.Client.Apps().StatefulSets(statefulSet.Namespace).Delete(statefulSet.Name, nil); err != nil {
+	if err := w.KubeClient.Apps().StatefulSets(statefulSet.Namespace).Delete(statefulSet.Name, nil); err != nil {
 		return err
 	}
 
-	return DeleteService(watcher, &kapi.Service{
+	return DeleteService(w, &kapi.Service{
 		ObjectMeta: kapi.ObjectMeta{
 			Name:      statefulSet.Spec.ServiceName,
 			Namespace: statefulSet.Namespace,

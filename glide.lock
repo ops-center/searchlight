@@ -1,5 +1,5 @@
 hash: 47359ea3289e04c66d4f56025d241cba371fc4e90d7132dda5246b6b74dbf37e
-updated: 2017-06-02T14:18:22.689169423-07:00
+updated: 2017-06-11T01:20:49.32320741-07:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -9,7 +9,7 @@ imports:
   - compute/metadata
   - internal
 - name: github.com/appscode/api
-  version: e5c101f3bad6e4fe387ac7daaa7657b1a4de6e87
+  version: e7e27c6907a387a93c0e7bba995fdbf32fcea265
   subpackages:
   - attic/v1beta1
   - auth/v1beta1
@@ -32,19 +32,15 @@ imports:
   - util
 - name: github.com/appscode/errors
   version: 748883e321a9f99fe901bd2663c7af3fcae43ea4
-  subpackages:
-  - h/log
 - name: github.com/appscode/go
   version: 5eabd32a8a0fe824b5e12c37dc53a0afea8507c9
   subpackages:
   - crypto/rand
   - env
   - flags
-  - hold
   - io
   - net
   - net/httpclient
-  - runtime
   - version
 - name: github.com/appscode/go-notify
   version: b56c335311b82247e828ccdc8516621abc230b45
@@ -231,16 +227,10 @@ imports:
   version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
   - pbutil
-- name: github.com/mikespook/golib
-  version: 38fe6917d34b267a79c3432369e7dcc379e2d5b3
-  subpackages:
-  - autoinc
-  - idgen
-  - signal
 - name: github.com/mitchellh/go-wordwrap
   version: ad45545899c7b13c020ea92b2072220eefad42b8
 - name: github.com/nlopes/slack
-  version: c86337c0ef2486a15edd804355d9c73d2f2caed1
+  version: f243c7602fdf906248fc1f165284daa4e4d2d09e
 - name: github.com/pborman/uuid
   version: ca53cad383cad2479bbba7f7a1a05797ec1386e4
 - name: github.com/prometheus/client_golang
@@ -280,7 +270,7 @@ imports:
 - name: github.com/Sirupsen/logrus
   version: 51fe59aca108dc5680109e7b2051cbdcfa5a253c
 - name: github.com/spf13/cobra
-  version: 8d4ce3549a0bf0e3569df3aae7423b7743cd05a9
+  version: d7cfb134748502f60bc1797cd26fcc3e4eb4b927
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/StackExchange/wmi
@@ -397,11 +387,6 @@ imports:
   version: 6e4869b434bd001f6983749881c7ead3545887d8
 - name: gopkg.in/macaron.v1
   version: a325110f8b392bce3e5cdeb8c44bf98078ada3be
-- name: gopkg.in/mgo.v2
-  version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
-  subpackages:
-  - bson
-  - internal/json
 - name: gopkg.in/yaml.v2
   version: 53feefa2559fb8dfa8d81baad31be332c97d6c77
 - name: k8s.io/kubernetes
@@ -456,22 +441,35 @@ imports:
   - pkg/auth/user
   - pkg/client/cache
   - pkg/client/clientset_generated/internalclientset
+  - pkg/client/clientset_generated/internalclientset/fake
   - pkg/client/clientset_generated/internalclientset/typed/apps/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/apps/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/authentication/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/authentication/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/authorization/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/authorization/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/autoscaling/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/autoscaling/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/batch/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/batch/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/certificates/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/certificates/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/core/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/core/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/extensions/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/extensions/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/policy/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/policy/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/rbac/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/rbac/internalversion/fake
   - pkg/client/clientset_generated/internalclientset/typed/storage/internalversion
+  - pkg/client/clientset_generated/internalclientset/typed/storage/internalversion/fake
   - pkg/client/metrics
   - pkg/client/restclient
   - pkg/client/testing/core
   - pkg/client/transport
   - pkg/client/typed/discovery
+  - pkg/client/typed/discovery/fake
   - pkg/client/unversioned/auth
   - pkg/client/unversioned/clientcmd
   - pkg/client/unversioned/clientcmd/api

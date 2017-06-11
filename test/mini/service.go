@@ -1,12 +1,12 @@
 package mini
 
 import (
-	"github.com/appscode/searchlight/cmd/searchlight/app"
 	"github.com/appscode/searchlight/pkg/testing"
+	"github.com/appscode/searchlight/pkg/watcher"
 	kapi "k8s.io/kubernetes/pkg/api"
 )
 
-func CreateService(watcher *app.Watcher, namespace string, selector map[string]string) (*kapi.Service, error) {
+func CreateService(w *watcher.Watcher, namespace string, selector map[string]string) (*kapi.Service, error) {
 	service := &kapi.Service{
 		ObjectMeta: kapi.ObjectMeta{
 			Namespace: namespace,
@@ -15,15 +15,15 @@ func CreateService(watcher *app.Watcher, namespace string, selector map[string]s
 			Selector: selector,
 		},
 	}
-	if err := testing.CreateKubernetesObject(watcher.Client, service); err != nil {
+	if err := testing.CreateKubernetesObject(w.KubeClient, service); err != nil {
 		return nil, err
 	}
 	return service, nil
 }
 
-func DeleteService(watcher *app.Watcher, service *kapi.Service) error {
+func DeleteService(w *watcher.Watcher, service *kapi.Service) error {
 	// Delete Service
-	if err := watcher.Client.Core().Services(service.Namespace).Delete(service.Name, nil); err != nil {
+	if err := w.KubeClient.Core().Services(service.Namespace).Delete(service.Name, nil); err != nil {
 		return err
 	}
 	return nil
