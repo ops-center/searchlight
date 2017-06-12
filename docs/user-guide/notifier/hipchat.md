@@ -11,17 +11,17 @@ env:
   - name: NOTIFY_VIA
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: notify_via
   - name: HIPCHAT_AUTH_TOKEN
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: hipchat_auth_token
   - name: HIPCHAT_TO
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: hipchat_to
 ```
 
@@ -33,7 +33,7 @@ env:
 | HIPCHAT_TO          | Set hipchat room ID. For multiple rooms, set comma separated IDs. |
 
 
-These environment variables will be set using `appscode-icinga` Secret.
+These environment variables will be set using `searchlight-icinga` Secret.
 
 > Set `NOTIFY_VIA` to `hipchat`
 

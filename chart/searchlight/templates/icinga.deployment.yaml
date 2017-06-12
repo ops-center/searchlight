@@ -22,7 +22,7 @@ spec:
         name: data-volume
       - emptyDir: {}
         name: script-volume
-      - name: appscode-icinga
+      - name: searchlight-icinga
         secret:
           secretName: {{ template "fullname" . }}-icinga
       containers:
@@ -41,7 +41,7 @@ spec:
         - mountPath: /var/db-script
           name: script-volume
         - mountPath: /srv/icinga2/secrets
-          name: appscode-icinga
+          name: searchlight-icinga
       - args:
         - basic
         - ./setup-db.sh

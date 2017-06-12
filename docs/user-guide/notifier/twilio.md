@@ -11,27 +11,27 @@ env:
   - name: NOTIFY_VIA
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: notify_via
   - name: TWILIO_ACCOUNT_SID
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: twilio_account_sid
   - name: TWILIO_AUTH_TOKEN
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: twilio_auth_token
   - name: TWILIO_FROM
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: twilio_from
   - name: TWILIO_TO
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: twilio_to
 ```
 
@@ -46,7 +46,7 @@ env:
 
 
 
-These environment variables will be set using `appscode-icinga` Secret.
+These environment variables will be set using `searchlight-icinga` Secret.
 
 > Set `NOTIFY_VIA` to `twilio`
 

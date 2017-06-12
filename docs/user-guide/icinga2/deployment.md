@@ -29,7 +29,7 @@ ICINGA_IDO_USER=icingaido
 ICINGA_IDO_PASSWORD=12345678
 ICINGA_API_USER=icingaapi
 ICINGA_API_PASSWORD=12345678
-ICINGA_ADDRESS=appscode-icinga.kube-system
+ICINGA_ADDRESS=searchlight-icinga.kube-system
 ```
 
 We can use following as `ICINGA_ADDRESS`:

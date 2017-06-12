@@ -11,17 +11,17 @@ env:
   - name: NOTIFY_VIA
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: notify_via
   - name: SLACK_AUTH_TOKEN
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: slack_auth_token
   - name: SLACK_CHANNEL
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: slack_channel
 ```
 
@@ -40,7 +40,7 @@ Add Searchlight app in your slack channel and use provided `bot_access_token`.
 
 #### Set Environment Variables
 
-These environment variables will be set using `appscode-icinga` Secret.
+These environment variables will be set using `searchlight-icinga` Secret.
 
 > Set `NOTIFY_VIA` to `slack`
 

@@ -11,27 +11,27 @@ env:
   - name: NOTIFY_VIA
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: notify_via
   - name: PLIVO_AUTH_ID
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: plivo_auth_id
   - name: PLIVO_AUTH_TOKEN
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: plivo_auth_token
   - name: PLIVO_FROM
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: plivo_from
   - name: PLIVO_TO
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: plivo_to
 ```
 
@@ -46,7 +46,7 @@ env:
 
 
 
-These environment variables will be set using `appscode-icinga` Secret.
+These environment variables will be set using `searchlight-icinga` Secret.
 
 > Set `NOTIFY_VIA` to `plivo`
 

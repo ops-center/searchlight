@@ -11,37 +11,37 @@ env:
   - name: NOTIFY_VIA
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: notify_via
   - name: SMTP_HOST
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: smtp_host
   - name: SMTP_PORT
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: smtp_port
   - name: SMTP_USERNAME
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: smtp_username
   - name: SMTP_PASSWORD
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: smtp_password
   - name: SMTP_FROM
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: smtp_from
   - name: SMTP_TO
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: smtp_to
 ```
 
@@ -58,7 +58,7 @@ env:
 | SMTP_TO                   | Set receipent address. For multiple receipents, set comma separated addresses. |
 
 
-These environment variables will be set using `appscode-icinga` Secret.
+These environment variables will be set using `searchlight-icinga` Secret.
 
 > Set `NOTIFY_VIA` to `smtp`
 

@@ -11,32 +11,32 @@ env:
   - name: NOTIFY_VIA
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: notify_via
   - name: MAILGUN_DOMAIN
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: mailgun_domain
   - name: MAILGUN_API_KEY
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: mailgun_api_key
   - name: MAILGUN_PUBLIC_API_KEY
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: mailgun_public_api_key
   - name: MAILGUN_FROM
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: mailgun_from
   - name: MAILGUN_TO
     valueFrom:
       secretKeyRef:
-        name: appscode-icinga
+        name: searchlight-icinga
         key: mailgun_to
 ```
 
@@ -51,7 +51,7 @@ env:
 | MAILGUN_TO              | Set recipient address. For multiple receipents, set comma separated addresses. |
 
 
-These environment variables will be set using `appscode-icinga` Secret.
+These environment variables will be set using `searchlight-icinga` Secret.
 
 > Set `NOTIFY_VIA` to `mailgun`
 
