@@ -26,7 +26,7 @@ var (
 	icingaSecretName      string
 	icingaSecretNamespace string = kapi.NamespaceDefault
 
-	address string
+	address string = ":8080"
 
 	kubeClient clientset.Interface
 	extClient  acs.ExtensionInterface
