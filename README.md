@@ -82,6 +82,14 @@ Please always check the release notes for upgrade instructions.
  - TPR version: monitoring.appscode.com/v1alpha1 is considered in alpha. This means breaking changes to the YAML format
 might happen among different releases of the operator.
 
+---
+
+**The searchlight operator collects anonymous usage statistics to help us learning
+how the software is being used and how we can improve it. To disable stats collection,
+run the operator with the flag** `--analytics=false`.
+
+---
+
 ## Support
 If you have any questions, you can reach out to us.
 
