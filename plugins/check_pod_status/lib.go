@@ -11,8 +11,9 @@ import (
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
-	kapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/labels"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 type Request struct {
@@ -40,12 +41,12 @@ func CheckPodStatus(req *Request) (util.IcingaState, interface{}) {
 
 	objectInfoList := make([]*objectInfo, 0)
 	if req.ObjectType == host.TypePods {
-		pod, err := kubeClient.Client.Core().Pods(req.Namespace).Get(req.ObjectName)
+		pod, err := kubeClient.Client.CoreV1().Pods(req.Namespace).Get(req.ObjectName, metav1.GetOptions{})
 		if err != nil {
 			return util.Unknown, err
 		}
 
-		if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {
+		if !(pod.Status.Phase == apiv1.PodSucceeded || pod.Status.Phase == apiv1.PodRunning) {
 			objectInfoList = append(objectInfoList, &objectInfo{Name: pod.Name, Status: string(pod.Status.Phase), Namespace: pod.Namespace})
 		}
 	} else {
@@ -56,18 +57,15 @@ func CheckPodStatus(req *Request) (util.IcingaState, interface{}) {
 			}
 		}
 
-		podList, err := kubeClient.Client.Core().
-			Pods(req.Namespace).List(
-			kapi.ListOptions{
-				LabelSelector: labelSelector,
-			},
-		)
+		podList, err := kubeClient.Client.CoreV1().Pods(req.Namespace).List(metav1.ListOptions{
+			LabelSelector: labelSelector.String(),
+		})
 		if err != nil {
 			return util.Unknown, err
 		}
 
 		for _, pod := range podList.Items {
-			if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {
+			if !(pod.Status.Phase == apiv1.PodSucceeded || pod.Status.Phase == apiv1.PodRunning) {
 				objectInfoList = append(objectInfoList, &objectInfo{Name: pod.Name, Status: string(pod.Status.Phase), Namespace: pod.Namespace})
 			}
 		}

@@ -9,7 +9,8 @@ import (
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
-	kapi "k8s.io/kubernetes/pkg/api"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 type Request struct {
@@ -22,7 +23,7 @@ func CheckNodeStatus(req *Request) (util.IcingaState, interface{}) {
 		return util.Unknown, err
 	}
 
-	node, err := kubeClient.Client.Core().Nodes().Get(req.Name)
+	node, err := kubeClient.Client.CoreV1().Nodes().Get(req.Name, metav1.GetOptions{})
 	if err != nil {
 		return util.Unknown, err
 	}
@@ -32,7 +33,7 @@ func CheckNodeStatus(req *Request) (util.IcingaState, interface{}) {
 	}
 
 	for _, condition := range node.Status.Conditions {
-		if condition.Type == kapi.NodeReady && condition.Status == kapi.ConditionFalse {
+		if condition.Type == apiv1.NodeReady && condition.Status == apiv1.ConditionFalse {
 			return util.Critical, "Node is not Ready"
 		}
 	}

@@ -7,8 +7,9 @@ import (
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
-	kapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/labels"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 type objectInfo struct {
@@ -27,11 +28,9 @@ func CheckComponentStatus() (util.IcingaState, interface{}) {
 		return util.Unknown, err
 	}
 
-	components, err := kubeClient.Client.Core().
-		ComponentStatuses().List(
-		kapi.ListOptions{
-			LabelSelector: labels.Everything(),
-		},
+	components, err := kubeClient.Client.CoreV1().ComponentStatuses().List(metav1.ListOptions{
+		LabelSelector: labels.Everything().String(),
+	},
 	)
 	if err != nil {
 		return util.Unknown, err
@@ -40,7 +39,7 @@ func CheckComponentStatus() (util.IcingaState, interface{}) {
 	objectInfoList := make([]*objectInfo, 0)
 	for _, component := range components.Items {
 		for _, condition := range component.Conditions {
-			if condition.Type == kapi.ComponentHealthy && condition.Status == kapi.ConditionFalse {
+			if condition.Type == apiv1.ComponentHealthy && condition.Status == apiv1.ConditionFalse {
 				objectInfoList = append(objectInfoList,
 					&objectInfo{
 						Name:   component.Name,

@@ -1,9 +1,8 @@
 package api
 
 import (
-	"k8s.io/kubernetes/pkg/api"
-	schema "k8s.io/kubernetes/pkg/api/unversioned"
-	"k8s.io/kubernetes/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 // GroupName is the group name use in this package
@@ -27,13 +26,11 @@ var (
 	AddToScheme   = SchemeBuilder.AddToScheme
 )
 
-// Adds the list of known types to api.Scheme.
+// Adds the list of known types to apiv1.Scheme.
 func addKnownTypes(scheme *runtime.Scheme) error {
 	scheme.AddKnownTypes(SchemeGroupVersion,
 		&Alert{},
 		&AlertList{},
-
-		&api.ListOptions{},
 	)
 	return nil
 }

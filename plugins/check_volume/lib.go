@@ -11,7 +11,8 @@ import (
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
-	kapi "k8s.io/kubernetes/pkg/api"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 const (
@@ -37,7 +38,7 @@ const (
 	vsphereVolumePluginName        = "kubernetes.io~vsphere-volume"
 )
 
-func getVolumePluginName(volumeSource *kapi.VolumeSource) string {
+func getVolumePluginName(volumeSource *apiv1.VolumeSource) string {
 	if volumeSource.AWSElasticBlockStore != nil {
 		return awsElasticBlockStorePluginName
 	} else if volumeSource.AzureDisk != nil {
@@ -82,7 +83,7 @@ func getVolumePluginName(volumeSource *kapi.VolumeSource) string {
 	return ""
 }
 
-func getPersistentVolumePluginName(volumeSource *kapi.PersistentVolumeSource) string {
+func getPersistentVolumePluginName(volumeSource *apiv1.PersistentVolumeSource) string {
 	if volumeSource.AWSElasticBlockStore != nil {
 		return awsElasticBlockStorePluginName
 	} else if volumeSource.AzureDisk != nil {
@@ -167,7 +168,7 @@ func getHostfactsSecretData(kubeClient *k8s.KubeClient, secretName, secretNamesp
 		return nil
 	}
 
-	secret, err := kubeClient.Client.Core().Secrets(secretNamespace).Get(secretName)
+	secret, err := kubeClient.Client.CoreV1().Secrets(secretNamespace).Get(secretName, metav1.GetOptions{})
 	if err != nil {
 		return nil
 	}
@@ -245,7 +246,7 @@ func checkNodeDiskStat(req *Request) (util.IcingaState, interface{}) {
 	}
 
 	node_name := parts[0]
-	node, err := kubeClient.Client.Core().Nodes().Get(node_name)
+	node, err := kubeClient.Client.CoreV1().Nodes().Get(node_name, metav1.GetOptions{})
 	if err != nil {
 		return util.Unknown, err
 	}
@@ -256,7 +257,7 @@ func checkNodeDiskStat(req *Request) (util.IcingaState, interface{}) {
 
 	hostIP := ""
 	for _, address := range node.Status.Addresses {
-		if address.Type == kapi.NodeInternalIP {
+		if address.Type == apiv1.NodeInternalIP {
 			hostIP = address.Address
 		}
 	}
@@ -282,7 +283,7 @@ func checkPodVolumeStat(req *Request) (util.IcingaState, interface{}) {
 
 	pod_name := parts[0]
 	namespace := parts[1]
-	pod, err := kubeClient.Client.Core().Pods(namespace).Get(pod_name)
+	pod, err := kubeClient.Client.CoreV1().Pods(namespace).Get(pod_name, metav1.GetOptions{})
 	if err != nil {
 		return util.Unknown, err
 	}
@@ -292,13 +293,12 @@ func checkPodVolumeStat(req *Request) (util.IcingaState, interface{}) {
 	for _, volume := range pod.Spec.Volumes {
 		if volume.Name == name {
 			if volume.PersistentVolumeClaim != nil {
-				claim, err := kubeClient.Client.Core().
-					PersistentVolumeClaims(namespace).Get(volume.PersistentVolumeClaim.ClaimName)
+				claim, err := kubeClient.Client.CoreV1().PersistentVolumeClaims(namespace).Get(volume.PersistentVolumeClaim.ClaimName, metav1.GetOptions{})
 				if err != nil {
 					return util.Unknown, err
 
 				}
-				volume, err := kubeClient.Client.Core().PersistentVolumes().Get(claim.Spec.VolumeName)
+				volume, err := kubeClient.Client.CoreV1().PersistentVolumes().Get(claim.Spec.VolumeName, metav1.GetOptions{})
 				if err != nil {
 					return util.Unknown, err
 				}

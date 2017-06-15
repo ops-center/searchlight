@@ -7,26 +7,26 @@ import (
 
 	aci "github.com/appscode/searchlight/api"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/unversioned"
-	"k8s.io/kubernetes/pkg/apimachinery/registered"
-	"k8s.io/kubernetes/pkg/runtime"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/pkg/api"
 )
 
 func TestDefaultGroupVersion(t *testing.T) {
 	i := &aci.Alert{
-		ObjectMeta: api.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      "foo",
 			Namespace: "bar",
 		},
 	}
 
-	gv, err := unversioned.ParseGroupVersion("monitoring.appscode.com/v1alpha1")
+	gv, err := schema.ParseGroupVersion("monitoring.appscode.com/v1alpha1")
 	if err != nil {
 		fmt.Println(err)
 	}
 	// if monitoring.appscode.com/v1alpha1 is not enabled, return an error
-	if !registered.IsEnabledVersion(gv) {
+	if !api.Registry.IsEnabledVersion(gv) {
 		fmt.Println("monitoring.appscode.com/v1alpha1 is not enabled")
 	}
 
@@ -34,7 +34,7 @@ func TestDefaultGroupVersion(t *testing.T) {
 }
 
 func TestSetDefault(t *testing.T) {
-	metadata := &unversioned.TypeMeta{
+	metadata := &metav1.TypeMeta{
 		Kind:       "Alert",
 		APIVersion: "monitoring.appscode.com/v1alpha1",
 	}

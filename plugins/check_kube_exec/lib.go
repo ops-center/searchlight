@@ -10,8 +10,10 @@ import (
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/util"
 	"github.com/spf13/cobra"
-	kapi "k8s.io/kubernetes/pkg/api"
-	clientset "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset"
+	"k8s.io/apimachinery/pkg/apis/meta/internalversion"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	clientset "k8s.io/client-go/kubernetes"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 	"k8s.io/kubernetes/pkg/client/unversioned/remotecommand"
 	remotecommandserver "k8s.io/kubernetes/pkg/kubelet/server/remotecommand"
 	utilexec "k8s.io/kubernetes/pkg/util/exec"
@@ -46,7 +48,7 @@ func CheckKubeExec(req *Request) (util.IcingaState, interface{}) {
 		return util.Unknown, err
 	}
 
-	pod, err := kubeClient.Core().Pods(req.Namespace).Get(req.Pod)
+	pod, err := kubeClient.CoreV1().Pods(req.Namespace).Get(req.Pod, metav1.GetOptions{})
 	if err != nil {
 		return util.Unknown, err
 	}
@@ -74,14 +76,14 @@ func CheckKubeExec(req *Request) (util.IcingaState, interface{}) {
 		SubResource("exec").
 		Param("container", req.Container)
 
-	execRequest.VersionedParams(&kapi.PodExecOptions{
+	execRequest.VersionedParams(&apiv1.PodExecOptions{
 		Container: req.Container,
 		Command:   []string{req.Command},
 		Stdin:     true,
 		Stdout:    false,
 		Stderr:    false,
 		TTY:       false,
-	}, kapi.ParameterCodec)
+	}, internalversion.ParameterCodec)
 
 	exec, err := remotecommand.NewExecutor(kubeConfig, "POST", execRequest.URL())
 	if err != nil {
