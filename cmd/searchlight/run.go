@@ -42,6 +42,9 @@ func NewCmdRun() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			run()
 		},
+		PostRun: func(cmd *cobra.Command, args []string) {
+			analytics.SendEvent("operator", "stopped", Version)
+		},
 	}
 
 	cmd.Flags().StringVar(&masterURL, "master", masterURL, "The address of the Kubernetes API server (overrides any value in kubeconfig)")
@@ -87,7 +90,7 @@ func run() {
 	if enableAnalytics {
 		analytics.Enable()
 	}
-	analytics.SendEvent("", "started", Version)
+	analytics.SendEvent("operator", "started", Version)
 
 	http.Handle("/metrics", promhttp.Handler())
 	log.Infoln("Listening on", address)
