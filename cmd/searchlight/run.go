@@ -17,7 +17,6 @@ import (
 	clientset "k8s.io/client-go/kubernetes"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
 	"k8s.io/client-go/tools/clientcmd"
-	_ "k8s.io/kubernetes/pkg/client/clientset_generated/internalclientset/fake"
 )
 
 var (

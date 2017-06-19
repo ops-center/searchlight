@@ -97,7 +97,7 @@ func CreateAlertEvent(kubeClient clientset.Interface, alert *aci.Alert, reason t
 		event.Type = apiv1.EventTypeNormal
 	}
 
-	if _, err := kubeClient.Core().Events(alert.Namespace).Create(event); err != nil {
+	if _, err := kubeClient.CoreV1().Events(alert.Namespace).Create(event); err != nil {
 		log.Debugln(err)
 	}
 }

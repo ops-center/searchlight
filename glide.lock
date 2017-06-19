@@ -1,10 +1,8 @@
-hash: cbcc856eba9ca14cee8194fc5b3ef9695cc3f119fa60d7104dcf455cccd87747
-updated: 2017-06-15T08:09:07.935719921-07:00
+hash: 49e2eaea4a57a709ee1fa21885d3a9e8351af7c6dc165b34e4798eba7d9a4cda
+updated: 2017-06-19T16:47:20.789189475-07:00
 imports:
-- name: bitbucket.org/ww/goautoneg
-  version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
 - name: github.com/appscode/api
-  version: e7e27c6907a387a93c0e7bba995fdbf32fcea265
+  version: 1c70d2f0d695d3521ff72771b903d4c8d15f88e4
   subpackages:
   - attic/v1beta1
   - auth/v1beta1
@@ -36,6 +34,7 @@ imports:
   - io
   - net
   - net/httpclient
+  - types
   - version
 - name: github.com/appscode/go-notify
   version: b56c335311b82247e828ccdc8516621abc230b45
@@ -196,9 +195,10 @@ imports:
   subpackages:
   - go
 - name: github.com/prometheus/common
-  version: ffe929a3f4c4faeaa10f2b9535c2b1be3ad15650
+  version: 13ba4ddd0caa9c28ca7b7bffe1dfa9ed8d5ef207
   subpackages:
   - expfmt
+  - internal/bitbucket.org/ww/goautoneg
   - model
 - name: github.com/prometheus/procfs
   version: 454a56f35412459b5e684fd5ec0f9211b94f002a
@@ -222,7 +222,7 @@ imports:
 - name: github.com/Sirupsen/logrus
   version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
 - name: github.com/spf13/cobra
-  version: b4dbd37a01839e0653eec12aa4bbb2a2ce7b2a37
+  version: 99b5d838ca16c25cc4944e323684f8415e8b10ba
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/StackExchange/wmi
@@ -283,7 +283,7 @@ imports:
   - unicode/norm
   - width
 - name: google.golang.org/genproto
-  version: aa2eb687b4d3e17154372564ad8d6bf11c3cf21f
+  version: 411e09b969b1170a9f0c467558eb4c4c110d9c77
   subpackages:
   - googleapis/api/annotations
   - googleapis/rpc/status
@@ -310,7 +310,7 @@ imports:
 - name: gopkg.in/inf.v0
   version: 3887ee99ecf07df5b447e9b00d9c0b2adaa9f3e4
 - name: gopkg.in/ini.v1
-  version: 6e4869b434bd001f6983749881c7ead3545887d8
+  version: d3de07a94d22b4a0972deb4b96d790c2c0ce8333
 - name: gopkg.in/macaron.v1
   version: a325110f8b392bce3e5cdeb8c44bf98078ada3be
 - name: gopkg.in/yaml.v2
@@ -370,7 +370,6 @@ imports:
   version: 3627aeb7d4f6ade38f995d2c923e459146493c7e
   subpackages:
   - discovery
-  - discovery/fake
   - kubernetes
   - kubernetes/scheme
   - kubernetes/typed/apps/v1beta1
@@ -456,92 +455,13 @@ imports:
   - util/homedir
   - util/integer
 - name: k8s.io/kubernetes
-  version: 490c6f13df1cb6612e0993c4c14f2ff90f8cdbf3
+  version: 7fa1c1756d8bc963f1a389f4a6937dc71f08ada2
   subpackages:
   - pkg/api
-  - pkg/api/install
-  - pkg/api/unversioned
-  - pkg/api/v1
-  - pkg/apis/apps
-  - pkg/apis/apps/install
-  - pkg/apis/apps/v1beta1
-  - pkg/apis/authentication
-  - pkg/apis/authentication/install
-  - pkg/apis/authentication/v1
-  - pkg/apis/authentication/v1beta1
-  - pkg/apis/authorization
-  - pkg/apis/authorization/install
-  - pkg/apis/authorization/v1
-  - pkg/apis/authorization/v1beta1
-  - pkg/apis/autoscaling
-  - pkg/apis/autoscaling/install
-  - pkg/apis/autoscaling/v1
-  - pkg/apis/autoscaling/v2alpha1
-  - pkg/apis/batch
-  - pkg/apis/batch/install
-  - pkg/apis/batch/v1
-  - pkg/apis/batch/v2alpha1
-  - pkg/apis/certificates
-  - pkg/apis/certificates/install
-  - pkg/apis/certificates/v1beta1
-  - pkg/apis/componentconfig
-  - pkg/apis/componentconfig/install
-  - pkg/apis/componentconfig/v1alpha1
-  - pkg/apis/extensions
-  - pkg/apis/extensions/install
-  - pkg/apis/extensions/v1beta1
-  - pkg/apis/policy
-  - pkg/apis/policy/install
-  - pkg/apis/policy/v1beta1
-  - pkg/apis/rbac
-  - pkg/apis/rbac/install
-  - pkg/apis/rbac/v1alpha1
-  - pkg/apis/rbac/v1beta1
-  - pkg/apis/settings
-  - pkg/apis/settings/install
-  - pkg/apis/settings/v1alpha1
-  - pkg/apis/storage
-  - pkg/apis/storage/install
-  - pkg/apis/storage/v1
-  - pkg/apis/storage/v1beta1
-  - pkg/client/clientset_generated/internalclientset
-  - pkg/client/clientset_generated/internalclientset/fake
-  - pkg/client/clientset_generated/internalclientset/scheme
-  - pkg/client/clientset_generated/internalclientset/typed/apps/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/apps/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/authentication/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/authentication/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/authorization/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/authorization/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/autoscaling/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/autoscaling/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/batch/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/batch/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/certificates/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/certificates/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/core/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/core/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/extensions/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/extensions/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/policy/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/policy/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/rbac/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/rbac/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/settings/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/settings/internalversion/fake
-  - pkg/client/clientset_generated/internalclientset/typed/storage/internalversion
-  - pkg/client/clientset_generated/internalclientset/typed/storage/internalversion/fake
   - pkg/client/unversioned/remotecommand
-  - pkg/fields
-  - pkg/kubelet/qos
   - pkg/kubelet/server/remotecommand
-  - pkg/kubelet/types
-  - pkg/labels
-  - pkg/master/ports
-  - pkg/util
   - pkg/util/exec
   - pkg/util/interrupt
-  - pkg/util/parsers
   - pkg/util/term
 testImports:
 - name: github.com/pmezard/go-difflib

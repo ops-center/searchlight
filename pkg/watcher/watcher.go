@@ -32,7 +32,7 @@ type Watcher struct {
 	SyncPeriod time.Duration
 
 	// lister store
-	Storage *stash.Storage
+	Storage stash.Storage
 	// Enable analytics
 	EnableAnalytics bool
 	sync.Mutex
@@ -57,8 +57,6 @@ func (w *Watcher) setup() {
 	if err := w.ensureThirdPartyResource(); err != nil {
 		log.Fatalln(err)
 	}
-	w.Storage = &stash.Storage{}
-
 	// Enable analytics
 	if w.EnableAnalytics {
 		analytics.Enable()
@@ -88,7 +86,7 @@ func (w *Watcher) ensureThirdPartyResource() error {
 		},
 	}
 
-	_, err = w.KubeClient.Extensions().ThirdPartyResources().Create(thirdPartyResource)
+	_, err = w.KubeClient.ExtensionsV1beta1().ThirdPartyResources().Create(thirdPartyResource)
 	return err
 }
 

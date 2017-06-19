@@ -5,8 +5,8 @@ import (
 	"github.com/appscode/searchlight/pkg/watcher"
 	"github.com/appscode/searchlight/test/plugin"
 	"github.com/appscode/searchlight/util"
-	kapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/labels"
+	"k8s.io/apimachinery/pkg/labels"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 func getStatusCodeForPodStatus(w *watcher.Watcher, objectType, objectName, namespace string) (util.IcingaState, error) {
@@ -16,7 +16,7 @@ func getStatusCodeForPodStatus(w *watcher.Watcher, objectType, objectName, names
 		if err != nil {
 			return util.Unknown, err
 		}
-		if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {
+		if !(pod.Status.Phase == apiv1.PodSucceeded || pod.Status.Phase == apiv1.PodRunning) {
 			return util.Critical, nil
 		}
 
@@ -35,7 +35,7 @@ func getStatusCodeForPodStatus(w *watcher.Watcher, objectType, objectName, names
 		}
 
 		for _, pod := range podList {
-			if !(pod.Status.Phase == kapi.PodSucceeded || pod.Status.Phase == kapi.PodRunning) {
+			if !(pod.Status.Phase == apiv1.PodSucceeded || pod.Status.Phase == apiv1.PodRunning) {
 				return util.Critical, nil
 			}
 		}

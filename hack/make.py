@@ -274,7 +274,7 @@ def install():
 
 def default():
     gen()
-    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./cmd/...'))
+    die(call('GO15VENDOREXPERIMENT=1 ' + libbuild.GOC + ' install ./cmd/... ./test/...'))
 
 
 if __name__ == "__main__":

@@ -4,11 +4,13 @@ import (
 	"errors"
 	"time"
 
+	"github.com/appscode/go/types"
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/pkg/testing"
 	"github.com/appscode/searchlight/pkg/watcher"
 	"github.com/appscode/searchlight/util"
-	"k8s.io/kubernetes/pkg/apis/extensions"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	extensions "k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
 func CreateDeployment(w *watcher.Watcher, namespace string) (*extensions.Deployment, error) {
@@ -26,7 +28,7 @@ func CreateDeployment(w *watcher.Watcher, namespace string) (*extensions.Deploym
 			return nil, err
 		}
 
-		if deployment.Spec.Replicas == nDeployment.Status.AvailableReplicas {
+		if *deployment.Spec.Replicas == nDeployment.Status.AvailableReplicas {
 			return nDeployment, nil
 		}
 
@@ -38,13 +40,13 @@ func CreateDeployment(w *watcher.Watcher, namespace string) (*extensions.Deploym
 }
 
 func DeleteDeployment(w *watcher.Watcher, deployment *extensions.Deployment) error {
-	deployment, err := w.KubeClient.Extensions().Deployments(deployment.Namespace).Get(deployment.Name)
+	deployment, err := w.KubeClient.ExtensionsV1beta1().Deployments(deployment.Namespace).Get(deployment.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 	// Update Deployment
-	deployment.Spec.Replicas = 0
-	if _, err := w.KubeClient.Extensions().Deployments(deployment.Namespace).Update(deployment); err != nil {
+	deployment.Spec.Replicas = types.Int32P(0)
+	if _, err := w.KubeClient.ExtensionsV1beta1().Deployments(deployment.Namespace).Update(deployment); err != nil {
 		return err
 	}
 
@@ -71,7 +73,7 @@ func DeleteDeployment(w *watcher.Watcher, deployment *extensions.Deployment) err
 	}
 
 	// Delete Deployment
-	if err := w.KubeClient.Extensions().Deployments(deployment.Namespace).Delete(deployment.Name, nil); err != nil {
+	if err := w.KubeClient.ExtensionsV1beta1().Deployments(deployment.Namespace).Delete(deployment.Name, nil); err != nil {
 		return err
 	}
 	return nil

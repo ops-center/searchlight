@@ -34,7 +34,7 @@ type IcingaController struct {
 func New(kubeClient clientset.Interface,
 	icingaClient *icinga.IcingaClient,
 	extClient acs.ExtensionInterface,
-	storage *stash.Storage) *IcingaController {
+	storage stash.Storage) *IcingaController {
 	data, err := getIcingaDataMap()
 	if err != nil {
 		log.Errorln("Icinga data not found")

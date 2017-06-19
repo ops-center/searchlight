@@ -4,14 +4,15 @@ import (
 	"errors"
 	"time"
 
+	"github.com/appscode/go/types"
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/pkg/testing"
 	"github.com/appscode/searchlight/pkg/watcher"
 	"github.com/appscode/searchlight/util"
-	kapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/unversioned"
-	"k8s.io/kubernetes/pkg/apis/extensions"
-	"k8s.io/kubernetes/pkg/labels"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
+	extensions "k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
 func checkReplicaSet(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) (*extensions.ReplicaSet, error) {
@@ -45,7 +46,7 @@ func CreateReplicaSet(w *watcher.Watcher, namespace string) (*extensions.Replica
 
 func ReCreateReplicaSet(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) (*extensions.ReplicaSet, error) {
 	newReplicaSet := &extensions.ReplicaSet{
-		ObjectMeta: kapi.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      replicaSet.Name,
 			Namespace: replicaSet.Namespace,
 		},
@@ -60,7 +61,7 @@ func ReCreateReplicaSet(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) (
 	return checkReplicaSet(w, newReplicaSet)
 }
 
-func GetLastReplica(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) (*kapi.Pod, error) {
+func GetLastReplica(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) (*apiv1.Pod, error) {
 	podList, err := w.Storage.PodStore.List(labels.Set(replicaSet.Spec.Selector.MatchLabels).AsSelector())
 	if err != nil {
 		return nil, err
@@ -69,8 +70,8 @@ func GetLastReplica(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) (*kap
 		return nil, errors.New("Pod Not Fount")
 	}
 
-	var lastCreationTime unversioned.Time
-	var lastPod *kapi.Pod
+	var lastCreationTime metav1.Time
+	var lastPod *apiv1.Pod
 
 	for _, pod := range podList {
 		if lastCreationTime.Before(pod.CreationTimestamp) {
@@ -84,13 +85,13 @@ func GetLastReplica(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) (*kap
 
 func DeleteReplicaSet(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) error {
 	// Update ReplicaSet
-	replicaSet, err := w.KubeClient.Extensions().ReplicaSets(replicaSet.Namespace).Get(replicaSet.Name)
+	replicaSet, err := w.KubeClient.ExtensionsV1beta1().ReplicaSets(replicaSet.Namespace).Get(replicaSet.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 
-	replicaSet.Spec.Replicas = 0
-	if _, err := w.KubeClient.Extensions().ReplicaSets(replicaSet.Namespace).Update(replicaSet); err != nil {
+	replicaSet.Spec.Replicas = types.Int32P(0)
+	if _, err := w.KubeClient.ExtensionsV1beta1().ReplicaSets(replicaSet.Namespace).Update(replicaSet); err != nil {
 		return err
 	}
 
@@ -117,14 +118,14 @@ func DeleteReplicaSet(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) err
 	}
 
 	// Delete ReplicaSet
-	if err := w.KubeClient.Extensions().ReplicaSets(replicaSet.Namespace).Delete(replicaSet.Name, nil); err != nil {
+	if err := w.KubeClient.ExtensionsV1beta1().ReplicaSets(replicaSet.Namespace).Delete(replicaSet.Name, nil); err != nil {
 		return err
 	}
 	return nil
 }
 
 func UpdateReplicaSet(w *watcher.Watcher, replicaSet *extensions.ReplicaSet) (*extensions.ReplicaSet, error) {
-	if _, err := w.KubeClient.Extensions().ReplicaSets(replicaSet.Namespace).Update(replicaSet); err != nil {
+	if _, err := w.KubeClient.ExtensionsV1beta1().ReplicaSets(replicaSet.Namespace).Update(replicaSet); err != nil {
 		return nil, err
 	}
 

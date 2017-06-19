@@ -36,7 +36,7 @@ func (b *IcingaController) Acknowledge(event *apiv1.Event) error {
 	timestamp := metav1.NewTime(time.Now().UTC())
 	event.Annotations[types.AcknowledgeTimestamp] = timestamp.String()
 
-	if _, err = b.ctx.KubeClient.Core().Events(event.Namespace).Update(event); err != nil {
+	if _, err = b.ctx.KubeClient.CoreV1().Events(event.Namespace).Update(event); err != nil {
 		return errors.New().WithCause(err).Err()
 	}
 	return nil

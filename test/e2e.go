@@ -9,10 +9,9 @@ import (
 	"github.com/appscode/searchlight/pkg/client/icinga"
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/pkg/watcher"
-	acw "github.com/appscode/searchlight/pkg/watcher"
 	"github.com/appscode/searchlight/test/mini"
 	"github.com/appscode/searchlight/util"
-	kapi "k8s.io/kubernetes/pkg/api"
+	"k8s.io/client-go/pkg/api"
 )
 
 type testData struct {
@@ -83,7 +82,7 @@ func getIcingaClient() (icingaClient *icinga.IcingaClient, err error) {
 				icinga.IcingaAddress: IcingaAddress,
 			}
 
-			namespace := kapi.NamespaceSystem
+			namespace := api.NamespaceSystem
 			icingaSecretName, err := mini.CreateIcingaSecret(kubeClient, namespace, secretMap)
 
 			icingaClient, err = icinga.NewIcingaClient(kubeClient.Client, icingaSecretName, namespace)
@@ -143,11 +142,9 @@ func runKubeD(setIcingaClient bool) (w *watcher.Watcher, err error) {
 			}
 
 			w = &watcher.Watcher{
-				Watcher: acw.Watcher{
-					KubeClient: kubeClient.Client,
-					ExtClient:  kubeClient.ExtClient,
-					SyncPeriod: time.Minute * 2,
-				},
+				KubeClient: kubeClient.Client,
+				ExtClient:  kubeClient.ExtClient,
+				SyncPeriod: time.Minute * 2,
 			}
 
 			// Set IcingaClient
@@ -161,8 +158,6 @@ func runKubeD(setIcingaClient bool) (w *watcher.Watcher, err error) {
 				w.IcingaClient = icingaClient
 				e2eWatcher.isIcingaIncluded = true
 			}
-
-			w.Watcher.Dispatch = w.Dispatch
 			go w.Run()
 			time.Sleep(time.Second * 10)
 			e2eWatcher.watcher = w

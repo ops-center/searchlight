@@ -8,10 +8,10 @@ import (
 	"github.com/appscode/go/crypto/rand"
 	aci "github.com/appscode/searchlight/api"
 	"github.com/appscode/searchlight/pkg/watcher"
-	kapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/unversioned"
-	"k8s.io/kubernetes/pkg/apis/extensions"
-	"k8s.io/kubernetes/pkg/labels"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
+	extensions "k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
 type alertThirdPartyResource struct {
@@ -23,18 +23,18 @@ var alertResource = alertThirdPartyResource{}
 func createAlertThirdPartyResource(w *watcher.Watcher) (err error) {
 	alertResource.once.Do(
 		func() {
-			_, err = w.KubeClient.Extensions().ThirdPartyResources().Get("alert.monitoring.appscode.com")
+			_, err = w.KubeClient.ExtensionsV1beta1().ThirdPartyResources().Get("alert.monitoring.appscode.com", metav1.GetOptions{})
 			if err == nil {
 				return
 			}
 
 			fmt.Println("== > Creating ThirdPartyResource")
 			thirdPartyResource := &extensions.ThirdPartyResource{
-				TypeMeta: unversioned.TypeMeta{
+				TypeMeta: metav1.TypeMeta{
 					APIVersion: "extensions/v1beta1",
 					Kind:       "ThirdPartyResource",
 				},
-				ObjectMeta: kapi.ObjectMeta{
+				ObjectMeta: metav1.ObjectMeta{
 					Name: "alert.monitoring.appscode.com",
 				},
 				Versions: []extensions.APIVersion{
@@ -43,15 +43,14 @@ func createAlertThirdPartyResource(w *watcher.Watcher) (err error) {
 					},
 				},
 			}
-			_, err = w.KubeClient.Extensions().ThirdPartyResources().Create(thirdPartyResource)
+			_, err = w.KubeClient.ExtensionsV1beta1().ThirdPartyResources().Create(thirdPartyResource)
 			if err != nil {
 				return
 			}
 
 			try := 0
 			for {
-				_, err = w.ExtClient.Alert(kapi.NamespaceDefault).
-					List(kapi.ListOptions{LabelSelector: labels.Everything()})
+				_, err = w.ExtClient.Alert(apiv1.NamespaceDefault).List(metav1.ListOptions{LabelSelector: labels.Everything().String()})
 
 				if err != nil {
 					fmt.Println(err.Error())
@@ -73,11 +72,11 @@ func createAlertThirdPartyResource(w *watcher.Watcher) (err error) {
 
 func getAlert(namespace string) *aci.Alert {
 	fakeAlert := &aci.Alert{
-		TypeMeta: unversioned.TypeMeta{
+		TypeMeta: metav1.TypeMeta{
 			Kind:       "Alert",
 			APIVersion: "monitoring.appscode.com/v1alpha1",
 		},
-		ObjectMeta: kapi.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      rand.WithUniqSuffix("alert"),
 			Namespace: namespace,
 			Labels: map[string]string{

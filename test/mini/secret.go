@@ -7,7 +7,8 @@ import (
 	"github.com/appscode/go/crypto/rand"
 	"github.com/appscode/searchlight/pkg/client/icinga"
 	"github.com/appscode/searchlight/pkg/client/k8s"
-	kapi "k8s.io/kubernetes/pkg/api"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 type icingaSecretInfo struct {
@@ -32,18 +33,18 @@ func CreateIcingaSecret(kubeClient *k8s.KubeClient, namespace string, secretMap 
 				secretString = secretString + fmt.Sprintf("%s=%s\n", key, val)
 			}
 
-			secret := &kapi.Secret{
-				ObjectMeta: kapi.ObjectMeta{
+			secret := &apiv1.Secret{
+				ObjectMeta: metav1.ObjectMeta{
 					Name:      rand.WithUniqSuffix("fake-secret"),
 					Namespace: namespace,
 				},
 				Data: map[string][]byte{
 					icinga.ENV: []byte(secretString),
 				},
-				Type: kapi.SecretTypeOpaque,
+				Type: apiv1.SecretTypeOpaque,
 			}
 			// Create Fake Secret
-			if _, err = kubeClient.Client.Core().Secrets(secret.Namespace).Create(secret); err != nil {
+			if _, err = kubeClient.Client.CoreV1().Secrets(secret.Namespace).Create(secret); err != nil {
 				return
 			}
 			icingaSecret.name = secret.Name

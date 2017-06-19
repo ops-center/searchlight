@@ -4,12 +4,14 @@ import (
 	"errors"
 	"time"
 
+	"github.com/appscode/go/types"
 	"github.com/appscode/searchlight/pkg/controller/host"
 	"github.com/appscode/searchlight/pkg/testing"
 	"github.com/appscode/searchlight/pkg/watcher"
 	"github.com/appscode/searchlight/util"
-	kapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/apis/apps"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
+	apps "k8s.io/client-go/pkg/apis/apps/v1beta1"
 )
 
 func CreateStatefulSet(w *watcher.Watcher, namespace string) (*apps.StatefulSet, error) {
@@ -20,7 +22,7 @@ func CreateStatefulSet(w *watcher.Watcher, namespace string) (*apps.StatefulSet,
 	}
 
 	statefulSet := &apps.StatefulSet{
-		ObjectMeta: kapi.ObjectMeta{
+		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 		},
 		Spec: apps.StatefulSetSpec{
@@ -35,18 +37,13 @@ func CreateStatefulSet(w *watcher.Watcher, namespace string) (*apps.StatefulSet,
 	check := 0
 	for {
 		time.Sleep(time.Second * 30)
-		nStatefulSet, exists, err := w.Storage.StatefulSetStore.Get(statefulSet)
+		ss, err := w.Storage.StatefulSetStore.StatefulSets(statefulSet.Namespace).Get(statefulSet.Name)
 		if err != nil {
 			return nil, err
 		}
-		if !exists {
-			return nil, errors.New("StatefulSet not found")
+		if ss.Status.Replicas == *statefulSet.Spec.Replicas {
+			return ss, nil
 		}
-
-		if nStatefulSet.(*apps.StatefulSet).Status.Replicas == statefulSet.Spec.Replicas {
-			return nStatefulSet.(*apps.StatefulSet), nil
-		}
-
 		if check > 6 {
 			return nil, errors.New("Fail to create StatefulSet")
 		}
@@ -55,13 +52,13 @@ func CreateStatefulSet(w *watcher.Watcher, namespace string) (*apps.StatefulSet,
 }
 
 func DeleteStatefulSet(w *watcher.Watcher, statefulSet *apps.StatefulSet) error {
-	statefulSet, err := w.KubeClient.Apps().StatefulSets(statefulSet.Namespace).Get(statefulSet.Name)
+	statefulSet, err := w.KubeClient.AppsV1beta1().StatefulSets(statefulSet.Namespace).Get(statefulSet.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
 	// Update StatefulSet
-	statefulSet.Spec.Replicas = 0
-	if _, err := w.KubeClient.Apps().StatefulSets(statefulSet.Namespace).Update(statefulSet); err != nil {
+	statefulSet.Spec.Replicas = types.Int32P(0)
+	if _, err := w.KubeClient.AppsV1beta1().StatefulSets(statefulSet.Namespace).Update(statefulSet); err != nil {
 		return err
 	}
 
@@ -88,12 +85,12 @@ func DeleteStatefulSet(w *watcher.Watcher, statefulSet *apps.StatefulSet) error 
 	}
 
 	// Delete StatefulSet
-	if err := w.KubeClient.Apps().StatefulSets(statefulSet.Namespace).Delete(statefulSet.Name, nil); err != nil {
+	if err := w.KubeClient.AppsV1beta1().StatefulSets(statefulSet.Namespace).Delete(statefulSet.Name, nil); err != nil {
 		return err
 	}
 
-	return DeleteService(w, &kapi.Service{
-		ObjectMeta: kapi.ObjectMeta{
+	return DeleteService(w, &apiv1.Service{
+		ObjectMeta: metav1.ObjectMeta{
 			Name:      statefulSet.Spec.ServiceName,
 			Namespace: statefulSet.Namespace,
 		},

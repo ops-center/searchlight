@@ -160,12 +160,12 @@ func NodeWatchFunc(c clientset.Interface) func(options metav1.ListOptions) (watc
 
 func DeploymentListFunc(c clientset.Interface) func(metav1.ListOptions) (runtime.Object, error) {
 	return func(opts metav1.ListOptions) (runtime.Object, error) {
-		return c.Extensions().Deployments(apiv1.NamespaceAll).List(opts)
+		return c.ExtensionsV1beta1().Deployments(apiv1.NamespaceAll).List(opts)
 	}
 }
 
 func DeploymentWatchFunc(c clientset.Interface) func(options metav1.ListOptions) (watch.Interface, error) {
 	return func(options metav1.ListOptions) (watch.Interface, error) {
-		return c.Extensions().Deployments(apiv1.NamespaceAll).Watch(options)
+		return c.ExtensionsV1beta1().Deployments(apiv1.NamespaceAll).Watch(options)
 	}
 }

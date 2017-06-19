@@ -25,7 +25,7 @@ import (
 	"github.com/appscode/searchlight/test/plugin/pod_exists"
 	"github.com/appscode/searchlight/test/plugin/pod_status"
 	"github.com/stretchr/testify/assert"
-	kapi "k8s.io/kubernetes/pkg/api"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 func TestComponentStatus(t *testing.T) {
@@ -94,12 +94,12 @@ func TestKubeExec(t *testing.T) {
 	}
 	fmt.Println("--> Running kubeD")
 
-	replicaSet, err := mini.CreateReplicaSet(watcher, kapi.NamespaceDefault)
+	replicaSet, err := mini.CreateReplicaSet(watcher, apiv1.NamespaceDefault)
 	if !assert.Nil(t, err) {
 		return
 	}
 
-	objectList, err := host.GetObjectList(watcher.Client, host.CheckCommandKubeExec, host.HostTypePod,
+	objectList, err := host.GetObjectList(watcher.KubeClient, host.CheckCommandKubeExec, host.HostTypePod,
 		replicaSet.Namespace, host.TypeReplicasets, replicaSet.Name, "")
 	if !assert.Nil(t, err) {
 		return
@@ -208,7 +208,7 @@ func TestPodExistsPodStatus(t *testing.T) {
 	fmt.Println()
 	fmt.Println("-- >> Testing plugings for", host.TypeReplicationcontrollers)
 	fmt.Println("---- >> Creating")
-	replicationController, err := mini.CreateReplicationController(watcher, kapi.NamespaceDefault)
+	replicationController, err := mini.CreateReplicationController(watcher, apiv1.NamespaceDefault)
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -226,7 +226,7 @@ func TestPodExistsPodStatus(t *testing.T) {
 	fmt.Println()
 	fmt.Println("-- >> Testing plugings for", host.TypeDaemonsets)
 	fmt.Println("---- >> Creating")
-	daemonSet, err := mini.CreateDaemonSet(watcher, kapi.NamespaceDefault)
+	daemonSet, err := mini.CreateDaemonSet(watcher, apiv1.NamespaceDefault)
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -244,7 +244,7 @@ func TestPodExistsPodStatus(t *testing.T) {
 	fmt.Println()
 	fmt.Println("-- >> Testing plugings for", host.TypeDeployments)
 	fmt.Println("---- >> Creating")
-	deployment, err := mini.CreateDeployment(watcher, kapi.NamespaceDefault)
+	deployment, err := mini.CreateDeployment(watcher, apiv1.NamespaceDefault)
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -262,7 +262,7 @@ func TestPodExistsPodStatus(t *testing.T) {
 	fmt.Println()
 	fmt.Println("-- >> Testing plugings for", host.TypeStatefulSet)
 	fmt.Println("---- >> Creating")
-	statefulSet, err := mini.CreateStatefulSet(watcher, kapi.NamespaceDefault)
+	statefulSet, err := mini.CreateStatefulSet(watcher, apiv1.NamespaceDefault)
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -276,7 +276,7 @@ func TestPodExistsPodStatus(t *testing.T) {
 	fmt.Println()
 	fmt.Println("-- >> Testing plugings for", host.TypeReplicasets)
 	fmt.Println("---- >> Creating")
-	replicaSet, err := mini.CreateReplicaSet(watcher, kapi.NamespaceDefault)
+	replicaSet, err := mini.CreateReplicaSet(watcher, apiv1.NamespaceDefault)
 	if !assert.Nil(t, err) {
 		return
 	}
@@ -308,13 +308,13 @@ func TestPodExistsPodStatus(t *testing.T) {
 	fmt.Println()
 	fmt.Println("-- >> Testing plugings for", host.TypeCluster)
 	fmt.Println("---- >> Testing", host.CheckCommandPodExists)
-	totalPod, err := pod_exists.GetPodCount(watcher, kapi.NamespaceDefault)
+	totalPod, err := pod_exists.GetPodCount(watcher, apiv1.NamespaceDefault)
 	if !assert.Nil(t, err) {
 		return
 	}
-	checkPodExists("", "", kapi.NamespaceDefault, totalPod)
+	checkPodExists("", "", apiv1.NamespaceDefault, totalPod)
 	fmt.Println("---- >> Testing", host.CheckCommandPodStatus)
-	checkPodStatus("", "", kapi.NamespaceDefault)
+	checkPodStatus("", "", apiv1.NamespaceDefault)
 
 	// Delete skiped objects
 	fmt.Println("-- >> Deleting", host.TypeStatefulSet)

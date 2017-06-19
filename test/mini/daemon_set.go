@@ -8,7 +8,7 @@ import (
 	"github.com/appscode/searchlight/pkg/testing"
 	"github.com/appscode/searchlight/pkg/watcher"
 	"github.com/appscode/searchlight/util"
-	"k8s.io/kubernetes/pkg/apis/extensions"
+	extensions "k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
 func CreateDaemonSet(w *watcher.Watcher, namespace string) (*extensions.DaemonSet, error) {
@@ -21,16 +21,13 @@ func CreateDaemonSet(w *watcher.Watcher, namespace string) (*extensions.DaemonSe
 	check := 0
 	for {
 		time.Sleep(time.Second * 30)
-		nDaemonSet, exists, err := w.Storage.DaemonSetStore.Get(daemonSet)
+		dmn, err := w.Storage.DaemonSetStore.DaemonSets(daemonSet.Namespace).Get(daemonSet.Name)
 		if err != nil {
 			return nil, err
 		}
-		if !exists {
-			return nil, errors.New("DaemonSet not found")
-		}
 
-		if nDaemonSet.(*extensions.DaemonSet).Status.DesiredNumberScheduled == nDaemonSet.(*extensions.DaemonSet).Status.CurrentNumberScheduled {
-			return nDaemonSet.(*extensions.DaemonSet), nil
+		if dmn.Status.DesiredNumberScheduled == dmn.Status.CurrentNumberScheduled {
+			return dmn, nil
 		}
 
 		if check > 6 {
@@ -47,7 +44,7 @@ func DeleteDaemonSet(watcher *watcher.Watcher, daemonSet *extensions.DaemonSet) 
 	}
 
 	// Delete DaemonSet
-	if err := watcher.KubeClient.Extensions().DaemonSets(daemonSet.Namespace).Delete(daemonSet.Name, nil); err != nil {
+	if err := watcher.KubeClient.ExtensionsV1beta1().DaemonSets(daemonSet.Namespace).Delete(daemonSet.Name, nil); err != nil {
 		return err
 	}
 
@@ -57,7 +54,7 @@ func DeleteDaemonSet(watcher *watcher.Watcher, daemonSet *extensions.DaemonSet) 
 	}
 
 	for _, pod := range podList {
-		if err := watcher.KubeClient.Core().Pods(pod.Namespace).Delete(pod.Name, nil); err != nil {
+		if err := watcher.KubeClient.CoreV1().Pods(pod.Namespace).Delete(pod.Name, nil); err != nil {
 			return err
 		}
 	}

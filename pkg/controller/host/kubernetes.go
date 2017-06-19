@@ -57,7 +57,7 @@ func getLabels(client clientset.Interface, namespace, objectType, objectName str
 		}
 		labelsMap = replicaSet.Spec.Selector.MatchLabels
 	} else if objectType == TypeStatefulSet {
-		statefulSet, err := client.Apps().StatefulSets(namespace).Get(objectName, metav1.GetOptions{})
+		statefulSet, err := client.AppsV1beta1().StatefulSets(namespace).Get(objectName, metav1.GetOptions{})
 		if err != nil {
 			return nil, errors.New().WithCause(err).Err()
 		}

@@ -6,16 +6,14 @@ import (
 	"github.com/appscode/go/crypto/rand"
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/test/plugin"
-	kapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/labels"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/labels"
 )
 
 func getKubernetesNodeName(kubeClient *k8s.KubeClient) (string, error) {
-	nodeList, err := kubeClient.Client.Core().Nodes().List(
-		kapi.ListOptions{
-			LabelSelector: labels.Everything(),
-		},
-	)
+	nodeList, err := kubeClient.Client.CoreV1().Nodes().List(metav1.ListOptions{
+		LabelSelector: labels.Everything().String(),
+	})
 	if err != nil {
 		return "", err
 	}

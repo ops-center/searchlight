@@ -4,6 +4,7 @@ import (
 	"errors"
 
 	"github.com/appscode/go/crypto/rand"
+	"github.com/appscode/go/types"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientset "k8s.io/client-go/kubernetes"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
@@ -84,10 +85,10 @@ func CreateKubernetesObject(kubeClient clientset.Interface, kubeObject interface
 		}
 		replicationController.Spec.Template = fixPodTemplateSpecPtr(replicationController.Spec.Template)
 		replicationController.Spec.Selector = replicationController.Spec.Template.Labels
-		if replicationController.Spec.Replicas == 0 {
-			replicationController.Spec.Replicas = Replica
+		if *replicationController.Spec.Replicas == 0 {
+			replicationController.Spec.Replicas = types.Int32P(Replica)
 		}
-		replicationController, err = kubeClient.Core().ReplicationControllers(fixNamespace(replicationController.Namespace)).Create(replicationController)
+		replicationController, err = kubeClient.CoreV1().ReplicationControllers(fixNamespace(replicationController.Namespace)).Create(replicationController)
 		return
 	case *extensions.DaemonSet:
 		daemonSet := kubeObject.(*extensions.DaemonSet)
@@ -98,7 +99,7 @@ func CreateKubernetesObject(kubeClient clientset.Interface, kubeObject interface
 		daemonSet.Spec.Selector = &metav1.LabelSelector{
 			MatchLabels: daemonSet.Spec.Template.Labels,
 		}
-		daemonSet, err = kubeClient.Extensions().DaemonSets(fixNamespace(daemonSet.Namespace)).Create(daemonSet)
+		daemonSet, err = kubeClient.ExtensionsV1beta1().DaemonSets(fixNamespace(daemonSet.Namespace)).Create(daemonSet)
 		return
 	case *apps.StatefulSet:
 		statefulSet := kubeObject.(*apps.StatefulSet)
@@ -109,10 +110,10 @@ func CreateKubernetesObject(kubeClient clientset.Interface, kubeObject interface
 		statefulSet.Spec.Selector = &metav1.LabelSelector{
 			MatchLabels: statefulSet.Spec.Template.Labels,
 		}
-		if statefulSet.Spec.Replicas == 0 {
-			statefulSet.Spec.Replicas = Replica
+		if *statefulSet.Spec.Replicas == 0 {
+			statefulSet.Spec.Replicas = types.Int32P(Replica)
 		}
-		statefulSet, err = kubeClient.Apps().StatefulSets(fixNamespace(statefulSet.Namespace)).Create(statefulSet)
+		statefulSet, err = kubeClient.AppsV1beta1().StatefulSets(fixNamespace(statefulSet.Namespace)).Create(statefulSet)
 		return
 	case *extensions.ReplicaSet:
 		replicaSet := kubeObject.(*extensions.ReplicaSet)
@@ -123,10 +124,10 @@ func CreateKubernetesObject(kubeClient clientset.Interface, kubeObject interface
 		replicaSet.Spec.Selector = &metav1.LabelSelector{
 			MatchLabels: replicaSet.Spec.Template.Labels,
 		}
-		if replicaSet.Spec.Replicas == 0 {
-			replicaSet.Spec.Replicas = Replica
+		if *replicaSet.Spec.Replicas == 0 {
+			replicaSet.Spec.Replicas = types.Int32P(Replica)
 		}
-		replicaSet, err = kubeClient.Extensions().ReplicaSets(fixNamespace(replicaSet.Namespace)).Create(replicaSet)
+		replicaSet, err = kubeClient.ExtensionsV1beta1().ReplicaSets(fixNamespace(replicaSet.Namespace)).Create(replicaSet)
 		return
 	case *extensions.Deployment:
 		deployment := kubeObject.(*extensions.Deployment)
@@ -137,10 +138,10 @@ func CreateKubernetesObject(kubeClient clientset.Interface, kubeObject interface
 		deployment.Spec.Selector = &metav1.LabelSelector{
 			MatchLabels: deployment.Spec.Template.Labels,
 		}
-		if deployment.Spec.Replicas == 0 {
-			deployment.Spec.Replicas = Replica
+		if *deployment.Spec.Replicas == 0 {
+			deployment.Spec.Replicas = types.Int32P(Replica)
 		}
-		deployment, err = kubeClient.Extensions().Deployments(fixNamespace(deployment.Namespace)).Create(deployment)
+		deployment, err = kubeClient.ExtensionsV1beta1().Deployments(fixNamespace(deployment.Namespace)).Create(deployment)
 		return
 	case *apiv1.Pod:
 		pod := kubeObject.(*apiv1.Pod)
@@ -148,7 +149,7 @@ func CreateKubernetesObject(kubeClient clientset.Interface, kubeObject interface
 			pod.Name = rand.WithUniqSuffix("e2e-pod")
 		}
 		pod.Spec = fixPodSpec(pod.Spec)
-		pod, err = kubeClient.Core().Pods(fixNamespace(pod.Namespace)).Create(pod)
+		pod, err = kubeClient.CoreV1().Pods(fixNamespace(pod.Namespace)).Create(pod)
 		return
 	case *apiv1.Service:
 		service := kubeObject.(*apiv1.Service)
@@ -156,7 +157,7 @@ func CreateKubernetesObject(kubeClient clientset.Interface, kubeObject interface
 			service.Name = rand.WithUniqSuffix("e2e-svc")
 		}
 		service.Spec = fixServiceSpec(service.Spec)
-		service, err = kubeClient.Core().Services(fixNamespace(service.Namespace)).Create(service)
+		service, err = kubeClient.CoreV1().Services(fixNamespace(service.Namespace)).Create(service)
 		return
 	default:
 		err = errors.New("Unknown objectType")

@@ -14,10 +14,20 @@ func (m *Version) Print() {
 	fmt.Printf("CommitHash = %v\n", m.CommitHash)
 	fmt.Printf("GitBranch = %v\n", m.GitBranch)
 	fmt.Printf("GitTag = %v\n", m.GitTag)
-	fmt.Printf("CommitTimestamp = %v\n", m.CommitTimestamp)
+	if m.CommitTimestamp != "" {
+		fmt.Printf("CommitTimestamp = %v\n", m.CommitTimestamp)
+	}
 
-	fmt.Printf("BuildTimestamp = %v\n", m.BuildTimestamp)
-	fmt.Printf("BuildHost = %v\n", m.BuildHost)
-	fmt.Printf("BuildHostOs = %v\n", m.BuildHostOs)
-	fmt.Printf("BuildHostArch = %v\n", m.BuildHostArch)
+	if m.BuildTimestamp != "" {
+		fmt.Printf("BuildTimestamp = %v\n", m.BuildTimestamp)
+	}
+	if m.BuildHost != "" {
+		fmt.Printf("BuildHost = %v\n", m.BuildHost)
+	}
+	if m.BuildHostOs != "" {
+		fmt.Printf("BuildHostOs = %v\n", m.BuildHostOs)
+	}
+	if m.BuildHostArch != "" {
+		fmt.Printf("BuildHostArch = %v\n", m.BuildHostArch)
+	}
 }

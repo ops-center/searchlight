@@ -63,7 +63,7 @@ type Context struct {
 	ObjectType string
 	ObjectName string
 
-	Storage *stash.Storage
+	Storage stash.Storage
 	sync.Mutex
 }
 

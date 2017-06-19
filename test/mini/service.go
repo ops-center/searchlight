@@ -3,15 +3,16 @@ package mini
 import (
 	"github.com/appscode/searchlight/pkg/testing"
 	"github.com/appscode/searchlight/pkg/watcher"
-	kapi "k8s.io/kubernetes/pkg/api"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
-func CreateService(w *watcher.Watcher, namespace string, selector map[string]string) (*kapi.Service, error) {
-	service := &kapi.Service{
-		ObjectMeta: kapi.ObjectMeta{
+func CreateService(w *watcher.Watcher, namespace string, selector map[string]string) (*apiv1.Service, error) {
+	service := &apiv1.Service{
+		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 		},
-		Spec: kapi.ServiceSpec{
+		Spec: apiv1.ServiceSpec{
 			Selector: selector,
 		},
 	}
@@ -21,9 +22,9 @@ func CreateService(w *watcher.Watcher, namespace string, selector map[string]str
 	return service, nil
 }
 
-func DeleteService(w *watcher.Watcher, service *kapi.Service) error {
+func DeleteService(w *watcher.Watcher, service *apiv1.Service) error {
 	// Delete Service
-	if err := w.KubeClient.Core().Services(service.Namespace).Delete(service.Name, nil); err != nil {
+	if err := w.KubeClient.CoreV1().Services(service.Namespace).Delete(service.Name, nil); err != nil {
 		return err
 	}
 	return nil

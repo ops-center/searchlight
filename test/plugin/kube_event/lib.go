@@ -7,9 +7,10 @@ import (
 	"github.com/appscode/searchlight/pkg/client/k8s"
 	"github.com/appscode/searchlight/test/plugin"
 	"github.com/appscode/searchlight/util"
-	kapi "k8s.io/kubernetes/pkg/api"
-	"k8s.io/kubernetes/pkg/api/unversioned"
-	"k8s.io/kubernetes/pkg/fields"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
+	"k8s.io/client-go/pkg/api"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 func getStatusCodeForEventCount(kubeClient *k8s.KubeClient, checkInterval, clockSkew time.Duration) (util.IcingaState, error) {
@@ -17,13 +18,13 @@ func getStatusCodeForEventCount(kubeClient *k8s.KubeClient, checkInterval, clock
 	now := time.Now()
 	// Create some fake event
 	for i := 0; i < 5; i++ {
-		_, err := kubeClient.Client.Core().Events(kapi.NamespaceDefault).Create(&kapi.Event{
-			ObjectMeta: kapi.ObjectMeta{
+		_, err := kubeClient.Client.CoreV1().Events(apiv1.NamespaceDefault).Create(&apiv1.Event{
+			ObjectMeta: metav1.ObjectMeta{
 				Name: rand.WithUniqSuffix("event"),
 			},
-			Type:           kapi.EventTypeWarning,
-			FirstTimestamp: unversioned.NewTime(now),
-			LastTimestamp:  unversioned.NewTime(now),
+			Type:           apiv1.EventTypeWarning,
+			FirstTimestamp: metav1.NewTime(now),
+			LastTimestamp:  metav1.NewTime(now),
 		})
 		if err != nil {
 			return util.Unknown, err
@@ -31,13 +32,11 @@ func getStatusCodeForEventCount(kubeClient *k8s.KubeClient, checkInterval, clock
 	}
 
 	count := 0
-	field := fields.OneTermEqualSelector(kapi.EventTypeField, kapi.EventTypeWarning)
+	field := fields.OneTermEqualSelector(api.EventTypeField, apiv1.EventTypeWarning)
 	checkTime := time.Now().Add(-(checkInterval + clockSkew))
-	eventList, err := kubeClient.Client.Core().Events(kapi.NamespaceAll).List(
-		kapi.ListOptions{
-			FieldSelector: field,
-		},
-	)
+	eventList, err := kubeClient.Client.CoreV1().Events(apiv1.NamespaceAll).List(metav1.ListOptions{
+		FieldSelector: field.String(),
+	})
 	if err != nil {
 		return util.Unknown, err
 	}
