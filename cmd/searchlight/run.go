@@ -26,7 +26,7 @@ var (
 	icingaSecretName      string
 	icingaSecretNamespace string = apiv1.NamespaceDefault
 
-	address string = ":8080"
+	address string = ":56790"
 
 	kubeClient clientset.Interface
 	extClient  acs.ExtensionInterface
