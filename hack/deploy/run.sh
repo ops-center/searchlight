@@ -19,14 +19,14 @@ ICINGA_IDO_USER=icingaido
 ICINGA_IDO_PASSWORD=$(cat /dev/urandom | base64 | tr -d "=+/" | dd bs=16 count=1 2> /dev/null)
 ICINGA_API_USER=icingaapi
 ICINGA_API_PASSWORD=$(cat /dev/urandom | base64 | tr -d "=+/" | dd bs=16 count=1 2> /dev/null)
-ICINGA_ADDRESS=searchlight-icinga.kube-system
+ICINGA_ADDRESS=searchlight-operator.kube-system
 EOF
 
 
 export ICINGA_SECRET_ENV=$(echo $env_data | base64 -w 0)
 
 # Directory for certificates
-certificate_dir=$GOPATH/src/github.com/appscode/searchlight/hack/deploy/icinga2/certificate
+certificate_dir=$GOPATH/src/github.com/appscode/searchlight/hack/deploy/certificate
 mkdir -p $certificate_dir
 
 pushd $certificate_dir
@@ -58,14 +58,9 @@ pushd $certificate_dir
 popd
 
 # Deploy Secret
-curl https://raw.githubusercontent.com/appscode/searchlight/1.5.9/hack/kubernetes/icinga2/secret.yaml |envsubst | kubectl apply -f -
-
-# Create Service
-kubectl apply -f https://raw.githubusercontent.com/appscode/searchlight/1.5.9/hack/kubernetes/icinga2/service.yaml
-
-# Create Deployment
-kubectl apply -f https://raw.githubusercontent.com/appscode/searchlight/1.5.9/hack/kubernetes/icinga2/deployment.yaml
-
+curl https://raw.githubusercontent.com/appscode/searchlight/1.5.9/hack/deploy/deployment.yaml \
+  | envsubst \
+  | kubectl apply -f -
 
 #To login into Icingaweb2, use following authentication information:
 echo
