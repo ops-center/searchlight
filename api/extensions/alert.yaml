@@ -2,6 +2,6 @@ metadata:
   name: alert.monitoring.appscode.com
 apiVersion: extensions/v1beta1
 kind: ThirdPartyResource
-description: "Searchlight by AppsCode - AlertManager for Kubernetes"
+description: "Searchlight by AppsCode - Monitoring for Kubernetes"
 versions:
   - name: v1alpha1
