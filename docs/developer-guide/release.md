@@ -20,12 +20,3 @@ $ ./hack/make.py build; env APPSCODE_ENV=prod ./hack/make.py push; ./hack/make.p
 ./hack/docker/icinga/setup.sh; ./hack/docker/icinga/setup.sh release
 ```
 - Now, update the release notes in Github. See previous release notes to get an idea what to include there.
-
-
-Now, you should probably also release a new version of kubed. These steps are:
-- Revendor kubed so that new changes become available.
-- Build kubed. Add any flags if needed.
-- Push changes to release branch.
-- Build and release kubed docker image.
-- Now update Kubernetes salt stack files so that the new kubed image is used.
-

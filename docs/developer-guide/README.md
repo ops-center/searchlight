@@ -1,0 +1,92 @@
+## Development Guide
+This document is intended to be the canonical source of truth for things like supported toolchain versions for building Searchlight.
+If you find a requirement that this doc does not capture, please submit an issue on github.
+
+This document is intended to be relative to the branch in which it is found. It is guaranteed that requirements will change over time
+for the development branch, but release branches of Searchlight should not change.
+
+### Build Searchlight
+Some of the Searchlight development helper scripts rely on a fairly up-to-date GNU tools environment, so most recent Linux distros should
+work just fine out-of-the-box.
+
+#### Setup GO
+Searchlight is written in Google's GO programming language. Currently, Searchlight is developed and tested on **go 1.8.3**. If you haven't set up a GO
+development environment, please follow [these instructions](https://golang.org/doc/code.html) to install GO.
+
+#### Download Source
+
+```sh
+$ go get github.com/appscode/searchlight
+$ cd $(go env GOPATH)/src/github.com/appscode/searchlight
+```
+
+#### Install Dev tools
+To install various dev tools for Searchlight, run the following command:
+```sh
+$ ./hack/builddeps.sh
+```
+
+#### Build Binary
+```
+$ ./hack/make.py
+$ searchlight version
+```
+
+#### Dependency management
+Searchlight uses [Glide](https://github.com/Masterminds/glide) to manage dependencies. Dependencies are already checked in the `vendor` folder.
+If you want to update/add dependencies, run:
+```sh
+$ glide slow
+```
+
+
+#### Build Operator Docker image
+To build and push your custom Docker image, follow the steps below. To release a new version of Searchlight, please follow the [release guide](/docs/developer-guide/release.md).
+
+```sh
+# Build Docker image
+$ ./hack/docker/searchlight/setup.sh; ./hack/docker/searchlight/setup.sh push
+
+# Add docker tag for your repository
+$ docker tag appscode/searchlight:<tag> <image>:<tag>
+
+# Push Image
+$ docker push <image>:<tag>
+
+# Example:
+docker tag appscode/searchlight:default aerokite/searchlight:default
+docker push aerokite/searchlight:default
+```
+
+
+#### Build Icinga Docker image
+
+Default Icinga also includes `hyperalert` plugin.
+```sh
+gsutil cp gs://appscode-dev/binaries/hyperalert/<tag>/hyperalert-linux-amd64 plugins/hyperalert
+```
+
+We can add `hyperalert` plugin in Icinga downloaded from anywhere. We just need  to add plugin in plugins directory and name it as `hyperalert`.
+
+```sh
+# Build Docker image
+./hack/docker/icinga/build.sh
+
+# This will push docker image to any repositories
+
+# Add docker tag to image for your repository
+docker tag appscode/icinga:<tag>-k8s <repository>:<tag>-k8s
+
+# Push Image
+docker push <repository>:<tag>-k8s
+
+# Example:
+docker tag appscode/icinga:default-k8s aerokite/icinga:default-k8s
+docker push aerokite/icinga:default-k8s
+```
+
+
+#### Generate CLI Reference Docs
+```sh
+$ ./hack/gendocs/make.sh
+```
