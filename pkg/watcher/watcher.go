@@ -78,7 +78,11 @@ func (w *Watcher) ensureThirdPartyResource() error {
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: resourceName,
+			Labels: map[string]string{
+				"app": "searchlight",
+			},
 		},
+		Description: "Searchlight by AppsCode - Alerts for Kubernetes",
 		Versions: []extensions.APIVersion{
 			{
 				Name: aci.V1alpha1SchemeGroupVersion.Version,
