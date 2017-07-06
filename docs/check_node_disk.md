@@ -37,7 +37,7 @@ OK: (Disk & Inodes)
 Before using this CheckCommand, you must need to run `hostfacts` service in each Kubernetes node.
 Node disk stat is collected from `hostfacts` service deployed in each node.
 
-See Hostfacts [deployment guide](../hostfacts/deployment.md)
+See Hostfacts [deployment guide](hostfacts.md)
 
 
 ##### Configure Alert Object
