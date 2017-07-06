@@ -14,9 +14,7 @@ func (m *Version) Print() {
 	fmt.Printf("CommitHash = %v\n", m.CommitHash)
 	fmt.Printf("GitBranch = %v\n", m.GitBranch)
 	fmt.Printf("GitTag = %v\n", m.GitTag)
-	if m.CommitTimestamp != "" {
-		fmt.Printf("CommitTimestamp = %v\n", m.CommitTimestamp)
-	}
+	fmt.Printf("CommitTimestamp = %v\n", m.CommitTimestamp)
 
 	if m.BuildTimestamp != "" {
 		fmt.Printf("BuildTimestamp = %v\n", m.BuildTimestamp)

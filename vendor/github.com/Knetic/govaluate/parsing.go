@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 	"unicode"
+	"strings"
 )
 
 func parseTokens(expression string, functions map[string]ExpressionFunction) ([]ExpressionToken, error) {
@@ -152,6 +153,32 @@ func readToken(stream *lexerStream, state lexerState, functions map[string]Expre
 			if found {
 				kind = FUNCTION
 				tokenValue = function
+			}
+
+			// accessor?
+			accessorIndex := strings.Index(tokenString, ".")
+			if accessorIndex > 0 {
+
+				// check that it doesn't end with a hanging period
+				if tokenString[len(tokenString)-1] == '.' {
+					errorMsg := fmt.Sprintf("Hanging accessor on token '%s'", tokenString)
+					return ExpressionToken{}, errors.New(errorMsg), false
+				}
+
+				kind = ACCESSOR
+				splits :=  strings.Split(tokenString, ".")
+				tokenValue = splits
+
+				// check that none of them are unexported
+				for i := 1; i < len(splits); i++ {
+
+					firstCharacter := getFirstRune(splits[i])
+
+					if unicode.ToUpper(firstCharacter) != firstCharacter {
+						errorMsg := fmt.Sprintf("Unable to access unexported field '%s' in token '%s'", splits[i], tokenString)
+						return ExpressionToken{}, errors.New(errorMsg), false
+					}
+				}
 			}
 			break
 		}
@@ -392,7 +419,8 @@ func isVariableName(character rune) bool {
 
 	return unicode.IsLetter(character) ||
 		unicode.IsDigit(character) ||
-		character == '_'
+		character == '_' ||
+		character == '.'
 }
 
 func isNotClosingBracket(character rune) bool {
@@ -449,4 +477,13 @@ func tryParseExactTime(candidate string, format string) (time.Time, bool) {
 	}
 
 	return ret, true
+}
+
+func getFirstRune(candidate string) rune {
+
+	for _, character := range candidate {
+	    return character
+	}
+
+	return 0
 }

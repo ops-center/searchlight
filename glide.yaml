@@ -55,6 +55,10 @@ import:
   version: v0.10.0
 - package: github.com/jpillora/go-ogle-analytics
   version: master
+- package: github.com/spf13/cobra
+  version: master
+- package: github.com/spf13/pflag
+  version: master
 testImport:
 - package: github.com/stretchr/testify
   version: v1.1.4
