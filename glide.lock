@@ -1,5 +1,5 @@
 hash: 49e2eaea4a57a709ee1fa21885d3a9e8351af7c6dc165b34e4798eba7d9a4cda
-updated: 2017-07-08T20:58:14.886530113-07:00
+updated: 2017-07-09T15:11:25.873254304-07:00
 imports:
 - name: github.com/appscode/api
   version: b61754fd4d336573cfed5cf16bcbdfe6d30d078d
@@ -48,10 +48,6 @@ imports:
   - slack
   - smtp
   - twilio
-- name: github.com/appscode/kubed
-  version: efb38445568c1a15be77f5c9b782ef07cc10850d
-  subpackages:
-  - pkg/events
 - name: github.com/appscode/log
   version: 68e0e42e42c01371f3950571fc87c2298a51dd8f
   subpackages:
@@ -180,7 +176,7 @@ imports:
 - name: github.com/juju/ratelimit
   version: 77ed1c8a01217656d2080ad51981f6e99adaa177
 - name: github.com/Knetic/govaluate
-  version: 6f13716d3d9d121223a2dea46f726f413f57f0c4
+  version: ecff4eed5a1b9d98d7f4795c732fb24ad55e6fc8
 - name: github.com/mailgun/mailgun-go
   version: 369a1fa57ce6fb314e627087b9fff0db5c266c0f
 - name: github.com/mailru/easyjson
