@@ -50,21 +50,18 @@ CRITICAL: {
 ```yaml
 # This will check all pod status in default namespace
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: Alert
+kind: PodAlert
 metadata:
   name: check-pod-status
   namespace: default
-  labels:
-    alert.appscode.com/objectType: cluster
 spec:
-  CheckCommand: pod_status
-  IcingaParam:
-    AlertIntervalSec: 120
-    CheckIntervalSec: 60
-  NotifierParams:
-  - Method: EMAIL
-    State: CRITICAL
-    UserUid: system-admin
+  check: pod_status
+  alertInterval: 2m
+  checkInterval: 1m
+  receivers:
+  - method: EMAIL
+    state: CRITICAL
+    to: system-admin
 
 
 # To check for others kubernetes objects, set following labels

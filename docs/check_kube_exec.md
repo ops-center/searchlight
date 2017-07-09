@@ -40,7 +40,7 @@ CRITICAL: Exit Code: 2
 ##### Configure Alert Object
 ```yaml
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: Alert
+kind: PodAlert
 metadata:
   name: check-kube-exec
   namespace: kube-system
@@ -48,14 +48,13 @@ metadata:
     alert.appscode.com/objectType: pods
     alert.appscode.com/objectName: monitoring-influxdb-0.12.2-n3lo2
 spec:
-  CheckCommand: kube_exec
-  IcingaParam:
-    AlertIntervalSec: 120
-    CheckIntervalSec: 60
-  NotifierParams:
-  - Method: EMAIL
-    State: CRITICAL
-    UserUid: system-admin
+  check: kube_exec
+  alertInterval: 2m
+  checkInterval: 1m
+  receivers:
+  - method: EMAIL
+    state: CRITICAL
+    to: system-admin
   vars:
     argv: ls /var/influxdb/token.ini
 ```

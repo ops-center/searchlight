@@ -30,21 +30,18 @@ OK: Node is Ready
 ```yaml
 # This alert will be set to all nodes individually
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: Alert
+kind: NodeAlert
 metadata:
   name: check-node-status
   namespace: default
-  labels:
-    alert.appscode.com/objectType: cluster
 spec:
-  CheckCommand: node_status
-  IcingaParam:
-    AlertIntervalSec: 120
-    CheckIntervalSec: 60
-  NotifierParams:
-  - Method: EMAIL
-    State: CRITICAL
-    UserUid: system-admin
+  check: node_status
+  alertInterval: 2m
+  checkInterval: 1m
+  receivers:
+  - method: EMAIL
+    state: CRITICAL
+    to: system-admin
 
 # To set alert on specific node, set following labels
 # labels:

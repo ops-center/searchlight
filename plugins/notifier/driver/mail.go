@@ -51,7 +51,7 @@ func render(ctx *pongo2.Context, template string) (string, error) {
 	return body, nil
 }
 
-func RenderMail(alert *aci.Alert, req *api.IncidentNotifyRequest) (string, error) {
+func RenderMail(alert *aci.PodAlert, req *api.IncidentNotifyRequest) (string, error) {
 	t := time.Unix(req.Time, 0)
 
 	objectType, objectName := getObjectInfo(alert.Labels)
@@ -63,7 +63,7 @@ func RenderMail(alert *aci.Alert, req *api.IncidentNotifyRequest) (string, error
 		"kubernetesObjectName": objectName,
 		"IcingaHostName":       req.HostName,
 		"IcingaServiceName":    alert.Name,
-		"CheckCommand":         alert.Spec.CheckCommand,
+		"CheckCommand":         alert.Spec.Check,
 		"IcingaType":           req.Type,
 		"IcingaState":          req.State,
 		"IcingaOutput":         req.Output,

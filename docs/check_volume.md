@@ -58,22 +58,18 @@ See Hostfacts [deployment guide](hostfacts.md)
 ##### Configure Alert Object
 ```yaml
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: Alert
+kind: PodAlert
 metadata:
   name: check-pod-volume-1
   namespace: kube-system
-  labels:
-    alert.appscode.com/objectType: services
-    alert.appscode.com/objectName: monitoring-influxdb
 spec:
-  CheckCommand: volume
-  IcingaParam:
-    AlertIntervalSec: 120
-    CheckIntervalSec: 60
-  NotifierParams:
-  - Method: EMAIL
-    State: CRITICAL
-    UserUid: system-admin
+  check: volume
+  alertInterval: 2m
+  checkInterval: 1m
+  receivers:
+  - method: EMAIL
+    state: CRITICAL
+    to: system-admin
   vars:
     volume_name: influxdb-persistent-storage
     warning: 70

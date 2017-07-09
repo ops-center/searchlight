@@ -6,17 +6,16 @@ import (
 	"sync"
 	"time"
 
-	"github.com/appscode/searchlight/pkg/client/icinga"
 	"github.com/appscode/searchlight/pkg/client/k8s"
-	"github.com/appscode/searchlight/pkg/watcher"
+	"github.com/appscode/searchlight/pkg/controller"
+	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/appscode/searchlight/test/mini"
-	"github.com/appscode/searchlight/util"
 	"k8s.io/client-go/pkg/api"
 )
 
 type testData struct {
 	Data                map[string]interface{}
-	ExpectedIcingaState util.IcingaState
+	ExpectedIcingaState icinga.State
 }
 
 type dataConfig struct {
@@ -50,7 +49,7 @@ func getKubeClient() (kubeClient *k8s.KubeClient, err error) {
 
 type icingaClient struct {
 	isIcingaClientSet bool
-	client            *icinga.IcingaClient
+	client            *icinga.Client
 	once              sync.Once
 }
 
@@ -62,7 +61,7 @@ var (
 	IcingaAPIPass string = os.Getenv("ICINGA_API_PASS")
 )
 
-func getIcingaClient() (icingaClient *icinga.IcingaClient, err error) {
+func getIcingaClient() (icingaClient *icinga.Client, err error) {
 	if e2eIcingaClient.isIcingaClientSet {
 		icingaClient = e2eIcingaClient.client
 		return
@@ -100,13 +99,13 @@ func getIcingaClient() (icingaClient *icinga.IcingaClient, err error) {
 type kubeWatcher struct {
 	isWatcherSet     bool
 	isIcingaIncluded bool
-	watcher          *watcher.Watcher
+	watcher          *controller.Controller
 	once             sync.Once
 }
 
 var e2eWatcher = kubeWatcher{isWatcherSet: false}
 
-func runKubeD(setIcingaClient bool) (w *watcher.Watcher, err error) {
+func runKubeD(setIcingaClient bool) (w *controller.Controller, err error) {
 	// Watcher is already running.. Want to Add IcingaClient
 	if e2eWatcher.isWatcherSet && setIcingaClient {
 		// IcingaClient is already added in watcher
@@ -115,7 +114,7 @@ func runKubeD(setIcingaClient bool) (w *watcher.Watcher, err error) {
 			return
 		} else {
 			// Added IcingaClient
-			var icingaClient *icinga.IcingaClient
+			var icingaClient *icinga.Client
 			icingaClient, err = getIcingaClient()
 			if err != nil {
 				return
@@ -141,7 +140,7 @@ func runKubeD(setIcingaClient bool) (w *watcher.Watcher, err error) {
 				return
 			}
 
-			w = &watcher.Watcher{
+			w = &controller.Controller{
 				KubeClient: kubeClient.Client,
 				ExtClient:  kubeClient.ExtClient,
 				SyncPeriod: time.Minute * 2,
@@ -150,7 +149,7 @@ func runKubeD(setIcingaClient bool) (w *watcher.Watcher, err error) {
 			// Set IcingaClient
 			if setIcingaClient {
 				// Added IcingaClient
-				var icingaClient *icinga.IcingaClient
+				var icingaClient *icinga.Client
 				icingaClient, err = getIcingaClient()
 				if err != nil {
 					return

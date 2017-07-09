@@ -5,16 +5,14 @@ import (
 	"time"
 
 	"github.com/appscode/go/types"
-	"github.com/appscode/searchlight/pkg/controller/host"
-	"github.com/appscode/searchlight/pkg/testing"
-	"github.com/appscode/searchlight/pkg/watcher"
-	"github.com/appscode/searchlight/util"
+	"github.com/appscode/searchlight/pkg/controller"
+	"github.com/appscode/searchlight/pkg/icinga"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
 	apps "k8s.io/client-go/pkg/apis/apps/v1beta1"
 )
 
-func CreateStatefulSet(w *watcher.Watcher, namespace string) (*apps.StatefulSet, error) {
+func CreateStatefulSet(w *controller.Controller, namespace string) (*apps.StatefulSet, error) {
 	// Create Service
 	service, err := CreateService(w, namespace, nil)
 	if err != nil {
@@ -30,7 +28,7 @@ func CreateStatefulSet(w *watcher.Watcher, namespace string) (*apps.StatefulSet,
 		},
 	}
 
-	if err := testing.CreateKubernetesObject(w.KubeClient, statefulSet); err != nil {
+	if err := CreateKubernetesObject(w.KubeClient, statefulSet); err != nil {
 		return nil, err
 	}
 
@@ -51,7 +49,7 @@ func CreateStatefulSet(w *watcher.Watcher, namespace string) (*apps.StatefulSet,
 	}
 }
 
-func DeleteStatefulSet(w *watcher.Watcher, statefulSet *apps.StatefulSet) error {
+func DeleteStatefulSet(w *controller.Controller, statefulSet *apps.StatefulSet) error {
 	statefulSet, err := w.KubeClient.AppsV1beta1().StatefulSets(statefulSet.Namespace).Get(statefulSet.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -62,7 +60,7 @@ func DeleteStatefulSet(w *watcher.Watcher, statefulSet *apps.StatefulSet) error 
 		return err
 	}
 
-	labelSelector, err := util.GetLabels(w.KubeClient, statefulSet.Namespace, host.TypeStatefulSet, statefulSet.Name)
+	labelSelector, err := icinga.GetLabels(w.KubeClient, statefulSet.Namespace, icinga.TypeStatefulSet, statefulSet.Name)
 	if err != nil {
 		return err
 	}

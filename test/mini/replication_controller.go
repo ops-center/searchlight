@@ -5,18 +5,16 @@ import (
 	"time"
 
 	"github.com/appscode/go/types"
-	"github.com/appscode/searchlight/pkg/controller/host"
-	"github.com/appscode/searchlight/pkg/testing"
-	"github.com/appscode/searchlight/pkg/watcher"
-	"github.com/appscode/searchlight/util"
+	"github.com/appscode/searchlight/pkg/controller"
+	"github.com/appscode/searchlight/pkg/icinga"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
-func CreateReplicationController(w *watcher.Watcher, namespace string) (*apiv1.ReplicationController, error) {
+func CreateReplicationController(w *controller.Controller, namespace string) (*apiv1.ReplicationController, error) {
 	replicationController := &apiv1.ReplicationController{}
 	replicationController.Namespace = namespace
-	if err := testing.CreateKubernetesObject(w.KubeClient, replicationController); err != nil {
+	if err := CreateKubernetesObject(w.KubeClient, replicationController); err != nil {
 		return nil, err
 	}
 
@@ -40,7 +38,7 @@ func CreateReplicationController(w *watcher.Watcher, namespace string) (*apiv1.R
 	return replicationController, nil
 }
 
-func DeleteReplicationController(w *watcher.Watcher, replicationController *apiv1.ReplicationController) error {
+func DeleteReplicationController(w *controller.Controller, replicationController *apiv1.ReplicationController) error {
 	replicationController, err := w.KubeClient.CoreV1().ReplicationControllers(replicationController.Namespace).Get(replicationController.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -51,7 +49,7 @@ func DeleteReplicationController(w *watcher.Watcher, replicationController *apiv
 		return err
 	}
 
-	labelSelector, err := util.GetLabels(w.KubeClient, replicationController.Namespace, host.TypeReplicationcontrollers, replicationController.Name)
+	labelSelector, err := icinga.GetLabels(w.KubeClient, replicationController.Namespace, icinga.TypeReplicationcontrollers, replicationController.Name)
 	if err != nil {
 		return err
 	}

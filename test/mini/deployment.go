@@ -5,18 +5,16 @@ import (
 	"time"
 
 	"github.com/appscode/go/types"
-	"github.com/appscode/searchlight/pkg/controller/host"
-	"github.com/appscode/searchlight/pkg/testing"
-	"github.com/appscode/searchlight/pkg/watcher"
-	"github.com/appscode/searchlight/util"
+	"github.com/appscode/searchlight/pkg/controller"
+	"github.com/appscode/searchlight/pkg/icinga"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	extensions "k8s.io/client-go/pkg/apis/extensions/v1beta1"
 )
 
-func CreateDeployment(w *watcher.Watcher, namespace string) (*extensions.Deployment, error) {
+func CreateDeployment(w *controller.Controller, namespace string) (*extensions.Deployment, error) {
 	deployment := &extensions.Deployment{}
 	deployment.Namespace = namespace
-	if err := testing.CreateKubernetesObject(w.KubeClient, deployment); err != nil {
+	if err := CreateKubernetesObject(w.KubeClient, deployment); err != nil {
 		return nil, err
 	}
 
@@ -39,7 +37,7 @@ func CreateDeployment(w *watcher.Watcher, namespace string) (*extensions.Deploym
 	}
 }
 
-func DeleteDeployment(w *watcher.Watcher, deployment *extensions.Deployment) error {
+func DeleteDeployment(w *controller.Controller, deployment *extensions.Deployment) error {
 	deployment, err := w.KubeClient.ExtensionsV1beta1().Deployments(deployment.Namespace).Get(deployment.Name, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -50,7 +48,7 @@ func DeleteDeployment(w *watcher.Watcher, deployment *extensions.Deployment) err
 		return err
 	}
 
-	labelSelector, err := util.GetLabels(w.KubeClient, deployment.Namespace, host.TypeDeployments, deployment.Name)
+	labelSelector, err := icinga.GetLabels(w.KubeClient, deployment.Namespace, icinga.TypeDeployments, deployment.Name)
 	if err != nil {
 		return err
 	}

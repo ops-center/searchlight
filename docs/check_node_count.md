@@ -31,21 +31,18 @@ CRITICAL: Found 2 node(s) instead of 3
 ##### Configure Alert Object
 ```yaml
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: Alert
+kind: ClusterAlert
 metadata:
   name: check-node-count
   namespace: default
-  labels:
-    alert.appscode.com/objectType: cluster
 spec:
-  CheckCommand: node_count
-  IcingaParam:
-    AlertIntervalSec: 120
-    CheckIntervalSec: 60
-  NotifierParams:
-  - Method: EMAIL
-    State: CRITICAL
-    UserUid: system-admin
-  Vars:
+  check: node_count
+  alertInterval: 2m
+  checkInterval: 1m
+  receivers:
+  - method: EMAIL
+    state: CRITICAL
+    to: system-admin
+  vars:
     count: 3
 ```
