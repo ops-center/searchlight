@@ -60,7 +60,7 @@ spec:
         - --icinga-secret-namespace=kube-system
         - --v=3
         ports:
-        - containerPort: 8080
+        - containerPort: 56790
           name: http
           protocol: TCP     
       - image: appscode/icinga:1.5.9-k8s

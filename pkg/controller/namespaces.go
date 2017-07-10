@@ -29,6 +29,16 @@ func (c *Controller) WatchNamespaces() {
 		cache.ResourceEventHandlerFuncs{
 			DeleteFunc: func(obj interface{}) {
 				if ns, ok := obj.(*apiv1.Namespace); ok {
+					if alerts, err := c.ExtClient.ClusterAlerts(ns.Name).List(metav1.ListOptions{}); err == nil {
+						for _, alert := range alerts.Items {
+							c.ExtClient.ClusterAlerts(alert.Namespace).Delete(alert.Name)
+						}
+					}
+					if alerts, err := c.ExtClient.NodeAlerts(ns.Name).List(metav1.ListOptions{}); err == nil {
+						for _, alert := range alerts.Items {
+							c.ExtClient.NodeAlerts(alert.Namespace).Delete(alert.Name)
+						}
+					}
 					if alerts, err := c.ExtClient.PodAlerts(ns.Name).List(metav1.ListOptions{}); err == nil {
 						for _, alert := range alerts.Items {
 							c.ExtClient.PodAlerts(alert.Namespace).Delete(alert.Name)
