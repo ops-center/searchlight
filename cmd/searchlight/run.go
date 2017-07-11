@@ -63,9 +63,12 @@ func NewCmdRun() *cobra.Command {
 			}
 			icingaClient := icinga.NewClient(*cfg)
 			for {
-				icingaClient.Check()
-
-				time.Sleep(1 * time.Second)
+				if icingaClient.Check().Get(nil).Do().Status == 200 {
+					log.Infoln("connected to icinga api")
+					break
+				}
+				log.Infoln("Waiting for icinga to start")
+				time.Sleep(2 * time.Second)
 			}
 
 			ctrl := controller.New(kubeClient, extClient, icingaClient)
