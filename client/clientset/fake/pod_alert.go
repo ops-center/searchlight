@@ -1,10 +1,9 @@
 package fake
 
 import (
-	aci "github.com/appscode/searchlight/api"
+	tapi "github.com/appscode/searchlight/api"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/testing"
 )
@@ -14,23 +13,23 @@ type FakePodAlert struct {
 	ns   string
 }
 
-var resourcePodAlert = schema.GroupVersionResource{Group: "monitoring.appscode.com", Version: "v1alpha1", Resource: "podalerts"}
+var resourcePodAlert = tapi.V1alpha1SchemeGroupVersion.WithResource(tapi.ResourceTypePodAlert)
 
 // Get returns the PodAlert by name.
-func (mock *FakePodAlert) Get(name string) (*aci.PodAlert, error) {
+func (mock *FakePodAlert) Get(name string) (*tapi.PodAlert, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewGetAction(resourcePodAlert, mock.ns, name), &aci.PodAlert{})
+		Invokes(testing.NewGetAction(resourcePodAlert, mock.ns, name), &tapi.PodAlert{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*aci.PodAlert), err
+	return obj.(*tapi.PodAlert), err
 }
 
 // List returns the a of PodAlerts.
-func (mock *FakePodAlert) List(opts metav1.ListOptions) (*aci.PodAlertList, error) {
+func (mock *FakePodAlert) List(opts metav1.ListOptions) (*tapi.PodAlertList, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewListAction(resourcePodAlert, mock.ns, opts), &aci.PodAlert{})
+		Invokes(testing.NewListAction(resourcePodAlert, mock.ns, opts), &tapi.PodAlert{})
 
 	if obj == nil {
 		return nil, err
@@ -40,8 +39,8 @@ func (mock *FakePodAlert) List(opts metav1.ListOptions) (*aci.PodAlertList, erro
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &aci.PodAlertList{}
-	for _, item := range obj.(*aci.PodAlertList).Items {
+	list := &tapi.PodAlertList{}
+	for _, item := range obj.(*tapi.PodAlertList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
@@ -50,43 +49,43 @@ func (mock *FakePodAlert) List(opts metav1.ListOptions) (*aci.PodAlertList, erro
 }
 
 // Create creates a new PodAlert.
-func (mock *FakePodAlert) Create(svc *aci.PodAlert) (*aci.PodAlert, error) {
+func (mock *FakePodAlert) Create(svc *tapi.PodAlert) (*tapi.PodAlert, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewCreateAction(resourcePodAlert, mock.ns, svc), &aci.PodAlert{})
+		Invokes(testing.NewCreateAction(resourcePodAlert, mock.ns, svc), &tapi.PodAlert{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*aci.PodAlert), err
+	return obj.(*tapi.PodAlert), err
 }
 
 // Update updates a PodAlert.
-func (mock *FakePodAlert) Update(svc *aci.PodAlert) (*aci.PodAlert, error) {
+func (mock *FakePodAlert) Update(svc *tapi.PodAlert) (*tapi.PodAlert, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewUpdateAction(resourcePodAlert, mock.ns, svc), &aci.PodAlert{})
+		Invokes(testing.NewUpdateAction(resourcePodAlert, mock.ns, svc), &tapi.PodAlert{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*aci.PodAlert), err
+	return obj.(*tapi.PodAlert), err
 }
 
 // Delete deletes a PodAlert by name.
 func (mock *FakePodAlert) Delete(name string) error {
 	_, err := mock.Fake.
-		Invokes(testing.NewDeleteAction(resourcePodAlert, mock.ns, name), &aci.PodAlert{})
+		Invokes(testing.NewDeleteAction(resourcePodAlert, mock.ns, name), &tapi.PodAlert{})
 
 	return err
 }
 
-func (mock *FakePodAlert) UpdateStatus(srv *aci.PodAlert) (*aci.PodAlert, error) {
+func (mock *FakePodAlert) UpdateStatus(srv *tapi.PodAlert) (*tapi.PodAlert, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(resourcePodAlert, "status", mock.ns, srv), &aci.PodAlert{})
+		Invokes(testing.NewUpdateSubresourceAction(resourcePodAlert, "status", mock.ns, srv), &tapi.PodAlert{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*aci.PodAlert), err
+	return obj.(*tapi.PodAlert), err
 }
 
 func (mock *FakePodAlert) Watch(opts metav1.ListOptions) (watch.Interface, error) {

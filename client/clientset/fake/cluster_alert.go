@@ -1,10 +1,9 @@
 package fake
 
 import (
-	aci "github.com/appscode/searchlight/api"
+	tapi "github.com/appscode/searchlight/api"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/testing"
 )
@@ -14,23 +13,23 @@ type FakeClusterAlert struct {
 	ns   string
 }
 
-var resourceClusterAlert = schema.GroupVersionResource{Group: "monitoring.appscode.com", Version: "v1alpha1", Resource: "clusteralerts"}
+var resourceClusterAlert = tapi.V1alpha1SchemeGroupVersion.WithResource(tapi.ResourceTypeClusterAlert)
 
 // Get returns the ClusterAlert by name.
-func (mock *FakeClusterAlert) Get(name string) (*aci.ClusterAlert, error) {
+func (mock *FakeClusterAlert) Get(name string) (*tapi.ClusterAlert, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewGetAction(resourceClusterAlert, mock.ns, name), &aci.ClusterAlert{})
+		Invokes(testing.NewGetAction(resourceClusterAlert, mock.ns, name), &tapi.ClusterAlert{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*aci.ClusterAlert), err
+	return obj.(*tapi.ClusterAlert), err
 }
 
 // List returns the a of ClusterAlerts.
-func (mock *FakeClusterAlert) List(opts metav1.ListOptions) (*aci.ClusterAlertList, error) {
+func (mock *FakeClusterAlert) List(opts metav1.ListOptions) (*tapi.ClusterAlertList, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewListAction(resourceClusterAlert, mock.ns, opts), &aci.ClusterAlert{})
+		Invokes(testing.NewListAction(resourceClusterAlert, mock.ns, opts), &tapi.ClusterAlert{})
 
 	if obj == nil {
 		return nil, err
@@ -40,8 +39,8 @@ func (mock *FakeClusterAlert) List(opts metav1.ListOptions) (*aci.ClusterAlertLi
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &aci.ClusterAlertList{}
-	for _, item := range obj.(*aci.ClusterAlertList).Items {
+	list := &tapi.ClusterAlertList{}
+	for _, item := range obj.(*tapi.ClusterAlertList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
 		}
@@ -50,43 +49,43 @@ func (mock *FakeClusterAlert) List(opts metav1.ListOptions) (*aci.ClusterAlertLi
 }
 
 // Create creates a new ClusterAlert.
-func (mock *FakeClusterAlert) Create(svc *aci.ClusterAlert) (*aci.ClusterAlert, error) {
+func (mock *FakeClusterAlert) Create(svc *tapi.ClusterAlert) (*tapi.ClusterAlert, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewCreateAction(resourceClusterAlert, mock.ns, svc), &aci.ClusterAlert{})
+		Invokes(testing.NewCreateAction(resourceClusterAlert, mock.ns, svc), &tapi.ClusterAlert{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*aci.ClusterAlert), err
+	return obj.(*tapi.ClusterAlert), err
 }
 
 // Update updates a ClusterAlert.
-func (mock *FakeClusterAlert) Update(svc *aci.ClusterAlert) (*aci.ClusterAlert, error) {
+func (mock *FakeClusterAlert) Update(svc *tapi.ClusterAlert) (*tapi.ClusterAlert, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewUpdateAction(resourceClusterAlert, mock.ns, svc), &aci.ClusterAlert{})
+		Invokes(testing.NewUpdateAction(resourceClusterAlert, mock.ns, svc), &tapi.ClusterAlert{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*aci.ClusterAlert), err
+	return obj.(*tapi.ClusterAlert), err
 }
 
 // Delete deletes a ClusterAlert by name.
 func (mock *FakeClusterAlert) Delete(name string) error {
 	_, err := mock.Fake.
-		Invokes(testing.NewDeleteAction(resourceClusterAlert, mock.ns, name), &aci.ClusterAlert{})
+		Invokes(testing.NewDeleteAction(resourceClusterAlert, mock.ns, name), &tapi.ClusterAlert{})
 
 	return err
 }
 
-func (mock *FakeClusterAlert) UpdateStatus(srv *aci.ClusterAlert) (*aci.ClusterAlert, error) {
+func (mock *FakeClusterAlert) UpdateStatus(srv *tapi.ClusterAlert) (*tapi.ClusterAlert, error) {
 	obj, err := mock.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(resourceClusterAlert, "status", mock.ns, srv), &aci.ClusterAlert{})
+		Invokes(testing.NewUpdateSubresourceAction(resourceClusterAlert, "status", mock.ns, srv), &tapi.ClusterAlert{})
 
 	if obj == nil {
 		return nil, err
 	}
-	return obj.(*aci.ClusterAlert), err
+	return obj.(*tapi.ClusterAlert), err
 }
 
 func (mock *FakeClusterAlert) Watch(opts metav1.ListOptions) (watch.Interface, error) {
