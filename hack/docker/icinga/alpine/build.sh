@@ -4,28 +4,28 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-LIB_ROOT=$(dirname "${BASH_SOURCE}")/../../..
-source "$LIB_ROOT/hack/libbuild/common/lib.sh"
-source "$LIB_ROOT/hack/libbuild/common/public_image.sh"
-
 GOPATH=$(go env GOPATH)
+REPO_ROOT=$GOPATH/src/github.com/appscode/searchlight
+source "$REPO_ROOT/hack/libbuild/common/lib.sh"
+source "$REPO_ROOT/hack/libbuild/common/public_image.sh"
+
 IMG=icinga
 ICINGAWEB_VER=2.1.2
 
-DIST=$GOPATH/src/github.com/appscode/searchlight/dist
+DIST=$REPO_ROOT/dist
 mkdir -p $DIST
 if [ -f "$DIST/.tag" ]; then
 	export $(cat $DIST/.tag | xargs)
 fi
 
 clean() {
-    pushd $GOPATH/src/github.com/appscode/searchlight/hack/docker/icinga
+    pushd $REPO_ROOT/hack/docker/icinga/alpine
 	rm -rf icingaweb2 plugins
 	popd
 }
 
 build() {
-    pushd $GOPATH/src/github.com/appscode/searchlight/hack/docker/icinga
+    pushd $REPO_ROOT/hack/docker/icinga/alpine
     detect_tag $DIST/.tag
 
 	rm -rf icingaweb2

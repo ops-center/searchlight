@@ -20,13 +20,13 @@ if [ -f "$REPO_ROOT/dist/.tag" ]; then
 fi
 
 clean() {
-    pushd $REPO_ROOT/hack/docker/icinga
+    pushd $REPO_ROOT/hack/docker/icinga/jessie
 	rm -rf icingaweb2 plugins
 	popd
 }
 
 build() {
-    pushd $REPO_ROOT/hack/docker/icinga
+    pushd $REPO_ROOT/hack/docker/icinga/jessie
     detect_tag $REPO_ROOT/dist/.tag
 
 	rm -rf icingaweb2
