@@ -192,7 +192,7 @@ func (c *Configurator) LoadIcingaConfig() (*Config, error) {
 		// auto generate the file
 		cfg := ini.Empty()
 		sec := cfg.Section("")
-		sec.NewKey(ICINGA_ADDRESS, "127.0.0.1")
+		sec.NewKey(ICINGA_ADDRESS, "127.0.0.1:5665")
 		sec.NewKey(ICINGA_CA_CERT, c.certFile("ca"))
 		sec.NewKey(ICINGA_API_USER, "icingaapi")
 		sec.NewKey(ICINGA_API_PASSWORD, rand.GeneratePassword())
