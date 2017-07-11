@@ -28,7 +28,7 @@ func getIcingaHostType(commandName, objectType string) (string, error) {
 	return "", errors.New("Icinga host_type not found")
 }
 
-func icingaHostSearchQuery(objectList []*icinga.KHost) string {
+func icingaHostSearchQuery(objectList []*icinga.IcingaHost) string {
 	matchHost := ""
 	for id, object := range objectList {
 		if id > 0 {
@@ -39,7 +39,7 @@ func icingaHostSearchQuery(objectList []*icinga.KHost) string {
 	return fmt.Sprintf(`{"filter": "(%s)"}`, matchHost)
 }
 
-func countIcingaService(w *controller.Controller, objectList []*icinga.KHost, serviceName string, expectZero bool) error {
+func countIcingaService(w *controller.Controller, objectList []*icinga.IcingaHost, serviceName string, expectZero bool) error {
 	in := icinga.IcingaServiceSearchQuery(serviceName, objectList)
 	var respService icinga.ResponseObject
 
@@ -76,7 +76,7 @@ func countIcingaService(w *controller.Controller, objectList []*icinga.KHost, se
 	return nil
 }
 
-func countIcingaHost(w *controller.Controller, objectList []*icinga.KHost, expectZero bool) error {
+func countIcingaHost(w *controller.Controller, objectList []*icinga.IcingaHost, expectZero bool) error {
 	in := icingaHostSearchQuery(objectList)
 	var respHost icinga.ResponseObject
 
@@ -113,7 +113,7 @@ func countIcingaHost(w *controller.Controller, objectList []*icinga.KHost, expec
 	return nil
 }
 
-func GetIcingaHostList(w *controller.Controller, alert *aci.PodAlert) ([]*icinga.KHost, error) {
+func GetIcingaHostList(w *controller.Controller, alert *aci.PodAlert) ([]*icinga.IcingaHost, error) {
 	objectType, objectName := icinga.GetObjectInfo(alert.Labels)
 	check := alert.Spec.Check
 
@@ -152,7 +152,7 @@ func CheckIcingaObjectsForAlert(w *controller.Controller, alert *aci.PodAlert, e
 	return
 }
 
-func CheckIcingaObjects(w *controller.Controller, alert *aci.PodAlert, objectList []*icinga.KHost, expectZeroHost, expectZeroService bool) (err error) {
+func CheckIcingaObjects(w *controller.Controller, alert *aci.PodAlert, objectList []*icinga.IcingaHost, expectZeroHost, expectZeroService bool) (err error) {
 	// Count Icinga Host in Icinga2. Should be found
 	fmt.Println("----> Counting Icinga Host")
 	if err = countIcingaHost(w, objectList, expectZeroHost); err != nil {
@@ -173,7 +173,7 @@ func CheckIcingaObjectsForPod(w *controller.Controller, podName, namespace strin
 	// Count Icinga Host in Icinga2. Should be found
 	fmt.Println("----> Counting Icinga Service")
 
-	objectList := []*icinga.KHost{
+	objectList := []*icinga.IcingaHost{
 		{
 			Name: fmt.Sprintf("%v@%v", podName, namespace),
 		},

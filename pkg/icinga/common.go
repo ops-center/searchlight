@@ -13,7 +13,7 @@ type commonHost struct {
 	IcingaClient *Client
 }
 
-func (h *commonHost) CreateIcingaHost(kh KHost) error {
+func (h *commonHost) CreateIcingaHost(kh IcingaHost) error {
 	name := kh.Name
 	resp := h.IcingaClient.Objects().Hosts(name).Get([]string{}).Do()
 	if resp.Status == 200 {
@@ -61,7 +61,7 @@ func (h *commonHost) DeleteIcingaHost(host string) error {
 }
 
 // createIcingaServiceForCluster
-func (h *commonHost) CreateIcingaService(svc string, kh KHost, attrs map[string]interface{}) error {
+func (h *commonHost) CreateIcingaService(svc string, kh IcingaHost, attrs map[string]interface{}) error {
 	obj := IcingaObject{
 		Templates: []string{"generic-service"},
 		Attrs:     attrs,
@@ -84,7 +84,7 @@ func (h *commonHost) CreateIcingaService(svc string, kh KHost, attrs map[string]
 	return errors.New("Can't create Icinga service").Err()
 }
 
-func (h *commonHost) UpdateIcingaService(svc string, kh KHost, attrs map[string]interface{}) error {
+func (h *commonHost) UpdateIcingaService(svc string, kh IcingaHost, attrs map[string]interface{}) error {
 	obj := IcingaObject{
 		Templates: []string{"generic-service"},
 		Attrs:     attrs,
@@ -104,7 +104,7 @@ func (h *commonHost) UpdateIcingaService(svc string, kh KHost, attrs map[string]
 	return nil
 }
 
-func (h *commonHost) DeleteIcingaService(svc string, kh KHost) error {
+func (h *commonHost) DeleteIcingaService(svc string, kh IcingaHost) error {
 	param := map[string]string{
 		"cascade": "1",
 	}
@@ -120,7 +120,7 @@ func (h *commonHost) DeleteIcingaService(svc string, kh KHost) error {
 	return errors.New("Fail to delete service").Err()
 }
 
-func (h *commonHost) CheckIcingaService(svc string, kh KHost) (bool, error) {
+func (h *commonHost) CheckIcingaService(svc string, kh IcingaHost) (bool, error) {
 	in := h.IcingaServiceSearchQuery(svc, kh)
 	var respService ResponseObject
 
@@ -130,7 +130,7 @@ func (h *commonHost) CheckIcingaService(svc string, kh KHost) (bool, error) {
 	return len(respService.Results) > 0, nil
 }
 
-func (h *commonHost) IcingaServiceSearchQuery(svc string, kids ...KHost) string {
+func (h *commonHost) IcingaServiceSearchQuery(svc string, kids ...IcingaHost) string {
 	matchHost := ""
 	for i, kh := range kids {
 		if i > 0 {
@@ -141,7 +141,7 @@ func (h *commonHost) IcingaServiceSearchQuery(svc string, kids ...KHost) string 
 	return fmt.Sprintf(`{"filter": "(%s)&&match(\"%s\",service.name)"}`, matchHost, svc)
 }
 
-func (h *commonHost) CreateIcingaNotification(alert tapi.Alert, kh KHost) error {
+func (h *commonHost) CreateIcingaNotification(alert tapi.Alert, kh IcingaHost) error {
 	obj := IcingaObject{
 		Templates: []string{"icinga2-notifier-template"},
 		Attrs: map[string]interface{}{
@@ -167,7 +167,7 @@ func (h *commonHost) CreateIcingaNotification(alert tapi.Alert, kh KHost) error 
 	return errors.New("Can't create Icinga notification").Err()
 }
 
-func (h *commonHost) UpdateIcingaNotification(alert tapi.Alert, kh KHost) error {
+func (h *commonHost) UpdateIcingaNotification(alert tapi.Alert, kh IcingaHost) error {
 	obj := IcingaObject{
 		Attrs: map[string]interface{}{
 			"interval": int(alert.GetAlertInterval().Seconds()),

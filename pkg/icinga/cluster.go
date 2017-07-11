@@ -24,8 +24,8 @@ func NewClusterHost(kubeClient clientset.Interface, extClient tcs.ExtensionInter
 	}
 }
 
-func (h *ClusterHost) GetObject(alert tapi.ClusterAlert) KHost {
-	return KHost{
+func (h *ClusterHost) GetObject(alert tapi.ClusterAlert) IcingaHost {
+	return IcingaHost{
 		Name: alert.Command() + "@" + alert.Namespace,
 		IP:   "127.0.0.1",
 	}

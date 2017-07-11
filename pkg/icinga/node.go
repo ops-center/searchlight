@@ -29,7 +29,7 @@ func NewNodeHost(kubeClient clientset.Interface, extClient tcs.ExtensionInterfac
 	}
 }
 
-func (h *NodeHost) GetObject(alert tapi.NodeAlert, node apiv1.Node) KHost {
+func (h *NodeHost) GetObject(alert tapi.NodeAlert, node apiv1.Node) IcingaHost {
 	nodeIP := "127.0.0.1"
 	for _, ip := range node.Status.Addresses {
 		if ip.Type == internalIP {
@@ -37,10 +37,10 @@ func (h *NodeHost) GetObject(alert tapi.NodeAlert, node apiv1.Node) KHost {
 			break
 		}
 	}
-	return KHost{Name: node.Name + "@" + alert.Namespace, IP: nodeIP}
+	return IcingaHost{Name: node.Name + "@" + alert.Namespace, IP: nodeIP}
 }
 
-func (h *NodeHost) expandVars(alertSpec tapi.NodeAlertSpec, kh KHost, attrs map[string]interface{}) error {
+func (h *NodeHost) expandVars(alertSpec tapi.NodeAlertSpec, kh IcingaHost, attrs map[string]interface{}) error {
 	commandVars := tapi.NodeCommands[alertSpec.Check].Vars
 	for key, val := range alertSpec.Vars {
 		if v, found := commandVars[key]; found {

@@ -28,11 +28,11 @@ func NewPodHost(kubeClient clientset.Interface, extClient tcs.ExtensionInterface
 	}
 }
 
-func (h *PodHost) GetObject(alert tapi.PodAlert, pod apiv1.Pod) KHost {
-	return KHost{Name: pod.Name + "@" + alert.Namespace, IP: pod.Status.PodIP}
+func (h *PodHost) GetObject(alert tapi.PodAlert, pod apiv1.Pod) IcingaHost {
+	return IcingaHost{Name: pod.Name + "@" + alert.Namespace, IP: pod.Status.PodIP}
 }
 
-func (h *PodHost) expandVars(alertSpec tapi.PodAlertSpec, kh KHost, attrs map[string]interface{}) error {
+func (h *PodHost) expandVars(alertSpec tapi.PodAlertSpec, kh IcingaHost, attrs map[string]interface{}) error {
 	commandVars := tapi.PodCommands[alertSpec.Check].Vars
 	for key, val := range alertSpec.Vars {
 		if v, found := commandVars[key]; found {

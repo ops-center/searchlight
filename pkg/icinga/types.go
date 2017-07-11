@@ -14,7 +14,7 @@ const (
 	ObjectName = "alert.appscode.com/objectName"
 )
 
-type KHost struct {
+type IcingaHost struct {
 	Name string
 	IP   string
 }
