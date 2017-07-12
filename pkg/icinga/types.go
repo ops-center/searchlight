@@ -44,7 +44,7 @@ func ParseHost(name string) (*IcingaHost, error) {
 	t := parts[1]
 	switch t {
 	case TypePod, TypeNode:
-		if len(parts) != 2 {
+		if len(parts) != 3 {
 			return nil, fmt.Errorf("Host %s has a bad format", name)
 		}
 		return &IcingaHost{
