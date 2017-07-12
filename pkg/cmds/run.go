@@ -30,7 +30,8 @@ var (
 
 func NewCmdRun(version string) *cobra.Command {
 	mgr := &icinga.Configurator{
-		Expiry: 10 * 365 * 24 * time.Hour,
+		NotifierSecretName: "searchlight-operator",
+		Expiry:             10 * 365 * 24 * time.Hour,
 	}
 	cmd := &cobra.Command{
 		Use:   "run",
@@ -88,7 +89,8 @@ func NewCmdRun(version string) *cobra.Command {
 
 	cmd.Flags().StringVar(&masterURL, "master", masterURL, "The address of the Kubernetes API server (overrides any value in kubeconfig)")
 	cmd.Flags().StringVar(&kubeconfigPath, "kubeconfig", kubeconfigPath, "Path to kubeconfig file with authorization information (the master location is set by the master flag).")
-	cmd.Flags().StringVarP(&mgr.ConfigRoot, "config-dir", "s", mgr.ConfigRoot, "Path to directory containing icinga2 config. This should be an emptyDir inside Kubernetes.")
+	cmd.Flags().StringVar(&mgr.ConfigRoot, "config-dir", mgr.ConfigRoot, "Path to directory containing icinga2 config. This should be an emptyDir inside Kubernetes.")
+	cmd.Flags().StringVar(&mgr.NotifierSecretName, "notifier-secret-name", mgr.NotifierSecretName, "Name of Kubernetes secret used to pass notifier credentials.")
 	cmd.Flags().StringVar(&address, "address", address, "Address to listen on for web interface and telemetry.")
 	cmd.Flags().BoolVar(&enableAnalytics, "analytics", enableAnalytics, "Send analytical event to Google Analytics")
 
