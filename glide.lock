@@ -1,5 +1,5 @@
 hash: ba7a43d99f7ae7abee5af0d04eedced27232e183ce6fc92b1ef4f5fd22c91221
-updated: 2017-07-12T12:56:06.258487108+06:00
+updated: 2017-07-12T21:34:21.892192795-07:00
 imports:
 - name: github.com/appscode/api
   version: b61754fd4d336573cfed5cf16bcbdfe6d30d078d
@@ -37,6 +37,8 @@ imports:
   version: 68e0e42e42c01371f3950571fc87c2298a51dd8f
   subpackages:
   - golog
+- name: github.com/appscode/pat
+  version: 48ff78925b7955367d8a048fc2b5cec8efadf8d3
 - name: github.com/Azure/go-ansiterm
   version: 70b2c90b260171e829f1ebd7c17f600c11858dbe
   subpackages:
@@ -74,7 +76,7 @@ imports:
   - signer/remote
   - signer/universal
 - name: github.com/cpuguy83/go-md2man
-  version: 23709d0847197db6021a51fdb193e66e9222d4e7
+  version: 71acacd42f85e5e82f70a55327789582a5200a90
   subpackages:
   - md2man
 - name: github.com/davecgh/go-spew
@@ -372,7 +374,7 @@ imports:
   - third_party/forked/golang/netutil
   - third_party/forked/golang/reflect
 - name: k8s.io/apiserver
-  version: 087d1a2efeb6296f04bb0f54e7af9890052aa6d7
+  version: 2308857ad3b8b18abf74ff734853973eda9da94d
   subpackages:
   - pkg/server/httplog
   - pkg/util/wsstream
@@ -463,7 +465,7 @@ imports:
   - util/homedir
   - util/integer
 - name: k8s.io/kubernetes
-  version: 313fd317f96265658831a576fafdd6ed85aaf428
+  version: 095136c3078ccf887b9034b7ce598a0a1faff769
   subpackages:
   - pkg/api
   - pkg/client/unversioned/remotecommand
