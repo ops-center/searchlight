@@ -42,6 +42,7 @@ libbuild.BIN_MATRIX = {
         'type': 'go',
         'go_version': True,
         'distro': {
+            'alpine': ['amd64'],
             'linux': ['amd64']
         }
     },
@@ -59,6 +60,7 @@ libbuild.BIN_MATRIX = {
         'go_version': True,
         'release': True,
         'distro': {
+            'alpine': ['amd64'],
             'linux': ['amd64']
         }
     },
@@ -155,6 +157,35 @@ libbuild.BIN_MATRIX = {
         }
     },
 }
+if libbuild.ENV not in ['prod']:
+    libbuild.BIN_MATRIX = {
+        'searchlight': {
+            'type': 'go',
+            'go_version': True,
+            'distro': {
+                'alpine': ['amd64'],
+                'linux': ['amd64']
+            }
+        },
+        'hostfacts': {
+            'type': 'go',
+            'go_version': False,
+            'release': True,
+            'use_cgo': False,
+            'distro': {
+                'linux': ['amd64'],
+            }
+        },
+        'hyperalert': {
+            'type': 'go',
+            'go_version': True,
+            'release': True,
+            'distro': {
+                'alpine': ['amd64'],
+                'linux': ['amd64']
+            }
+        },
+    }
 libbuild.BUCKET_MATRIX = {
     'prod': 'gs://appscode-cdn',
     'dev': 'gs://appscode-dev'
