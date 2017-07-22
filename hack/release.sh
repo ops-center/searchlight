@@ -14,8 +14,8 @@ APPSCODE_ENV=prod ./hack/make.py push
 ./hack/docker/searchlight/setup.sh
 APPSCODE_ENV=prod ./hack/docker/searchlight/setup.sh release
 
-./hack/docker/icinga/build.sh
-./hack/docker/icinga/build.sh release
+./hack/docker/icinga/alpine/build.sh
+./hack/docker/icinga/alpine/build.sh release
 
-./hack/docker/icinga/setup.sh
-./hack/docker/icinga/setup.sh release
+# ./hack/docker/icinga/alpine/setup.sh
+# ./hack/docker/icinga/alpine/setup.sh release
