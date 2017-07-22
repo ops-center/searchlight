@@ -19,86 +19,54 @@ icinga:
 
 ## Icinga configaration
 ## https://github.com/appscode/searchlight/blob/master/docs/icinga2/deployment.md#create-deployment
-##
+icinga2web:
+  password: changeit
 
-  env: |-
-    ICINGA_WEB_HOST=127.0.0.1
-    ICINGA_WEB_PORT=5432
-    ICINGA_WEB_DB=icingawebdb
-    ICINGA_WEB_USER=icingaweb
-    ICINGA_WEB_PASSWORD=12345678
-    ICINGA_WEB_ADMIN_PASSWORD=admin
-    ICINGA_IDO_HOST=127.0.0.1
-    ICINGA_IDO_PORT=5432
-    ICINGA_IDO_DB=icingaidodb
-    ICINGA_IDO_USER=icingaido
-    ICINGA_IDO_PASSWORD=12345678
-    ICINGA_API_USER=icingaapi
-    ICINGA_API_PASSWORD=12345678
+notifier:
+  ## Hipchat
+  ## ref https://github.com/appscode/searchlight/blob/master/docs/notifier/hipchat.md#set-environment-variables
+  hipchat:
+    authToken:
 
-## user must provide caCrt, icingaKey, icingaCrt
-## Details https://github.com/appscode/searchlight/blob/master/docs/icinga2/certificate.md
-##
+  ## Mailgun
+  ## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/mailgun.md#configure
+  mailgun:
+    domain:
+    apiKey:
+    publicAPIKey:
+    from:
 
-# caCrt:
-# icingaKey:
-# icingaCrt:
+  ## SMTP
+  ## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/smtp.md#configure
+  smtp:
+    host:
+    port:
+    insecureSkipVerify:
+    username:
+    password:
+    from:
 
-##
-## Add notifyVia example: https://github.com/appscode/searchlight/blob/master/docs/notifier/mailgun.md#configure
+  ## Twilio
+  ## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/twilio.md
+  twilio:
+    accountSid:
+    authToken:
+    from:
 
-# notifyVia:
+  ## Slack
+  ## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/slack.md
+  slack:
+    authToken:
+    channel:
 
-## Hipchat notifier
-## ref https://github.com/appscode/searchlight/blob/master/docs/notifier/hipchat.md#set-environment-variables
-##
+  ## Plivo
+  ## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/plivo.md
+  plivo:
+    authId:
+    authToken:
+    from:
 
-# hipchatAuthToken:
-# hipchatTo:
-
-## Mailgun notifier
-## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/mailgun.md#configure
-##
-
-# mailgunDomain:
-# mailgunAPIKey:
-# mailgunPublicAPIKey:
-# mailgunFrom:
-# mailgunTo:
-
-## SMTP notifier
-## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/smtp.md#configure
-##
-
-# smtpHost:
-# smtpPort:
-# smtpInsecureSkipVerify:
-# smtpUsername:
-# smtpPassword:
-# smtpFrom:
-# smtpTo:
-
-## Twilio notifier
-## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/twilio.md
-##
-
-# twilioAccountSid:
-# twilioAuthToken:
-# twilioFrom:
-# twilioTo:
-
-## Slack notifier.
-## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/slack.md
-##
-
-# slackAuthToken:
-# slackChannel:
-
-## Plivo notifier
-## ref: https://github.com/appscode/searchlight/blob/master/docs/notifier/plivo.md
-##
-
-# plivoAuthId:
-# plivoAuthToken:
-# plivoFrom:
-# plivoTo:
+## Install Default RBAC roles and bindings
+rbac:
+  install: false
+  apiVersion: v1beta1

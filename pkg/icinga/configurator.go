@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/appscode/envconfig"
 	"github.com/appscode/go/crypto/rand"
-	stringz "github.com/appscode/go/strings"
 	"github.com/appscode/log"
 	"github.com/cloudflare/cfssl/cli"
 	"github.com/cloudflare/cfssl/cli/genkey"
@@ -39,7 +39,7 @@ const (
 	ICINGA_WEB_DB               = "ICINGA_WEB_DB"
 	ICINGA_WEB_USER             = "ICINGA_WEB_USER"
 	ICINGA_WEB_PASSWORD         = "ICINGA_WEB_PASSWORD"
-	ICINGA_WEB_ADMIN_PASSWORD   = "ICINGA_WEB_ADMIN_PASSWORD"
+	ICINGA_WEB_UI_PASSWORD      = "ICINGA_WEB_UI_PASSWORD"
 )
 
 var (
@@ -62,7 +62,7 @@ var (
 		ICINGA_WEB_DB:               true,
 		ICINGA_WEB_USER:             true,
 		ICINGA_WEB_PASSWORD:         true,
-		ICINGA_WEB_ADMIN_PASSWORD:   true,
+		ICINGA_WEB_UI_PASSWORD:      true,
 	}
 )
 
@@ -77,11 +77,11 @@ type Configurator struct {
 }
 
 func (c *Configurator) ConfigFile() string {
-	return filepath.Join(c.ConfigRoot, "icinga2/config.ini")
+	return filepath.Join(c.ConfigRoot, "searchlight/config.ini")
 }
 
 func (c *Configurator) PKIDir() string {
-	return filepath.Join(c.ConfigRoot, "icinga2/pki")
+	return filepath.Join(c.ConfigRoot, "searchlight/pki")
 }
 
 func (c *Configurator) certFile(name string) string {
@@ -187,7 +187,7 @@ func (c *Configurator) generateCertificates() error {
 	return c.createClientCert(&csrReq)
 }
 
-func (c *Configurator) LoadIcingaConfig() (*Config, error) {
+func (c *Configurator) LoadConfig(userInput envconfig.LoaderFunc) (*Config, error) {
 	if _, err := os.Stat(c.ConfigFile()); os.IsNotExist(err) {
 		err = c.generateCertificates()
 		if err != nil {
@@ -199,22 +199,50 @@ func (c *Configurator) LoadIcingaConfig() (*Config, error) {
 		sec := cfg.Section("")
 		sec.NewKey(ICINGA_ADDRESS, "127.0.0.1:5665")
 		sec.NewKey(ICINGA_API_USER, "icingaapi")
-		sec.NewKey(ICINGA_API_PASSWORD, stringz.Val(os.Getenv(ICINGA_API_PASSWORD), rand.GeneratePassword()))
+		if v, ok := userInput(ICINGA_API_PASSWORD); ok {
+			sec.NewKey(ICINGA_API_PASSWORD, v)
+		} else {
+			sec.NewKey(ICINGA_API_PASSWORD, rand.GeneratePassword())
+		}
 		sec.NewKey(ICINGA_NOTIFIER_SECRET_NAME, c.NotifierSecretName)
-		sec.NewKey(ICINGA_CA_CERT, c.certFile("ca"))
-		sec.NewKey(ICINGA_SERVER_CERT, c.certFile("icinga"))
-		sec.NewKey(ICINGA_SERVER_KEY, c.certFile("icinga"))
+		if v, ok := userInput(ICINGA_CA_CERT); ok {
+			sec.NewKey(ICINGA_CA_CERT, v)
+		} else {
+			sec.NewKey(ICINGA_CA_CERT, c.certFile("ca"))
+		}
+		if v, ok := userInput(ICINGA_SERVER_CERT); ok {
+			sec.NewKey(ICINGA_SERVER_CERT, v)
+		} else {
+			sec.NewKey(ICINGA_SERVER_CERT, c.certFile("icinga"))
+		}
+		if v, ok := userInput(ICINGA_SERVER_KEY); ok {
+			sec.NewKey(ICINGA_SERVER_KEY, v)
+		} else {
+			sec.NewKey(ICINGA_SERVER_KEY, c.keyFile("icinga"))
+		}
 		sec.NewKey(ICINGA_IDO_HOST, "127.0.0.1")
 		sec.NewKey(ICINGA_IDO_PORT, "5432")
 		sec.NewKey(ICINGA_IDO_DB, "icingaidodb")
 		sec.NewKey(ICINGA_IDO_USER, "icingaido")
-		sec.NewKey(ICINGA_IDO_PASSWORD, stringz.Val(os.Getenv(ICINGA_IDO_PASSWORD), rand.GeneratePassword()))
+		if v, ok := userInput(ICINGA_IDO_PASSWORD); ok {
+			sec.NewKey(ICINGA_IDO_PASSWORD, v)
+		} else {
+			sec.NewKey(ICINGA_IDO_PASSWORD, rand.GeneratePassword())
+		}
 		sec.NewKey(ICINGA_WEB_HOST, "127.0.0.1")
 		sec.NewKey(ICINGA_WEB_PORT, "5432")
 		sec.NewKey(ICINGA_WEB_DB, "icingawebdb")
 		sec.NewKey(ICINGA_WEB_USER, "icingaweb")
-		sec.NewKey(ICINGA_WEB_PASSWORD, stringz.Val(os.Getenv(ICINGA_WEB_PASSWORD), rand.GeneratePassword()))
-		sec.NewKey(ICINGA_WEB_ADMIN_PASSWORD, stringz.Val(os.Getenv(ICINGA_WEB_ADMIN_PASSWORD), rand.GeneratePassword()))
+		if v, ok := userInput(ICINGA_WEB_PASSWORD); ok {
+			sec.NewKey(ICINGA_WEB_PASSWORD, v)
+		} else {
+			sec.NewKey(ICINGA_WEB_PASSWORD, rand.GeneratePassword())
+		}
+		if v, ok := userInput(ICINGA_WEB_UI_PASSWORD); ok {
+			sec.NewKey(ICINGA_WEB_UI_PASSWORD, v)
+		} else {
+			sec.NewKey(ICINGA_WEB_UI_PASSWORD, rand.GeneratePassword())
+		}
 
 		err = os.MkdirAll(filepath.Dir(c.ConfigFile()), 0755)
 		if err != nil {

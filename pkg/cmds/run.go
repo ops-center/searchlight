@@ -14,8 +14,10 @@ import (
 	"github.com/appscode/searchlight/pkg/analytics"
 	"github.com/appscode/searchlight/pkg/controller"
 	"github.com/appscode/searchlight/pkg/icinga"
+	"github.com/appscode/searchlight/pkg/util"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	clientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
@@ -71,7 +73,16 @@ func run(mgr *icinga.Configurator) {
 	kubeClient = clientset.NewForConfigOrDie(config)
 	extClient = tcs.NewForConfigOrDie(config)
 
-	cfg, err := mgr.LoadIcingaConfig()
+	secret, err := kubeClient.CoreV1().Secrets(util.OperatorNamespace()).Get(mgr.NotifierSecretName, metav1.GetOptions{})
+	if err != nil {
+		log.Fatalf("Failed to load secret: %s", err)
+	}
+	cfg, err := mgr.LoadConfig(func(key string) (value string, found bool) {
+		var bytes []byte
+		bytes, found = secret.Data[key]
+		value = string(bytes)
+		return
+	})
 	if err != nil {
 		log.Fatalln(err)
 	}

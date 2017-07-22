@@ -7,11 +7,6 @@ metadata:
     app: searchlight
 type: monitoring.appscode.com/icinga
 data:
-  .ENV: $ICINGA_SECRET_ENV
-  CA.CRT: $ICINGA_CA_CERT
-  ICINGA.KEY: $ICINGA_SERVER_KEY
-  ICINGA.CRT: $ICINGA_SERVER_CERT
-  NOTIFY_VIA: $NOTIFY_VIA
   HIPCHAT_AUTH_TOKEN: $HIPCHAT_AUTH_TOKEN
   HIPCHAT_TO: $HIPCHAT_TO
   MAILGUN_DOMAIN: $MAILGUN_DOMAIN
@@ -56,8 +51,7 @@ spec:
         image: appscode/searchlight:canary
         args:
         - run
-        - --icinga-secret-name=searchlight-operator
-        - --icinga-secret-namespace=kube-system
+        - --notifier-secret-name=searchlight-operator
         - --v=3
         ports:
         - containerPort: 56790
@@ -88,7 +82,7 @@ spec:
           - name: script-volume
             mountPath: /var/db-script
           - name: icingaconfig
-            mountPath: /srv/icinga2/secrets
+            mountPath: /srv/searchlight/secrets
       - image: appscode/postgres:9.5-v3-db
         name: ido
         args:

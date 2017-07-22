@@ -1,71 +1,14 @@
 FROM appscode/alpine:3.6
 
-ENV PGROOT /var/pv
-ENV PGSCRIPT /var/db-script
+ENV DATADIR /srv
 
+# Install Icinga2 ###################################
 RUN set -x \
-  && groupadd -r icinga --gid=888 \
-  && groupadd -r icingacmd --gid=777 \
-  && useradd -r -G icingacmd -g icinga --uid=888 icinga \
-  && usermod -a -G icingacmd www-data \
-  && mkdir -p /var/cache/icinga2 \
-  && chown -R icinga:icinga /var/cache/icinga2
-
-# Install compilers ###################################
-RUN set -x \
-  && apt-get update \
-  && apt-get install -y --no-install-recommends ca-certificates netcat wget curl \
-    build-essential \
-    libssl-dev \
-    libboost-all-dev \
-    bison \
-    flex \
-    libpq-dev \
-    libyajl-dev \
-    libedit-dev \
-    postgresql-client \
-    jq
-
-RUN set -x \
-  && wget http://www.cmake.org/files/v3.2/cmake-3.2.2.tar.gz \
-  && tar xf cmake-3.2.2.tar.gz \
-  && cd cmake-3.2.2 \
-  && ./configure \
-  && make \
-  && make install \
-  && cd ..
-
-# Icing2 ##############################################
-RUN set -x \
-  && wget https://github.com/Icinga/icinga2/archive/v2.4.8.tar.gz \
-  && tar xf v2.4.8.tar.gz \
-  && cd icinga2-2.4.8 \
-  && mkdir build && cd build \
-  && cmake .. -DICINGA2_WITH_MYSQL=OFF -DCMAKE_INSTALL_PREFIX= \
-  && make \
-  && make install \
-  && cd ../..
-
-# Nagios-plugins ####################################
-# https://wiki.icinga.org/display/howtos/Nagios+Plugins
-RUN set -x \
-  && wget https://www.monitoring-plugins.org/download/monitoring-plugins-2.1.2.tar.gz \
-  && tar xf monitoring-plugins-2.1.2.tar.gz \
-  && cd monitoring-plugins-2.1.2 \
-  && ./configure --prefix=/usr/lib/nagios \
-    --with-nagios-user=icinga \
-    --with-nagios-group=icinga \
-  && make \
-  && make install \
-  && mv /usr/lib/nagios/libexec /usr/lib/nagios/plugins \
-  && cd ..
-
-RUN set -x \
-  && rm -rf /monitoring-plugins-2.1.2 /monitoring-plugins-2.1.2.tar.gz \
-  && rm -rf /icinga2-2.4.8 /v2.4.8.tar.gz \
-  && rm -rf /cmake-3.2.2 /cmake-3.2.2.tar.gz \
-  && apt-get purge -y --auto-remove wget build-essential \
-  && rm -rf /var/lib/apt/lists/* /usr/share/doc /usr/share/man /tmp/*
+  && apk add --update --no-cache ca-certificates openssl curl nginx gettext bash \
+    icinga2 nagios-plugins \
+    postgresql \
+    jq \
+    php7-fpm
 
 # copy config templates
 RUN set -x && mkdir -p /scripts/icinga2
@@ -94,12 +37,11 @@ RUN set -x \
   && cat /scripts/users.conf >> /etc/icinga2/conf.d/users.conf \
   && rm /scripts/users.conf
 
-RUN set -x && rm /etc/icinga2/conf.d/hosts.conf
+RUN set -x && rm -rf /etc/icinga2/conf.d/hosts.conf
 
 # Fix icinga installation location and permission
 # This is needed since we are building from source
 RUN set -x \
-  && mv /share/icinga2-ido-pgsql /usr/share \
   && mv /var/lib/icinga2 /scripts/lib
 
 # Icingaweb2 ##############################################
@@ -113,7 +55,7 @@ COPY config/icingaweb2/resources.ini      /scripts/icingaweb2/resources.ini
 
 # Add icingaweb2
 COPY icingaweb2 /usr/share/icingaweb2
-RUN set -x && chown -R www-data:www-data /usr/share/icingaweb2
+RUN set -x && chown -R nginx:nginx /usr/share/icingaweb2
 COPY config/icingaweb2 /etc/icingaweb2/
 RUN set -x \
   && mkdir -p /etc/icingaweb2/enabledModules \
@@ -133,4 +75,4 @@ RUN ln -s /etc/sv /etc/service
 
 COPY runit.sh /runit.sh
 ENTRYPOINT ["/runit.sh"]
-EXPOSE  80 5665
+EXPOSE  60006 5665
