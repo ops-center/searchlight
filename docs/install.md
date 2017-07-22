@@ -24,7 +24,7 @@ versions:
   - name: v1alpha1
 ```
 
-```sh
+```console
 # Create Third Party Resource
 kubectl apply -f https://raw.githubusercontent.com/appscode/searchlight/master/api/extensions/alert.yaml
 ```
@@ -36,7 +36,7 @@ Icinga2 is used as monitoring system which uses various plugins to check resourc
 See Icinga2 [Deployment Guide](icinga2/deployment.md).
 
 Run following command to deploy Icinga2
-```sh
+```console
 curl https://raw.githubusercontent.com/appscode/searchlight/3.0.0/hack/deploy/icinga2/run.sh | bash
 ```
 
@@ -46,7 +46,7 @@ curl https://raw.githubusercontent.com/appscode/searchlight/3.0.0/hack/deploy/ic
 
 Searchlight Controller is used to communicate with Icinga2 API. To set an alert, create [Kubernetes Alert Objects](alert.md) with relevant information. Controller will consume that alert object.
  
-```sh
+```console
 # Create Deployment
 kubectl apply -f https://raw.githubusercontent.com/appscode/searchlight/3.0.0/hack/deploy/searchlight/deployment.yaml
 ```
