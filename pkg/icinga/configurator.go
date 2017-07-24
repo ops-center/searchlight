@@ -228,7 +228,7 @@ func (c *Configurator) LoadConfig(userInput envconfig.LoaderFunc) (*Config, erro
 				return nil, err
 			}
 		} else {
-			return nil, errors.New("Only some certs where provided.")
+			return nil, errors.New("Only some certs were provided.")
 		}
 		sec.NewKey(ICINGA_CA_CERT, c.certFile("ca"))
 		sec.NewKey(ICINGA_SERVER_CERT, c.certFile("icinga"))
