@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"reflect"
 
+	"github.com/appscode/envconfig"
 	"github.com/appscode/go/flags"
 	"github.com/appscode/go/net/httpclient"
 	"github.com/appscode/searchlight/pkg/icinga"
@@ -19,7 +20,6 @@ import (
 
 type Request struct {
 	URL             string
-	Query           string
 	Secret          string
 	Namespace       string
 	InClusterConfig bool
@@ -28,11 +28,13 @@ type Request struct {
 }
 
 type AuthInfo struct {
-	CertificateAuthorityData []byte `json:"certificate-authority-data,omitempty"`
-	ClientCertificateData    []byte `json:"client-certificate-data,omitempty"`
-	Token                    string `json:"token,omitempty"`
-	Username                 string `json:"username,omitempty"`
-	Password                 string `json:"password,omitempty"`
+	Username           string `envconfig:"USERNAME"`
+	Password           string `envconfig:"PASSWORD"`
+	Token              string `envconfig:"TOKEN"`
+	CACertData         string `envconfig:"CA_CERT_DATA"`
+	ClientCertData     string `envconfig:"CLIENT_CERT_DATA"`
+	ClientKeyData      string `envconfig:"CLIENT_KEY_DATA"`
+	InsecureSkipVerify bool   `envconfig:"INSECURE_SKIP_VERIFY"`
 }
 
 type JQ struct {
@@ -45,45 +47,54 @@ const (
 )
 
 func getData(req *Request) (string, error) {
-	httpClient := httpclient.Default().WithBaseURL(req.URL)
-	if req.Secret != "" {
+	var hc *httpclient.Client
+
+	if req.InClusterConfig {
 		kubeClient, err := util.NewClient()
 		if err != nil {
 			return "", err
 		}
+		cc := kubeClient.Client.CoreV1().RESTClient().(*rest.RESTClient)
+		hc = httpclient.New(cc.Client, nil, nil)
+	} else {
+		hc = httpclient.Default().WithBaseURL(req.URL)
 
-		name := req.Secret
-		namespace := req.Namespace
-
-		secret, err := kubeClient.Client.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
-		if err != nil {
-			return "", err
-		}
-
-		secretData := new(AuthInfo)
-		if data, found := secret.Data[auth]; found {
-			if err := json.Unmarshal(data, secretData); err != nil {
+		if req.Secret != "" {
+			kubeClient, err := util.NewClient()
+			if err != nil {
 				return "", err
 			}
+			secret, err := kubeClient.Client.CoreV1().Secrets(req.Namespace).Get(req.Secret, metav1.GetOptions{})
+			if err != nil {
+				return "", err
+			}
+			var au AuthInfo
+			err = envconfig.Load("", &au, func(key string) (string, bool) {
+				v, ok := secret.Data[key]
+				if !ok {
+					return "", false
+				}
+				return string(v), true
+			})
+			if err != nil {
+				return "", err
+			}
+			hc = hc.WithBasicAuth(au.Username, au.Password).WithBearerToken(au.Token)
+			if au.CACertData != "" {
+				if au.ClientCertData != "" && au.ClientKeyData != "" {
+					hc = hc.WithTLSConfig([]byte(au.CACertData), []byte(au.ClientKeyData), []byte(au.ClientKeyData))
+				} else {
+					hc = hc.WithTLSConfig([]byte(au.CACertData))
+				}
+			}
+			if au.InsecureSkipVerify {
+				hc = hc.WithInsecureSkipVerify()
+			}
 		}
-		httpClient.WithBearerToken(secretData.Token)
-		httpClient.WithBasicAuth(secretData.Username, secretData.Password)
-		if secretData.CertificateAuthorityData != nil {
-			httpClient.WithTLSConfig(secretData.ClientCertificateData, secretData.CertificateAuthorityData)
-		}
-	}
-	if req.InClusterConfig {
-		config, err := rest.InClusterConfig()
-		if err != nil {
-			return "", err
-		}
-
-		httpClient.WithBearerToken(config.BearerToken)
-		httpClient.WithInsecureSkipVerify()
 	}
 
 	var respJson interface{}
-	resp, err := httpClient.Call("GET", "", nil, &respJson, true)
+	resp, err := hc.Call("GET", "", nil, &respJson, true)
 	if err != nil {
 		return "", err
 	}
@@ -134,25 +145,25 @@ func CheckJsonPath(req *Request) (icinga.State, interface{}) {
 
 	}
 
-	jqData := &JQ{
-		J: jsonData,
-		Q: req.Query,
-	}
+	//jqData := &JQ{
+	//	J: jsonData,
+	//	Q: req.Query,
+	//}
+	//
+	//evalData, err := jqData.eval()
+	//if err != nil {
+	//	return icinga.UNKNOWN, "Invalid query. No data found"
+	//}
+	//
+	//evalDataByte, err := json.Marshal(evalData)
+	//if err != nil {
+	//	return icinga.UNKNOWN, err
+	//
+	//}
 
-	evalData, err := jqData.eval()
-	if err != nil {
-		return icinga.UNKNOWN, "Invalid query. No data found"
-	}
-
-	evalDataByte, err := json.Marshal(evalData)
-	if err != nil {
-		return icinga.UNKNOWN, err
-
-	}
-
-	evalDataString := string(evalDataByte)
+	//evalDataString := string(evalDataByte)
 	if req.Critical != "" {
-		isCritical, err := checkResult(evalDataString, req.Critical)
+		isCritical, err := checkResult(jsonData, req.Critical)
 		if err != nil {
 			return icinga.UNKNOWN, err
 		}
@@ -161,7 +172,7 @@ func CheckJsonPath(req *Request) (icinga.State, interface{}) {
 		}
 	}
 	if req.Warning != "" {
-		isWarning, err := checkResult(evalDataString, req.Warning)
+		isWarning, err := checkResult(jsonData, req.Warning)
 		if err != nil {
 			return icinga.UNKNOWN, err
 		}
@@ -199,7 +210,6 @@ func NewCmd() *cobra.Command {
 
 	c.Flags().StringVarP(&icingaHost, "host", "H", "", "Icinga host name")
 	c.Flags().StringVarP(&req.URL, "url", "u", "", "URL to get data")
-	c.Flags().StringVarP(&req.Query, "query", "q", "", `JQ query`)
 	c.Flags().StringVarP(&req.Secret, "secret", "s", "", `Kubernetes secret name`)
 	c.Flags().BoolVar(&req.InClusterConfig, "in_cluster_config", false, `Use Kubernetes InCluserConfig`)
 	c.Flags().StringVarP(&req.Warning, "warning", "w", "", `Warning JQ query which returns [true/false]`)
