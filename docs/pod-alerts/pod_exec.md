@@ -139,3 +139,62 @@ spec:
   vars:
     argv: ls /var/influxdb/token.ini
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+```console
+$ kubectl apply -f ./docs/examples/pod-alerts/pod_exec/demo-0.yaml 
+replicationcontroller "nginx" created
+podalert "pod-exec-demo-0" created
+
+$ kubectl get pods -n demo
+NAME          READY     STATUS    RESTARTS   AGE
+nginx-c0v51   1/1       Running   0          53s
+nginx-vqhzv   1/1       Running   0          53s
+
+$ kubectl describe podalert -n demo pod-exec-demo-0
+Name:		pod-exec-demo-0
+Namespace:	demo
+Labels:		<none>
+Events:
+  FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
+  ---------	--------	-----	----			-------------	--------	------		-------
+  3m		3m		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for PodAlert: "pod-exec-demo-0". Reason: secrets "any-notifier" not found
+  3m		3m		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-exec-demo-0"
+  3m		3m		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-exec-demo-0"
+
+```
+
+```console
+$ kubectl apply -f ./docs/examples/pod-alerts/pod_exec/demo-1.yaml 
+pod "busybox" created
+podalert "pod-exec-demo-1" created
+
+$ kubectl get pods -n demo
+NAME          READY     STATUS    RESTARTS   AGE
+busybox       1/1       Running   0          5s
+
+$ kubectl get podalert -n demo
+NAME              KIND
+pod-exec-demo-1   PodAlert.v1alpha1.monitoring.appscode.com
+
+$ kubectl describe podalert -n demo pod-exec-demo-1
+Name:		pod-exec-demo-1
+Namespace:	demo
+Labels:		<none>
+Events:
+  FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
+  ---------	--------	-----	----			-------------	--------	------		-------
+  31s		31s		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for PodAlert: "pod-exec-demo-1". Reason: secrets "any-notifier" not found
+  31s		31s		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-exec-demo-1"
+  27s		27s		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-exec-demo-1"
+```

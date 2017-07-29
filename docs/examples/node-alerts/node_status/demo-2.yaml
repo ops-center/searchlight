@@ -1,11 +1,11 @@
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: PodAlert
+kind: NodeAlert
 metadata:
-  name: pod-status-demo-1
+  name: node-status-demo-2
   namespace: demo
 spec:
-  check: pod_status
-  podName: busybox
+  check: node_status
+  nodeName: minikube
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: any-notifier
