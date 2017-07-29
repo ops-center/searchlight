@@ -52,7 +52,7 @@ spec:
     critical: 72h
   checkInterval: 30s
   alertInterval: 2m
-  notifierSecretName: any-notifier
+  notifierSecretName: notifier-config
   receivers:
   - notifier: mailgun
     state: CRITICAL

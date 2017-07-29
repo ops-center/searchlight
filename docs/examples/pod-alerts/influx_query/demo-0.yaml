@@ -8,7 +8,7 @@ spec:
   podName: nginx-2371676037-kv28m
   checkInterval: 30s
   alertInterval: 2m
-  notifierSecretName: any-notifier
+  notifierSecretName: notifier-config
   receivers:
   - notifier: mailgun
     state: CRITICAL

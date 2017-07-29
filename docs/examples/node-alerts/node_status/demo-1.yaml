@@ -9,7 +9,7 @@ spec:
     beta.kubernetes.io/os: linux
   checkInterval: 30s
   alertInterval: 2m
-  notifierSecretName: any-notifier
+  notifierSecretName: notifier-config
   receivers:
   - notifier: mailgun
     state: CRITICAL
