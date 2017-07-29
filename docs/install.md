@@ -40,7 +40,7 @@ janitors:
     endpoint: https://monitoring-influxdb.kube-system:8086
   kind: InfluxDB
   ttl: 2160h0m0s
-notifierSecretName: searchlight-notifier
+notifierSecretName: any-notifier
 recycleBin:
   handleUpdates: false
   path: /tmp/searchlight/trash

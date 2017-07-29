@@ -9,7 +9,7 @@ spec:
     argv: ls /var/influxdb/token.ini
   checkInterval: 30s
   alertInterval: 2m
-  notifierSecretName: searchlight-notifier
+  notifierSecretName: any-notifier
   receivers:
   - notifier: mailgun
     state: CRITICAL

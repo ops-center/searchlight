@@ -4,6 +4,12 @@ metadata:
   name: ca-cert-demo-0
 spec:
   check: ca_cert
-  checkInterval: 10s
   vars:
     count: 1
+  checkInterval: 30s
+  alertInterval: 2m
+  notifierSecretName: any-notifier
+  receivers:
+  - notifier: mailgun
+    state: CRITICAL
+    to: ["ops@example.com"]

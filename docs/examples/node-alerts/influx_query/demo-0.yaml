@@ -6,7 +6,7 @@ spec:
   check: influx_query
   checkInterval: 30s
   alertInterval: 2m
-  notifierSecretName: searchlight-notifier
+  notifierSecretName: any-notifier
   receivers:
   - notifier: mailgun
     state: CRITICAL
