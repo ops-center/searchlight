@@ -8,8 +8,8 @@ import (
 	"time"
 
 	tcs "github.com/appscode/searchlight/client/clientset"
-	"github.com/appscode/searchlight/pkg/controller"
 	"github.com/appscode/searchlight/pkg/icinga"
+	"github.com/appscode/searchlight/pkg/operator"
 	"github.com/appscode/searchlight/test/e2e"
 	"github.com/appscode/searchlight/test/e2e/framework"
 	. "github.com/appscode/searchlight/test/e2e/matcher"
@@ -34,7 +34,7 @@ const (
 )
 
 var (
-	ctrl *controller.Controller
+	op   *operator.Operator
 	root *framework.Framework
 )
 
@@ -105,10 +105,10 @@ var _ = BeforeSuite(func() {
 	fmt.Println()
 
 	// Controller
-	ctrl = controller.New(kubeClient, extClient, icingaClient, controller.Options{})
-	err = ctrl.Setup()
+	op = operator.New(kubeClient, extClient, icingaClient, operator.Options{})
+	err = op.Setup()
 	Expect(err).NotTo(HaveOccurred())
-	ctrl.Run()
+	op.Run()
 	root.EventuallyClusterAlert().Should(Succeed())
 	root.EventuallyNodeAlert().Should(Succeed())
 	root.EventuallyPodAlert().Should(Succeed())
