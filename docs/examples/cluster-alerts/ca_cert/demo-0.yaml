@@ -1,0 +1,9 @@
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: ClusterAlert
+metadata:
+  name: ca-cert-demo-0
+spec:
+  check: ca_cert
+  checkInterval: 10s
+  vars:
+    count: 1

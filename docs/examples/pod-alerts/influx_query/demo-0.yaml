@@ -1,0 +1,14 @@
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: PodAlert
+metadata:
+  name: influx-query-demo-0
+spec:
+  check: influx_query
+  podName: nginx-2371676037-kv28m
+  checkInterval: 30s
+  alertInterval: 2m
+  notifierSecretName: searchlight-notifier
+  receivers:
+  - notifier: mailgun
+    state: CRITICAL
+    to: ["ops@example.com"]

@@ -1,0 +1,14 @@
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: PodAlert
+metadata:
+  name: pod-status-demo-1
+spec:
+  check: pod_status
+  podName: busybox
+  checkInterval: 30s
+  alertInterval: 2m
+  notifierSecretName: searchlight-notifier
+  receivers:
+  - notifier: mailgun
+    state: CRITICAL
+    to: ["ops@example.com"]
