@@ -2,15 +2,20 @@
 
 # Check event
 
-This is used to check Kubernetes events. This plugin checks for all Warning events happened in last `c` seconds. Icinga check_interval is provided as `c`.
-
-ClusterAlert `env` prints the list of environment variables in searchlight-operator pods. This check command is used to test Searchlight.
+Check command `event` is used to check Kubernetes events. This plugin checks for all Warning events happened in the last `spec.checkInterval` duration.
 
 
 ## Spec
-`env` check command has no variables. Execution of this command can result in following states:
+`event` check command has the following variables:
+
+- `clockSkew` - Clock skew in Duration. [Default: 30s]. This time is added with `spec.checkInterval` while checking events
+- `involvedObjectKind` - Kind of involved object used to select events
+- `involvedObjectName` - Name of involved object used to select events
+- `involvedObjectNamespace` - Namespace of involved object used to select events
+- `involvedObjectUID` - UID of involved object used to select events
+
+Execution of this command can result in following states:
 - OK
-- WARNING
 - CRITICAL
 - UNKNOWN
 
@@ -34,44 +39,117 @@ kube-system   Active    6h
 demo          Active    4m
 ```
 
-### Create Alert
-In this tutorial, we are going to create an alert to check `env`.
+
+### Check existence of any warning event
+In this tutorial, a ClusterAlert will be used check existence of warning events occurred in the last check interval.
 ```yaml
-$ cat ./docs/examples/cluster-alerts/env/demo-0.yaml
+$ cat ./docs/examples/cluster-alerts/event/demo-0.yaml
 
 apiVersion: monitoring.appscode.com/v1alpha1
 kind: ClusterAlert
 metadata:
-  name: env-demo-0
+  name: event-demo-0
   namespace: demo
 spec:
-  check: env
+  check: event
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: notifier-config
   receivers:
   - notifier: mailgun
-    state: CRITICAL
+    state: WARNING
     to: ["ops@example.com"]
 ```
 ```console
-$ kubectl apply -f ./docs/examples/cluster-alerts/env/demo-0.yaml 
-clusteralert "env-demo-0" created
+$ kubectl apply -f ./docs/examples/cluster-alerts/event/demo-0.yaml
+replicationcontroller "nginx" created
+clusteralert "event-demo-0" created
 
-$ kubectl describe clusteralert env-demo-0 -n demo
-Name:		env-demo-0
+$ kubectl describe clusteralert -n demo event-demo-0
+Name:		event-demo-0
 Namespace:	demo
 Labels:		<none>
 Events:
   FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
   ---------	--------	-----	----			-------------	--------	------		-------
-  6m		6m		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for ClusterAlert: "env-demo-0". Reason: secrets "notifier-config" not found
-  6m		6m		1	Searchlight operator			Normal		SuccessfulSync	Applied ClusterAlert: "env-demo-0"
+  7s		7s		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for ClusterAlert: "event-demo-0". Reason: secrets "notifier-config" not found
+  7s		7s		1	Searchlight operator			Normal		SuccessfulSync	Applied ClusterAlert: "event-demo-0"
+
+$ kubectl get events -n demo
+LASTSEEN   FIRSTSEEN   COUNT     NAME           KIND           SUBOBJECT                TYPE      REASON           SOURCE                 MESSAGE
+15s        15s         1         nginx-9n8z7    Pod                                     Normal    Scheduled        default-scheduler      Successfully assigned nginx-9n8z7 to minikube
+15s        15s         1         nginx-9n8z7    Pod            spec.containers{nginx}   Normal    Pulling          kubelet, minikube      pulling image "nginx:bad"
+12s        12s         1         nginx-9n8z7    Pod            spec.containers{nginx}   Warning   Failed           kubelet, minikube      Failed to pull image "nginx:bad": rpc error: code = 2 desc = Tag bad not found in repository docker.io/library/nginx
+12s        12s         1         nginx-9n8z7    Pod                                     Warning   FailedSync       kubelet, minikube      Error syncing pod, skipping: failed to "StartContainer" for "nginx" with ErrImagePull: "rpc error: code = 2 desc = Tag bad not found in repository docker.io/library/nginx"
+12s        12s         1         nginx-9n8z7    Pod            spec.containers{nginx}   Normal    BackOff          kubelet, minikube      Back-off pulling image "nginx:bad"
+12s        12s         1         nginx-9n8z7    Pod                                     Warning   FailedSync       kubelet, minikube      Error syncing pod, skipping: failed to "StartContainer" for "nginx" with ImagePullBackOff: "Back-off pulling image \"nginx:bad\""
 ```
 
-Voila! `env` command has been synced to Icinga2. Searchlight also logged a warning event, we have not created the notifier secret `notifier-config`. Please visit [here](/docs/tutorials/notifiers.md) to learn how to configure notifier secret. Now, open IcingaWeb2 in your browser. You should see a Icinga host `demo@cluster` and Icinga service `env-demo-0`.
+Voila! `event` command has been synced to Icinga2. Please visit [here](/docs/tutorials/notifiers.md) to learn how to configure notifier secret. Now, open IcingaWeb2 in your browser. You should see a Icinga host `demo@cluster` and Icinga service `event-demo-0`.
 
-![Demo of check_env](/docs/images/cluster-alerts/env/demo-0.gif)
+![check-all-pods](/docs/images/cluster-alerts/event/demo-0.png)
+
+
+### Check existence of events for a specific object
+In this tutorial, a ClusterAlert will be used check existence of events for a specific object by setting one or more `spec.vars.involvedObject*` fields.
+```yaml
+$ cat ./docs/examples/cluster-alerts/event/demo-1.yaml
+
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: ClusterAlert
+metadata:
+  name: event-demo-1
+  namespace: demo
+spec:
+  check: event
+  vars:
+    involvedObjectName: busybox
+    involvedObjectNamespace: demo
+  checkInterval: 30s
+  alertInterval: 2m
+  notifierSecretName: notifier-config
+  receivers:
+  - notifier: mailgun
+    state: WARNING
+    to: ["ops@example.com"]
+```
+```console
+$ kubectl apply -f ./docs/examples/cluster-alerts/event/demo-1.yaml
+pod "busybox" created
+clusteralert "event-demo-1" created
+
+$ kubectl describe clusteralert -n demo event-demo-1
+Name:		event-demo-1
+Namespace:	demo
+Labels:		<none>
+Events:
+  FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
+  ---------	--------	-----	----			-------------	--------	------		-------
+  13s		13s		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for ClusterAlert: "event-demo-1". Reason: secrets "notifier-config" not found
+  13s		13s		1	Searchlight operator			Normal		SuccessfulSync	Applied ClusterAlert: "event-demo-1"
+
+$ kubectl get events -n demo
+LASTSEEN   FIRSTSEEN   COUNT     NAME      KIND      SUBOBJECT                  TYPE      REASON       SOURCE              MESSAGE
+19s        19s         1         busybox   Pod                                  Normal    Scheduled    default-scheduler   Successfully assigned busybox to minikube
+3s         18s         5         busybox   Pod       spec.containers{busybox}   Normal    Pulled       kubelet, minikube   Container image "busybox" already present on machine
+18s        18s         1         busybox   Pod       spec.containers{busybox}   Normal    Created      kubelet, minikube   Created container with id fa40f0698ed44706774a504be7b0eb6bd776b67082e76c4376a432b04c6e4f26
+18s        18s         1         busybox   Pod       spec.containers{busybox}   Warning   Failed       kubelet, minikube   Failed to start container with id fa40f0698ed44706774a504be7b0eb6bd776b67082e76c4376a432b04c6e4f26 with error: rpc error: code = 2 desc = failed to start container "fa40f0698ed44706774a504be7b0eb6bd776b67082e76c4376a432b04c6e4f26": Error response from daemon: Container command 'bad' not found or does not exist.
+18s        18s         1         busybox   Pod                                  Warning   FailedSync   kubelet, minikube   Error syncing pod, skipping: failed to "StartContainer" for "busybox" with rpc error: code = 2 desc = failed to start container "fa40f0698ed44706774a504be7b0eb6bd776b67082e76c4376a432b04c6e4f26": Error response from daemon: Container command 'bad' not found or does not exist.: "Start Container Failed"
+17s        17s         1         busybox   Pod       spec.containers{busybox}   Normal    Created      kubelet, minikube   Created container with id 6774cff0d7e0b9487ad87fd2dd712028102d0f2854be47561898cbe72cf10e4d
+17s        17s         1         busybox   Pod       spec.containers{busybox}   Warning   Failed       kubelet, minikube   Failed to start container with id 6774cff0d7e0b9487ad87fd2dd712028102d0f2854be47561898cbe72cf10e4d with error: rpc error: code = 2 desc = failed to start container "6774cff0d7e0b9487ad87fd2dd712028102d0f2854be47561898cbe72cf10e4d": Error response from daemon: Container command 'bad' not found or does not exist.
+17s        17s         1         busybox   Pod                                  Warning   FailedSync   kubelet, minikube   Error syncing pod, skipping: failed to "StartContainer" for "busybox" with rpc error: code = 2 desc = failed to start container "6774cff0d7e0b9487ad87fd2dd712028102d0f2854be47561898cbe72cf10e4d": Error response from daemon: Container command 'bad' not found or does not exist.: "Start Container Failed"
+6s         6s          1         busybox   Pod       spec.containers{busybox}   Normal    Created      kubelet, minikube   Created container with id 49455114b6bc1a626eb217fcf23cd1172dfd03d75d7f4650fbe52dd5940a1b24
+5s         5s          1         busybox   Pod       spec.containers{busybox}   Warning   Failed       kubelet, minikube   Failed to start container with id 49455114b6bc1a626eb217fcf23cd1172dfd03d75d7f4650fbe52dd5940a1b24 with error: rpc error: code = 2 desc = failed to start container "49455114b6bc1a626eb217fcf23cd1172dfd03d75d7f4650fbe52dd5940a1b24": Error response from daemon: Container command 'bad' not found or does not exist.
+5s         5s          1         busybox   Pod                                  Warning   FailedSync   kubelet, minikube   Error syncing pod, skipping: failed to "StartContainer" for "busybox" with rpc error: code = 2 desc = failed to start container "49455114b6bc1a626eb217fcf23cd1172dfd03d75d7f4650fbe52dd5940a1b24": Error response from daemon: Container command 'bad' not found or does not exist.: "Start Container Failed"
+4s         4s          1         busybox   Pod       spec.containers{busybox}   Normal    Created      kubelet, minikube   Created container with id a6e4a7734965f039faf72d60c131fe312a974b08100e787295ea1a5bb6cc3806
+4s         4s          1         busybox   Pod       spec.containers{busybox}   Warning   Failed       kubelet, minikube   Failed to start container with id a6e4a7734965f039faf72d60c131fe312a974b08100e787295ea1a5bb6cc3806 with error: rpc error: code = 2 desc = failed to start container "a6e4a7734965f039faf72d60c131fe312a974b08100e787295ea1a5bb6cc3806": Error response from daemon: Container command 'bad' not found or does not exist.
+4s         4s          1         busybox   Pod                                  Warning   FailedSync   kubelet, minikube   Error syncing pod, skipping: failed to "StartContainer" for "busybox" with rpc error: code = 2 desc = failed to start container "a6e4a7734965f039faf72d60c131fe312a974b08100e787295ea1a5bb6cc3806": Error response from daemon: Container command 'bad' not found or does not exist.: "Start Container Failed"
+3s         3s          1         busybox   Pod       spec.containers{busybox}   Normal    Created      kubelet, minikube   Created container with id 8ef27cb9fd83b61a6a99b838bc55fb61b1f76c33f0a55b25b104ccb08e743e28
+3s         3s          1         busybox   Pod       spec.containers{busybox}   Warning   Failed       kubelet, minikube   Failed to start container with id 8ef27cb9fd83b61a6a99b838bc55fb61b1f76c33f0a55b25b104ccb08e743e28 with error: rpc error: code = 2 desc = failed to start container "8ef27cb9fd83b61a6a99b838bc55fb61b1f76c33f0a55b25b104ccb08e743e28": Error response from daemon: Container command 'bad' not found or does not exist.
+3s         3s          1         busybox   Pod                                  Warning   FailedSync   kubelet, minikube   Error syncing pod, skipping: failed to "StartContainer" for "busybox" with rpc error: code = 2 desc = failed to start container "8ef27cb9fd83b61a6a99b838bc55fb61b1f76c33f0a55b25b104ccb08e743e28": Error response from daemon: Container command 'bad' not found or does not exist.: "Start Container Failed"
+```
+![check-by-pod-label](/docs/images/cluster-alerts/event/demo-1.png)
+
 
 ### Cleaning up
 To cleanup the Kubernetes resources created by this tutorial, run:
@@ -83,71 +161,3 @@ If you would like to uninstall Searchlight operator, please follow the steps [he
 
 
 ## Next Steps
-
-
-
-#### Supported Kubernetes Objects
-
-| Kubernetes Object | Icinga2 Host Type |
-| :---:             | :---:             |
-| cluster           | localhost         |
-
-#### Vars
-
-* `clock_skew` - Clock skew in Duration. [Default: 30s]. This time is added with check_interval while checking events
-
-#### Supported Icinga2 State
-
-* OK
-* WARNING
-* UNKNOWN
-
-#### Example
-###### Command
-```console
-hyperalert check_event --check_interval=1m
-# --check_interval are provided by Icinga2
-```
-###### Output
-```json
-WARNING: {
-   "objects":[  
-      {  
-         "name":"tc-1916705895-ukpfx",
-         "namespace":"default",
-         "kind":"Pod",
-         "count":5984,
-         "reason":"FailedSync",
-         "message":"Error syncing pod, skipping: failed to \"StartContainer\" for \"tc\" with ImagePullBackOff: \"Back-off pulling image \\\"appscode/tillerc:765a57f\\\"\"\n"
-      },
-      {  
-         "name":"kube-apiserver-ip-172-20-0-9.ec2.internal",
-         "namespace":"kube-system",
-         "kind":"Pod",
-         "count":300167,
-         "reason":"FailedValidation",
-         "message":"Error validating pod kube-apiserver-ip-172-20-0-9.ec2.internal.kube-system from file, ignoring: metadata.name: Duplicate value: \"kube-apiserver-ip-172-20-0-9.ec2.internal\""
-      }
-   ],
-   "message":"Found 2 Warning event(s)"
-}
-```
-
-##### Configure Alert Object
-```yaml
-apiVersion: monitoring.appscode.com/v1alpha1
-kind: Alert
-metadata:
-  name: check-kube-event
-  namespace: demo
-  labels:
-    alert.appscode.com/objectType: cluster
-spec:
-  check: event
-  alertInterval: 2m
-  checkInterval: 1m
-  receivers:
-  - notifier: mailgun
-    state: CRITICAL
-    to: ["ops@example.com"]
-```
