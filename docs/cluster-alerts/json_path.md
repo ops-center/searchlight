@@ -13,6 +13,7 @@ Check command `json_path` is used to check JSON HTTP response using [jq](https:/
 - `critical` - Critical [jq query](https://stedolan.github.io/jq/manual/#ConditionalsandComparisons) which returns [true/false]
 
 The following keys are supported for Secret passed via `secretName` flag.
+
 | Key                    | Description                                                 |
 -------------------------|-------------------------------------------------------------|
 | `USERNAME`             | `Optional` Username used with Basic auth for HTTP URL.      |
