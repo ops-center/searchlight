@@ -1,12 +1,17 @@
+> New to Searchlight? Please start [here](/docs/tutorials/README.md).
+
 # Check node_volume
 
-This is used to check Node Disk stat.
-
-ClusterAlert `env` prints the list of environment variables in searchlight-operator pods. This check command is used to test Searchlight.
-
+Check command `node_volume` is used to check percentage of available space in Kubernetes Nodes.
 
 ## Spec
-`env` check command has no variables. Execution of this command can result in following states:
+`node_volume` check command has the following variables:
+- `mountpoint` - Mountpoint of volume whose usage stats will be checked
+- `secretName` - Name of Kubernetes Secret used to pass [hostfacts auth info](/docs/hostfacts.md#create-hostfacts-secret)
+- `warning` - Warning level value (usage percentage defaults to 80.0)
+- `critical` - Critical level value (usage percentage defaults to 95.0)
+
+Execution of this command can result in following states:
 - OK
 - WARNING
 - CRITICAL
@@ -32,20 +37,24 @@ kube-system   Active    6h
 demo          Active    4m
 ```
 
-### Create Alert
-In this tutorial, we are going to create an alert to check `env`.
+### Check status of all nodes
+In this tutorial, we are going to create a NodeAlert to check status of all nodes.
 ```yaml
-$ cat ./docs/examples/cluster-alerts/env/demo-0.yaml
+$ cat ./docs/examples/node-alerts/node_volume/demo-0.yaml
 
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: ClusterAlert
+kind: NodeAlert
 metadata:
-  name: env-demo-0
+  name: node-volume-demo-0
   namespace: demo
 spec:
-  check: env
-  checkInterval: 30s
-  alertInterval: 2m
+  check: node_volume
+  vars:
+    mountpoint: /mnt/sda1
+    warning: 70
+    critical: 95
+  checkInterval: 5m
+  alertInterval: 3m
   notifierSecretName: notifier-config
   receivers:
   - notifier: mailgun
@@ -53,23 +62,113 @@ spec:
     to: ["ops@example.com"]
 ```
 ```console
-$ kubectl apply -f ./docs/examples/cluster-alerts/env/demo-0.yaml 
-clusteralert "env-demo-0" created
+$ kubectl apply -f ./docs/examples/node-alerts/node_volume/demo-0.yaml
+nodealert "node-volume-demo-0" created
 
-$ kubectl describe clusteralert env-demo-0 -n demo
-Name:		env-demo-0
+$ kubectl describe nodealert -n demo node-volume-demo-0
+Name:		node-volume-demo-0
 Namespace:	demo
 Labels:		<none>
 Events:
   FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
   ---------	--------	-----	----			-------------	--------	------		-------
-  6m		6m		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for ClusterAlert: "env-demo-0". Reason: secrets "notifier-config" not found
-  6m		6m		1	Searchlight operator			Normal		SuccessfulSync	Applied ClusterAlert: "env-demo-0"
+  6s		6s		1	Searchlight operator			Normal		SuccessfulSync	Applied NodeAlert: "node-volume-demo-0"
 ```
 
-Voila! `env` command has been synced to Icinga2. Searchlight also logged a warning event, we have not created the notifier secret `notifier-config`. Please visit [here](/docs/tutorials/notifiers.md) to learn how to configure notifier secret. Now, open IcingaWeb2 in your browser. You should see a Icinga host `demo@cluster` and Icinga service `env-demo-0`.
+Voila! `node_volume` command has been synced to Icinga2. Please visit [here](/docs/tutorials/notifiers.md) to learn how to configure notifier secret. Now, open IcingaWeb2 in your browser. You should see a Icinga host `demo@node@minikube` and Icinga service `node-volume-demo-0`.
 
-![Demo of check_env](/docs/images/cluster-alerts/env/demo-0.gif)
+![check-all-nodes](/docs/images/node-alerts/node_volume/demo-0.png)
+
+
+### Check status of nodes with matching labels
+In this tutorial, a NodeAlert will be used check status of nodes with matching labels by setting `spec.selector` field.
+
+```yaml
+$ cat ./docs/examples/node-alerts/node_volume/demo-1.yaml
+
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: NodeAlert
+metadata:
+  name: node-volume-demo-1
+  namespace: demo
+spec:
+  selector:
+    beta.kubernetes.io/os: linux
+  check: node_volume
+  vars:
+    mountpoint: /mnt/sda1
+    warning: 70
+    critical: 95
+  checkInterval: 5m
+  alertInterval: 3m
+  notifierSecretName: notifier-config
+  receivers:
+  - notifier: mailgun
+    state: CRITICAL
+    to: ["ops@example.com"]
+```
+```console
+$ kubectl apply -f ./docs/examples/node-alerts/node_volume/demo-1.yaml
+nodealert "node-volume-demo-1" created
+
+$ kubectl get nodealert -n demo
+NAME                 KIND
+node-volume-demo-1   NodeAlert.v1alpha1.monitoring.appscode.com
+
+$ kubectl describe nodealert -n demo node-volume-demo-1
+Name:		node-volume-demo-1
+Namespace:	demo
+Labels:		<none>
+Events:
+  FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
+  ---------	--------	-----	----			-------------	--------	------		-------
+  33s		33s		1	Searchlight operator			Normal		SuccessfulSync	Applied NodeAlert: "node-volume-demo-1"
+```
+![check-by-node-label](/docs/images/node-alerts/node_volume/demo-1.png)
+
+
+### Check status of a specific node
+In this tutorial, a NodeAlert will be used check status of a node by name by setting `spec.nodeName` field.
+
+```yaml
+$ cat ./docs/examples/node-alerts/node_volume/demo-2.yaml
+
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: NodeAlert
+metadata:
+  name: node-volume-demo-2
+  namespace: demo
+spec:
+  nodeName: minikube
+  check: node_volume
+  vars:
+    mountpoint: /mnt/sda1
+    warning: 70
+    critical: 95
+  checkInterval: 5m
+  alertInterval: 3m
+  notifierSecretName: notifier-config
+  receivers:
+  - notifier: mailgun
+    state: CRITICAL
+    to: ["ops@example.com"]
+```
+
+```console
+$ kubectl apply -f ./docs/examples/node-alerts/node_volume/demo-2.yaml
+nodealert "node-volume-demo-2" created
+
+$ kubectl describe nodealert -n demo node-volume-demo-2
+Name:		node-volume-demo-2
+Namespace:	demo
+Labels:		<none>
+Events:
+  FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
+  ---------	--------	-----	----			-------------	--------	------		-------
+  22s		22s		1	Searchlight operator			Normal		SuccessfulSync	Applied NodeAlert: "node-volume-demo-2"
+```
+![check-by-node-name](/docs/images/node-alerts/node_volume/demo-2.png)
+
 
 ### Cleaning up
 To cleanup the Kubernetes resources created by this tutorial, run:
@@ -81,65 +180,3 @@ If you would like to uninstall Searchlight operator, please follow the steps [he
 
 
 ## Next Steps
-
-
-#### Supported Kubernetes Objects
-
-| Kubernetes Object | Icinga2 Host Type |
-| :---:             | :---:             |
-| cluster           | node              |
-| nodes             | node              |
-
-#### Vars
-
-* `secretName` - Kubernetes secret name for hostfacts authentication
-* `secretNamespace` - Kubernetes namespace of secret
-* `warning` - Warning level value (usage percentage defaults to 75.0)
-* `critical` - Critical level value (usage percentage defaults to 90.0)
-
-#### Supported Icinga2 State
-
-* OK
-* CRITICAL
-* UNKNOWN
-
-#### Example
-###### Command
-```console
-hyperalert check_volume --node_stat --host ip-172-20-0-9.ec2.internal@default
-# --node_stat and --host are provided by Icinga2
-```
-###### Output
-```
-OK: (Disk & Inodes)
-```
-
-#### Required Hostfacts
-Before using this CheckCommand, you must need to run `hostfacts` service in each Kubernetes node.
-Node disk stat is collected from `hostfacts` service deployed in each node.
-
-See Hostfacts [deployment guide](hostfacts.md)
-
-
-##### Configure Alert Object
-```yaml
-apiVersion: monitoring.appscode.com/v1alpha1
-kind: NodeAlert
-metadata:
-  name: check-node-disk
-  namespace: demo
-  labels:
-    alert.appscode.com/objectType: cluster
-spec:
-  check: node_volume
-  alertInterval: 2m
-  checkInterval: 1m
-  receivers:
-  - notifier: mailgun
-    state: CRITICAL
-    to: ["ops@example.com"]
-
-# To set alert on specific node, set following labels
-#  selector:
-#    kubernetes.io/hostname: ip-172-20-0-9.ec2.internal
-```

@@ -1,14 +1,12 @@
+> New to Searchlight? Please start [here](/docs/tutorials/README.md).
+
 # Check node_status
 
-This is used to check Kubernetes Node status.
-
-ClusterAlert `env` prints the list of environment variables in searchlight-operator pods. This check command is used to test Searchlight.
-
+Check command `node_status` is used to check status of Kubernetes Nodes.
 
 ## Spec
-`env` check command has no variables. Execution of this command can result in following states:
+`node_status` check command has no variables. Execution of this command can result in following states:
 - OK
-- WARNING
 - CRITICAL
 - UNKNOWN
 
@@ -32,18 +30,18 @@ kube-system   Active    6h
 demo          Active    4m
 ```
 
-### Create Alert
-In this tutorial, we are going to create an alert to check `env`.
+### Check status of all nodes
+In this tutorial, we are going to create a NodeAlert to check status of all nodes.
 ```yaml
-$ cat ./docs/examples/cluster-alerts/env/demo-0.yaml
+$ cat ./docs/examples/node-alerts/node_status/demo-0.yaml
 
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: ClusterAlert
+kind: NodeAlert
 metadata:
-  name: env-demo-0
+  name: node-status-demo-0
   namespace: demo
 spec:
-  check: env
+  check: node_status
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: notifier-config
@@ -53,86 +51,7 @@ spec:
     to: ["ops@example.com"]
 ```
 ```console
-$ kubectl apply -f ./docs/examples/cluster-alerts/env/demo-0.yaml 
-clusteralert "env-demo-0" created
-
-$ kubectl describe clusteralert env-demo-0 -n demo
-Name:		env-demo-0
-Namespace:	demo
-Labels:		<none>
-Events:
-  FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
-  ---------	--------	-----	----			-------------	--------	------		-------
-  6m		6m		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for ClusterAlert: "env-demo-0". Reason: secrets "notifier-config" not found
-  6m		6m		1	Searchlight operator			Normal		SuccessfulSync	Applied ClusterAlert: "env-demo-0"
-```
-
-Voila! `env` command has been synced to Icinga2. Searchlight also logged a warning event, we have not created the notifier secret `notifier-config`. Please visit [here](/docs/tutorials/notifiers.md) to learn how to configure notifier secret. Now, open IcingaWeb2 in your browser. You should see a Icinga host `demo@cluster` and Icinga service `env-demo-0`.
-
-![Demo of check_env](/docs/images/cluster-alerts/env/demo-0.gif)
-
-### Cleaning up
-To cleanup the Kubernetes resources created by this tutorial, run:
-```console
-$ kubectl delete ns demo
-```
-
-If you would like to uninstall Searchlight operator, please follow the steps [here](/docs/uninstall.md).
-
-
-## Next Steps
-
-
-#### Supported Kubernetes Objects
-
-| Kubernetes Object | Icinga2 Host Type |
-| :---:             | :---:             |
-| cluster           | node              |
-| nodes             | node              |
-
-#### Supported Icinga2 State
-
-* OK
-* CRITICAL
-* UNKNOWN
-
-#### Example
-###### Command
-```console
-hyperalert check_node_status --host=ip-172-20-0-9.ec2.internal@default
-# --host is provided by Icinga2
-```
-###### Output
-```
-OK: Node is Ready
-```
-
-##### Configure Alert Object
-```yaml
-# This alert will be set to all nodes individually
-apiVersion: monitoring.appscode.com/v1alpha1
-kind: NodeAlert
-metadata:
-  name: check-node-status
-  namespace: demo
-spec:
-  check: node_status
-  alertInterval: 2m
-  checkInterval: 1m
-  receivers:
-  - notifier: mailgun
-    state: CRITICAL
-    to: ["ops@example.com"]
-
-# To set alert on specific node, set following labels
-# labels:
-#   alert.appscode.com/objectType: nodes
-#   alert.appscode.com/objectName: ip-172-20-0-9.ec2.internal
-```
-
-
-```console
-$ kubectl apply -f ./docs/examples/node-alerts/node_status/demo-0.yaml 
+$ kubectl apply -f ./docs/examples/node-alerts/node_status/demo-0.yaml
 nodealert "node-status-demo-0" created
 
 $ kubectl describe nodealert -n demo node-status-demo-0
@@ -142,13 +61,39 @@ Labels:		<none>
 Events:
   FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
   ---------	--------	-----	----			-------------	--------	------		-------
-  6s		6s		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for NodeAlert: "node-status-demo-0". Reason: secrets "notifier-config" not found
   6s		6s		1	Searchlight operator			Normal		SuccessfulSync	Applied NodeAlert: "node-status-demo-0"
 ```
 
+Voila! `node_status` command has been synced to Icinga2. Please visit [here](/docs/tutorials/notifiers.md) to learn how to configure notifier secret. Now, open IcingaWeb2 in your browser. You should see a Icinga host `demo@node@minikube` and Icinga service `node-status-demo-0`.
 
+![check-all-nodes](/docs/images/node-alerts/node_status/demo-0.png)
+
+
+### Check status of nodes with matching labels
+In this tutorial, a NodeAlert will be used check status of nodes with matching labels by setting `spec.selector` field.
+
+```yaml
+$ cat ./docs/examples/node-alerts/node_status/demo-1.yaml
+
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: NodeAlert
+metadata:
+  name: node-status-demo-1
+  namespace: demo
+spec:
+  check: node_status
+  selector:
+    beta.kubernetes.io/os: linux
+  checkInterval: 30s
+  alertInterval: 2m
+  notifierSecretName: notifier-config
+  receivers:
+  - notifier: mailgun
+    state: CRITICAL
+    to: ["ops@example.com"]
+```
 ```console
-$ kubectl apply -f ./docs/examples/node-alerts/node_status/demo-1.yaml 
+$ kubectl apply -f ./docs/examples/node-alerts/node_status/demo-1.yaml
 nodealert "node-status-demo-1" created
 
 $ kubectl get nodealert -n demo
@@ -162,12 +107,36 @@ Labels:		<none>
 Events:
   FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
   ---------	--------	-----	----			-------------	--------	------		-------
-  33s		33s		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for NodeAlert: "node-status-demo-1". Reason: secrets "notifier-config" not found
   33s		33s		1	Searchlight operator			Normal		SuccessfulSync	Applied NodeAlert: "node-status-demo-1"
+```
+![check-by-node-label](/docs/images/node-alerts/node_status/demo-1.png)
+
+
+### Check status of a specific node
+In this tutorial, a NodeAlert will be used check status of a node by name by setting `spec.nodeName` field.
+
+```yaml
+$ cat ./docs/examples/node-alerts/node_status/demo-2.yaml
+
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: NodeAlert
+metadata:
+  name: node-status-demo-2
+  namespace: demo
+spec:
+  check: node_status
+  nodeName: minikube
+  checkInterval: 30s
+  alertInterval: 2m
+  notifierSecretName: notifier-config
+  receivers:
+  - notifier: mailgun
+    state: CRITICAL
+    to: ["ops@example.com"]
 ```
 
 ```console
-$ kubectl apply -f ./docs/examples/node-alerts/node_status/demo-2.yaml 
+$ kubectl apply -f ./docs/examples/node-alerts/node_status/demo-2.yaml
 nodealert "node-status-demo-2" created
 
 $ kubectl describe nodealert -n demo node-status-demo-2
@@ -177,6 +146,18 @@ Labels:		<none>
 Events:
   FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
   ---------	--------	-----	----			-------------	--------	------		-------
-  22s		22s		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for NodeAlert: "node-status-demo-2". Reason: secrets "notifier-config" not found
   22s		22s		1	Searchlight operator			Normal		SuccessfulSync	Applied NodeAlert: "node-status-demo-2"
 ```
+![check-by-node-name](/docs/images/node-alerts/node_status/demo-2.png)
+
+
+### Cleaning up
+To cleanup the Kubernetes resources created by this tutorial, run:
+```console
+$ kubectl delete ns demo
+```
+
+If you would like to uninstall Searchlight operator, please follow the steps [here](/docs/uninstall.md).
+
+
+## Next Steps

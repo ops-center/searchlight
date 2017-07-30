@@ -1,3 +1,5 @@
+> New to Searchlight? Please start [here](/docs/tutorials/README.md).
+
 # Check ca_cert
 
 ClusterAlert `ca_cert` checks the expiration timestamp of Kubernetes api server CA certificate. No longer you have to get a surprise that the CA certificate for your cluster has expired.
@@ -72,7 +74,7 @@ Events:
 
 Voila! `ca_cert` command has been synced to Icinga2. Please visit [here](/docs/tutorials/notifiers.md) to learn how to configure notifier secret. Now, open IcingaWeb2 in your browser. You should see a Icinga host `demo@cluster` and Icinga service `ca-cert-demo-0`.
 
-![Demo of check_ca_cert](/docs/images/cluster-alerts/ca_cert/demo-0.png)
+![check ca_cert](/docs/images/cluster-alerts/ca_cert/demo-0.png)
 
 ### Cleaning up
 To cleanup the Kubernetes resources created by this tutorial, run:

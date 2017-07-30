@@ -1,13 +1,17 @@
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: PodAlert
+kind: NodeAlert
 metadata:
-  name: influx-query-demo-0
+  name: node-volume-demo-2
   namespace: demo
 spec:
-  check: influx_query
-  podName: nginx-2371676037-kv28m
-  checkInterval: 30s
-  alertInterval: 2m
+  nodeName: minikube
+  check: node_volume
+  vars:
+    mountpoint: /mnt/sda1
+    warning: 70
+    critical: 95
+  checkInterval: 5m
+  alertInterval: 3m
   notifierSecretName: notifier-config
   receivers:
   - notifier: mailgun

@@ -5,11 +5,12 @@ metadata:
   namespace: demo
 spec:
   check: node_volume
-  checkInterval: 10s
-spec:
-  check: node_volume
-  checkInterval: 30s
-  alertInterval: 2m
+  vars:
+    mountpoint: /mnt/sda1
+    warning: 70
+    critical: 95
+  checkInterval: 5m
+  alertInterval: 3m
   notifierSecretName: notifier-config
   receivers:
   - notifier: mailgun
