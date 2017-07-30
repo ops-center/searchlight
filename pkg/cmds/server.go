@@ -2,7 +2,6 @@ package cmds
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/appscode/go/net"
 	"github.com/appscode/log"
@@ -18,10 +17,7 @@ func NewCmdServer(version string) *cobra.Command {
 	}
 	log.Infoln("Detected IP for hostfacts server:", nodeIP.String())
 	srv := hostfacts.Server{
-		Address:  fmt.Sprintf("%s:%d", nodeIP, 56977),
-		Username: os.Getenv("HOSTFACTS_AUTH_USERNAME"),
-		Password: os.Getenv("HOSTFACTS_AUTH_PASSWORD"),
-		Token:    os.Getenv("HOSTFACTS_AUTH_TOKEN"),
+		Address: fmt.Sprintf("%s:%d", nodeIP, 56977),
 	}
 	cmd := &cobra.Command{
 		Use:   "run",
