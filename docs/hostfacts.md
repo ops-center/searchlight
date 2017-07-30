@@ -1,32 +1,44 @@
-# Deployment Guide
+# Hostfacts
+[Hostfacts](/docs/reference/hostfacts/hostfacts_run.md) is a http server used to expose various [node metrics](/pkg/hostfacts/server.go#L32). This is a wrapper around the wonderful [shirou/gopsutil](https://github.com/shirou/gopsutil) library. This is used by [`check_node_volume`](/docs/node-alerts/node_volume.md) and [`check_pod_volume`](/docs/pod-alerts/pod_volume.md) commands to detect available disk space. To use these check commands, hostfacts must be installed directly on every node in the cluster. Hostfacts can't be deployed using DaemonSet. This guide will walk you through how to deploy hostfacts as a Systemd service.
 
-This guide will walk you through how to deploy hostfacts service in kubernetes node.
+## Installation Guide
+First ssh into a Kubernetes node. If you are using [Minikube](https://github.com/kubernetes/minikube), run the following command:
+```console
+$ minikube ssh
+```
 
-### Deploy Hostfacts
+### Install Hostfacts
+Now, download and install a pre-built binary using the following command:
+```console
+curl -Lo hostfacts https://cdn.appscode.com/binaries/hostfacts/3.0.0/hostfacts-linux-amd64 \
+  && chmod +x hostfacts \
+  && sudo mv hostfacts /usr/bin/
+```
 
-Write `hostfacts.service` file in __systemd directory__ in your kubernetes node.
-
-##### systemd directory
-* Ubuntu
-
-    ```console
-    /lib/systemd/system
-    ```
-* RedHat
-
-    ```console
-    /usr/lib/systemd/system
-    ```
+If you are using kube-up scripts to provision Kubernetes cluster, you can find a salt formula [here](https://github.com/appscode/kubernetes/tree/1.5.7-ac/cluster/saltbase/salt/appscode-hostfacts).
 
 
-##### `hostfacts.service`
+### Create Systemd Service
+To run hostfacts server as a Systemd service, write `hostfacts.service` file in __systemd directory__ in your node.
+```console
+# Debian/Ubuntu (example, minikube)
+$ sudo vi /lib/systemd/system/hostfacts.service
+
+# RedHat
+$ sudo vi /usr/lib/systemd/system/hostfacts.service
+```
+
+Hostfacts supports various types of authentication mechanism. Write the `hostfacts.service` accordingly.
+
+#### Hostfacts without authentication
+If you are running Kubernetes cluster inside a private network in AWS or GCP or just for testing in minikube, you may ignore authentication and SSL. In that case, use a `hostfacts.service` file like below:
 
 ```ini
 [Unit]
 Description=Provide host facts
 
 [Service]
-ExecStart=/usr/bin/hostfacts
+ExecStart=/usr/bin/hostfacts run --v=3
 Restart=always
 RestartSec=5
 
@@ -34,68 +46,60 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-Set one of the following if you want to set authentication in `hostfacts`
+#### Hostfacts with Basic auth
+If you want to use a username/password pair with your Hostfacts binary, pass it via flag. Please note that, all nodes on your cluster must use the same username/password.
 
-* Basic Auth
+```ini
+[Unit]
+Description=Provide host facts
 
-    ```console
-    # Use ENV
-    # Add Environment in hostfacts.service under [Service] section
-    Environment=HOSTFACTS_AUTH_USERNAME="<username>"
-    Environment=HOSTFACTS_AUTH_PASSWORD="<password>"
-    ```
-    You can pass flags instead of using environment variables
-    ```
-    # Use Flags
-    # Modify ExecStart in [Service] section
-    ExecStart=/usr/bin/hostfacts --username="<username>" --password="<password>"
-    ```
-* Token
+[Service]
+ExecStart=/usr/bin/hostfacts run --v=3 --username="<username>" --password="<password>"
+Restart=always
+RestartSec=5
 
-    ```console
-    # Use ENV
-    # Add Environment in hostfacts.service under [Service] section
-    Environment=HOSTFACTS_AUTH_TOKEN="<token>"
-    ```
-    You can pass flag instead of using environment variable
-    ```
-    # Use Flags
-    # Modify ExecStart in [Service] section
-    ExecStart=/usr/bin/hostfacts --token="<token>"
-    ```
-
-If you want to set SSL certificate, do following
-
-1. Generate certificates and key. See process [here](../icinga2/certificate.md).
-2. Use flags to pass file directory
-
-    ```console
-    # Modify ExecStart in [Service] section
-    ExecStart=/usr/bin/hostfacts --caCertFile="<path to ca cert file>" --certFile="<path to server cert file>" --keyFile="<path to server key file>"
-    ```
-
-You can ignore SSL when Kubernetes is running in private network like GCE, AWS.
-
-> __Note:__ Modify `ExecStart` in `hostfacts.service`
-
-
-### Add `hostfacts` binary
-
-Download `hostfacts` and add binary in `/usr/bin`
-
-```console
-curl -G  https://cdn.appscode.com/binaries/hostfacts/3.0.0/hostfacts-linux-amd64 -o /usr/bin/hostfacts
-
-# Change access permissions for hostfacts binary
-chmod +x /usr/bin/hostfacts
+[Install]
+WantedBy=multi-user.target
 ```
 
-##### Start Service
+#### Hostfacts with Bearer token
+If you want to use a bearer token with your Hostfacts binary, pass it via flag. Please note that, all nodes on your cluster must use the same token and ca certificate if any.
+
+```ini
+[Unit]
+Description=Provide host facts
+
+[Service]
+ExecStart=/usr/bin/hostfacts run --v=3 --token="<token>"
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+```
+
+#### Using SSL
+If your cluster is running inside a shared network (eg, DigitalOcean), you should enable SSL. If you want to set SSL certificate, do the following:
+
+ - Generate a single pair of CA certificate and key. Then generate a separate SSL certificate pair for each node in your cluster. See the steps [here](/docs/certificate.md).
+ - Now, copy the ca.crt and node specific server.crt and server.key to the appropriate node. We recommend using folder `/srv/hostfacts/pki/`.
+ - Use flags to pass the path to node specific certificates to its hostfact binary.
+
+```ini
+# Basic auth
+ExecStart=/usr/bin/hostfacts run --v=3 --username="<username>" --password="<password>" --caCertFile="<path to ca cert file>" --certFile="<path to server cert file>" --keyFile="<path to server key file>"
+
+
+# Bearer token
+ExecStart=/usr/bin/hostfacts run --v=3 --token="<token>" --caCertFile="<path to ca cert file>" --certFile="<path to server cert file>" --keyFile="<path to server key file>"
+```
+
+### Activate Systemd service
 
 ```console
 # Configure to be automatically started at boot time
-systemctl enable hostfacts
+$ sudo systemctl enable hostfacts
 
 # Start service
-systemctl start hostfacts
+$ sudo systemctl start hostfacts
 ```
