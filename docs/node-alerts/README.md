@@ -1,80 +1,74 @@
-# Alert Objects
+> New to Searchlight? Please start [here](/docs/tutorials/README.md).
 
-Alert objects are consumed by Searchlight Controller to create Icinga2 hosts, services and notifications.
+# NodeAlerts
 
-Before we can create an Alert object, we must create the `Third Party Resource` in our Kubernetes cluster.
+## What is NodeAlert
+A `NodeAlert` is a Kubernetes `Third Party Object` (TPR). It provides declarative configuration of [Icinga services](https://www.icinga.com/docs/icinga2/latest/doc/09-object-types/#service) for Nodes in a Kubernetes native way. You only need to describe the desired check command and notifier in a NodeAlert object, and the Searchlight operator will create Icinga2 hosts, services and notifications to the desired state for you.
 
-
-##### Alert Object
+## NodeAlert Spec
+As with all other Kubernetes objects, a NodeAlert needs `apiVersion`, `kind`, and `metadata` fields. It also needs a `.spec` section. Below is an example NodeAlert object.
 
 ```yaml
 apiVersion: monitoring.appscode.com/v1alpha1
-kind: Alert
+kind: NodeAlert
 metadata:
-  name: check-es-logging-volume
-  namespace: kube-system
-  labels:
-    alert.appscode.com/objectType: replicationcontrollers
-    alert.appscode.com/objectName: elasticsearch-logging-v1
+  name: webstore
+  namespace: demo
 spec:
-  check: volume
-  checkInterval: 1m
-  alertInterval: 5m
-  Vars:
-    name: disk
-    warning: 60.0
-    critical: 75.0
+  selector:
+    beta.kubernetes.io/os: linux
+  check: node_volume
+  vars:
+    volumeName: webstore
+    warning: 70
+    critical: 95
+  checkInterval: 5m
+  alertInterval: 3m
+  notifierSecretName: notifier-config
+  receivers:
+  - notifier: mailgun
+    state: WARNING
+    to: ["ops@example.com"]
+  - notifier: twilio
+    state: CRITICAL
+    to: ["+1-234-567-8901"]
 ```
 
 This object will do the followings:
 
-* This Alert is set on ReplicationController named `elasticsearch-logging-v1` in `kube-system` namespace.
-* CheckCommand `volume` will be applied.
-* Icinga2 Service will check volume every 60s.
-* Notifications will be send every 5m if any problem is detected.
-* Email will be sent as a notification to admin user for `CRITICAL` state. For other states, no notification will be sent.
-* On each Pod under specified RC, volume named `disk` will be checked. If volume is used more than 60%, it is `WARNING`. For 75%, it is `CRITICAL`.
+- This Alert is set on nodes with matching label `beta.kubernetes.io/os=linux`.
+- Check command `node_volume` will be applied on volume named `webstore`.
+- Icinga will check for volume size every 5m.
+- Notifications will be sent every 3m if any problem is detected, until acknowledged.
+- When the disk is 70% full, it will reach `WARNING` state and emails will be sent to _ops@example.com_ via Mailgun as notification.
+- When the disk is 95% full, it will reach `CRITICAL` state and SMSes will be sent to _+1-234-567-8901_ via Twilio as notification.
 
-## Explanation
+Any NodeAlert object has 3 main sections:
 
-### Alert Object Fields
+### Node Selection
+Any NodeAlert can specify nodes in 2 ways:
 
-* apiVersion - The Kubernetes API version.
-* kind - The Kubernetes object type.
-* metadata.name - The name of the Alert object.
-* metadata.namespace - The namespace of the Alert object
-* metadata.labels - The Kubernetes object labels. This labels are used to determine for which object this alert will be set.
-* spec.check - Icinga CheckCommand name
-* spec.checkInterval - How frequently Icinga Service will be checked
-* spec.alertInterval - How frequently notifications will be send
-* spec.receivers - NotifierParams contains array of information to send notifications for Incident
-* spec.vars - Vars contains array of Icinga Service variables to be used in CheckCommand.
+- `spec.nodeName` can be used to specify a node by name.
 
-#### NotifierParam Fields
+- `spec.selector` is a node selector. Searchlight operator will update Icinga as nodes with matching labels are added/removed.
 
-* state - For which state notification will be sent
-* to - To whom notification will be sent
-* method - How this notification will be sent
+### Check Command
+Check commands are used by Icinga to periodically test some condition. If the test return positive appropriate notifications are sent. The following check commands are supported for nodes:
+- [influx_query](influx_query.md) - To check InfluxDB query result.
+- [node_status](node_status.md) - To check Kubernetes Node status.
+- [node_volume](node_volume.md) - To check Node Disk stat.
 
-> `NotifierParams` is only used when notification is sent via `AppsCode`.
+Each check command has a name specified in `spec.check` field. Optionally each check command can take one or more parameters. These are specified in `spec.vars` field. To learn about the available parameters for each check command, please visit their documentation. `spec.checkInterval` specifies how frequently Icinga will perform this check. Some examples are: 30s, 5m, 6h, etc.
 
-#### Metadata Labels
-* alert.appscode.com/objectType - The Kubernetes object type
-* alert.appscode.com/objectName - The Kubernetes object name
+### Notifiers
+When a check fails, Icinga will keep sending notifications until acknowledged via IcingaWeb dashboard. `spec.alertInterval` specifies how frequently notifications are sent. Icinga can send notifications to different targets based on alert state. `spec.receivers` contains that list of targets:
 
-#### CheckCommand
+| Name                       | Description                                                  |
+|----------------------------|--------------------------------------------------------------|
+| `spec.receivers[*].state`  | `Required` Name of state for which notification will be sent |
+| `spec.receivers[*].to`     | `Required` To whom notifications will be sent                |
+| `spec.receivers[*].method` | `Required` How this notification will be sent                |
 
-We currently supports following CheckCommands:
 
-* [component_status](check_component_status.md) - To check Kubernetes components.
-* [influx_query](check_influx_query.md) - To check InfluxDB query result.
-* [json_path](check_json_path.md) - To check any API response by parsing JSON using JQ queries.
-* [node_count](check_node_count.md) - To check total number of Kubernetes node.
-* [node_status](check_node_status.md) - To check Kubernetes Node status.
-* [pod_exists](check_pod_exists.md) - To check Kubernetes pod existence.
-* [pod_status](check_pod_status.md) - To check Kubernetes pod status.
-* [prometheus_metric](check_prometheus_metric.md) - To check Prometheus query result.
-* [node_volume](check_node_volume.md) - To check Node Disk stat.
-* [volume](check_pod_volume.md) - To check Pod volume stat.
-* [event](check_event.md) - To check Kubernetes events for all Warning TYPE happened in last 'c' seconds.
-* [pod_exec](check_pod_exec.md) - To check Kubernetes exec command. Returns OK if exit code is zero, otherwise, returns CRITICAL
+## Icinga Objects
+You can skip this section if you are unfamiliar with how Icinga works. Searchlight operator watches for NodeAlert objects and turns them into [Icinga objects](https://www.icinga.com/docs/icinga2/latest/doc/09-object-types/) accordingly. For each Kubernetes Node which has an NodeAlert configured, an [Icinga Host](https://www.icinga.com/docs/icinga2/latest/doc/09-object-types/#host) is created with the name `{namespace}@node@{node-name}` and address matching the internal IP of the Node. Now for each NodeAlert, an [Icinga service](https://www.icinga.com/docs/icinga2/latest/doc/09-object-types/#service) is created with name matching the NodeAlert name.
