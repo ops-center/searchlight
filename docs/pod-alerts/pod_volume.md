@@ -37,8 +37,8 @@ kube-system   Active    6h
 demo          Active    4m
 ```
 
-### Check status of all pods
-In this tutorial, we are going to create a PodAlert to check status of all pods.
+### Check volume of pods with matching labels
+In this tutorial, a PodAlert will be used check volume stats of pods with matching labels by setting `spec.selector` field.
 ```yaml
 $ cat ./docs/examples/pod-alerts/pod_volume/demo-0.yaml
 
@@ -65,13 +65,15 @@ spec:
     to: ["ops@example.com"]
 ```
 ```console
-$ kubectl apply -f ./docs/examples/pod-alerts/pod_volume/demo-0.yaml
-podalert "pod-volume-demo-0" created
+$ kubectl apply -f ./docs/examples/pod-alerts/pod_volume/demo-1.yaml
+persistentvolumeclaim "boxclaim" created
+pod "busybox" created
+podalert "pod-volume-demo-1" created
 
 $ kubectl get pods -n demo
 NAME      READY     STATUS    RESTARTS   AGE
-web-0     1/1       Running   0          1m
-web-1     1/1       Running   0          48s
+web-0     1/1       Running   0          10m
+web-1     1/1       Running   0          10m
 
 $ kubectl describe podalert -n demo pod-volume-demo-0
 Name:		pod-volume-demo-0
@@ -80,18 +82,18 @@ Labels:		<none>
 Events:
   FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
   ---------	--------	-----	----			-------------	--------	------		-------
-  2m		2m		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for PodAlert: "pod-volume-demo-0". Reason: secrets "notifier-config" not found
-  2m		2m		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-volume-demo-0"
-  2m		2m		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-volume-demo-0"
+  11m		11m		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for PodAlert: "pod-volume-demo-0". Reason: secrets "notifier-config" not found
+  11m		11m		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-volume-demo-0"
+  11m		11m		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-volume-demo-0"
 ```
 
 Voila! `pod_volume` command has been synced to Icinga2. Please visit [here](/docs/tutorials/notifiers.md) to learn how to configure notifier secret. Now, open IcingaWeb2 in your browser. You should see a Icinga host `demo@pod@minikube` and Icinga service `pod-volume-demo-0`.
 
-![check-all-pods](/docs/images/pod-alerts/pod_volume/demo-0.png)
+![check-pods-by-label](/docs/images/pod-alerts/pod_volume/demo-0.png)
 
 
-### Check status of pods with matching labels
-In this tutorial, a PodAlert will be used check status of pods with matching labels by setting `spec.selector` field.
+### Check status of a specific pod
+In this tutorial, a PodAlert will be used check volume stats of a pod by name by setting `spec.podName` field.
 
 ```yaml
 $ cat ./docs/examples/pod-alerts/pod_volume/demo-1.yaml
@@ -117,10 +119,10 @@ spec:
     to: ["ops@example.com"]
 ```
 ```console
-$ kubectl apply -f ./docs/examples/pod-alerts/pod_volume/demo-0.yaml 
-service "nginx" created
-statefulset "web" created
-podalert "pod-volume-demo-0" created
+$ kubectl apply -f ./docs/examples/pod-alerts/pod_volume/demo-1.yaml
+persistentvolumeclaim "boxclaim" created
+pod "busybox" created
+podalert "pod-volume-demo-1" created
 
 $ kubectl get podalert -n demo
 NAME                 KIND
@@ -133,56 +135,11 @@ Labels:		<none>
 Events:
   FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
   ---------	--------	-----	----			-------------	--------	------		-------
-  33s		33s		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-volume-demo-1"
+  1m		1m		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for PodAlert: "pod-volume-demo-1". Reason: secrets "notifier-config" not found
+  1m		1m		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-volume-demo-1"
+  1m		1m		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-volume-demo-1"
 ```
-![check-by-pod-label](/docs/images/pod-alerts/pod_volume/demo-1.png)
-
-
-### Check status of a specific pod
-In this tutorial, a PodAlert will be used check status of a pod by name by setting `spec.podName` field.
-
-```yaml
-$ cat ./docs/examples/pod-alerts/pod_volume/demo-2.yaml
-
-apiVersion: monitoring.appscode.com/v1alpha1
-kind: PodAlert
-metadata:
-  name: pod-volume-demo-2
-  namespace: demo
-spec:
-  podName: minikube
-  check: pod_volume
-  vars:
-    volumeName: /mnt/sda1
-    warning: 70
-    critical: 95
-  checkInterval: 5m
-  alertInterval: 3m
-  notifierSecretName: notifier-config
-  receivers:
-  - notifier: mailgun
-    state: CRITICAL
-    to: ["ops@example.com"]
-```
-
-```console
-$ kubectl apply -f ./docs/examples/pod-alerts/pod_volume/demo-1.yaml 
-persistentvolumeclaim "boxclaim" created
-pod "busybox" created
-podalert "pod-volume-demo-1" created
-
-$ kubectl describe podalert -n demo pod-volume-demo-1
-Name:		pod-volume-demo-1
-Namespace:	demo
-Labels:		<none>
-Events:
-  FirstSeen	LastSeen	Count	From			SubObjectPath	Type		Reason		Message
-  ---------	--------	-----	----			-------------	--------	------		-------
-  14s		14s		1	Searchlight operator			Warning		BadNotifier	Bad notifier config for PodAlert: "pod-volume-demo-1". Reason: secrets "notifier-config" not found
-  14s		14s		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-volume-demo-1"
-  10s		10s		1	Searchlight operator			Normal		SuccessfulSync	Applied PodAlert: "pod-volume-demo-1"
-```
-![check-by-pod-name](/docs/images/pod-alerts/pod_volume/demo-2.png)
+![check-by-pod-name](/docs/images/pod-alerts/pod_volume/demo-1.png)
 
 
 ### Cleaning up
