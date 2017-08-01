@@ -1,8 +1,7 @@
----
 apiVersion: monitoring.appscode.com/v1alpha1
 kind: ClusterAlert
 metadata:
-  name: check-kube-api
+  name: kube-api
   namespace: kube-system
   labels:
     alert.appscode.com/objectType: cluster
@@ -23,7 +22,7 @@ spec:
 apiVersion: monitoring.appscode.com/v1alpha1
 kind: ClusterAlert
 metadata:
-  name: check-component-status
+  name: component-status
   namespace: kube-system
 spec:
   check: component_status
@@ -37,7 +36,7 @@ spec:
 apiVersion: monitoring.appscode.com/v1alpha1
 kind: ClusterAlert
 metadata:
-  name: check-kibana-dns
+  name: kibana-dns
   namespace: kube-system
 spec:
   check: any_http
@@ -55,7 +54,7 @@ spec:
 apiVersion: monitoring.appscode.com/v1alpha1
 kind: NodeAlert
 metadata:
-  name: check-node-status
+  name: node-status
   namespace: kube-system
 spec:
   check: node_status
@@ -69,7 +68,7 @@ spec:
 apiVersion: monitoring.appscode.com/v1alpha1
 kind: NodeAlert
 metadata:
-  name: check-node-disk-stat
+  name: node-disk-stat
   namespace: kube-system
 spec:
   check: node_volume
