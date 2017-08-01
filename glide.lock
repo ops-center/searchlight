@@ -1,5 +1,5 @@
 hash: ba7a43d99f7ae7abee5af0d04eedced27232e183ce6fc92b1ef4f5fd22c91221
-updated: 2017-07-30T11:12:16.293344178-07:00
+updated: 2017-08-01T07:54:42.551715647-07:00
 imports:
 - name: github.com/appscode/api
   version: d98df977c923189d5e4856bf8d428f5528b6bdd1
@@ -20,7 +20,7 @@ imports:
   - types
   - version
 - name: github.com/appscode/go-notify
-  version: 984ba317a48743222422263ffc9a7ae3f54173b8
+  version: 1ecbe3cbc7b28971a2db50a9981f0790b9f500e2
   subpackages:
   - hipchat
   - log
@@ -277,7 +277,7 @@ imports:
 - name: github.com/Sirupsen/logrus
   version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
 - name: github.com/spf13/cobra
-  version: d7ba19510d17ff09130f842c8c2eb48f4196b6ee
+  version: b26b538f693051ac6518e65672de3144ce3fbedc
   subpackages:
   - doc
 - name: github.com/spf13/pflag
