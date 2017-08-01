@@ -1,0 +1,81 @@
+---
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: ClusterAlert
+metadata:
+  name: check-kube-api
+  namespace: kube-system
+  labels:
+    alert.appscode.com/objectType: cluster
+spec:
+  check: json_path
+  vars:
+    url: https://{{ pillar['instance_prefix'] }}-{{ pillar['appscode_ns'] }}.{{ pillar['appscode_cluster_root_domain'] }}:6443
+    query: ".paths"
+    critical: "length == 0"
+    in_cluster_config: true
+  checkInterval: 1m
+  alertInterval: 5m
+  receivers:
+  - notifier: $NOTIFIER
+    state: CRITICAL
+    to: ["$OPS_EMAIL"]
+---
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: ClusterAlert
+metadata:
+  name: check-component-status
+  namespace: kube-system
+spec:
+  check: component_status
+  checkInterval: 1m
+  alertInterval: 5m
+  receivers:
+  - notifier: $NOTIFIER
+    state: CRITICAL
+    to: ["$OPS_EMAIL"]
+---
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: ClusterAlert
+metadata:
+  name: check-kibana-dns
+  namespace: kube-system
+spec:
+  check: any_http
+  vars:
+    httpVhost: {{ pillar['instance_prefix'] }}-{{ pillar['appscode_ns'] }}.{{ pillar['appscode_cluster_root_domain'] }}
+    httpURI: "/kibana"
+    httpSSL: true
+  checkInterval: 1m
+  alertInterval: 5m
+  receivers:
+  - notifier: $NOTIFIER
+    state: CRITICAL
+    to: ["$OPS_EMAIL"]
+---
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: NodeAlert
+metadata:
+  name: check-node-status
+  namespace: kube-system
+spec:
+  check: node_status
+  checkInterval: 5m
+  alertInterval: 5m
+  receivers:
+  - notifier: $NOTIFIER
+    state: CRITICAL
+    to: ["$OPS_EMAIL"]
+---
+apiVersion: monitoring.appscode.com/v1alpha1
+kind: NodeAlert
+metadata:
+  name: check-node-disk-stat
+  namespace: kube-system
+spec:
+  check: node_volume
+  checkInterval: 1m
+  alertInterval: 5m
+  receivers:
+  - notifier: $NOTIFIER
+    state: CRITICAL
+    to: ["$OPS_EMAIL"]
