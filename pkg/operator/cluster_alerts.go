@@ -31,7 +31,7 @@ func (op *Operator) WatchClusterAlerts() {
 	}
 	_, ctrl := cache.NewInformer(lw,
 		&tapi.ClusterAlert{},
-		op.SyncPeriod,
+		op.Opt.ResyncPeriod,
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if alert, ok := obj.(*tapi.ClusterAlert); ok {

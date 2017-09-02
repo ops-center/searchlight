@@ -28,6 +28,7 @@ type Options struct {
 	ConfigSecretName string
 	APIAddress       string
 	WebAddress       string
+	ResyncPeriod     time.Duration
 }
 
 type Operator struct {
@@ -41,7 +42,6 @@ type Operator struct {
 	nodeHost    *icinga.NodeHost
 	podHost     *icinga.PodHost
 	recorder    record.EventRecorder
-	SyncPeriod  time.Duration
 }
 
 func New(kubeClient clientset.Interface, apiExtKubeClient apiextensionsclient.Interface, extClient tcs.ExtensionInterface, icingaClient *icinga.Client, opt Options) *Operator {
@@ -55,7 +55,6 @@ func New(kubeClient clientset.Interface, apiExtKubeClient apiextensionsclient.In
 		nodeHost:         icinga.NewNodeHost(kubeClient, extClient, icingaClient),
 		podHost:          icinga.NewPodHost(kubeClient, extClient, icingaClient),
 		recorder:         eventer.NewEventRecorder(kubeClient, "Searchlight operator"),
-		SyncPeriod:       5 * time.Minute,
 	}
 }
 

@@ -25,6 +25,7 @@ func NewCmdOperator() *cobra.Command {
 		ConfigSecretName: "searchlight-operator",
 		APIAddress:       ":8080",
 		WebAddress:       ":56790",
+		ResyncPeriod:     5 * time.Minute,
 	}
 	cmd := &cobra.Command{
 		Use:   "run",
@@ -40,6 +41,7 @@ func NewCmdOperator() *cobra.Command {
 	cmd.Flags().StringVar(&opt.ConfigSecretName, "config-secret-name", opt.ConfigSecretName, "Name of Kubernetes secret used to pass icinga credentials.")
 	cmd.Flags().StringVar(&opt.APIAddress, "api.address", opt.APIAddress, "The address of the Searchlight API Server")
 	cmd.Flags().StringVar(&opt.WebAddress, "web.address", opt.WebAddress, "Address to listen on for web interface and telemetry.")
+	cmd.Flags().DurationVar(&opt.ResyncPeriod, "resync-period", opt.ResyncPeriod, "If non-zero, will re-list this often. Otherwise, re-list will be delayed aslong as possible (until the upstream source closes the watch or times out.")
 
 	return cmd
 }

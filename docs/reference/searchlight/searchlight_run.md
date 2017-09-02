@@ -20,6 +20,7 @@ searchlight run [flags]
   -h, --help                        help for run
       --kubeconfig string           Path to kubeconfig file with authorization information (the master location is set by the master flag).
       --master string               The address of the Kubernetes API server (overrides any value in kubeconfig)
+      --resync-period duration      If non-zero, will re-list this often. Otherwise, re-list will be delayed aslong as possible (until the upstream source closes the watch or times out. (default 5m0s)
       --web.address string          Address to listen on for web interface and telemetry. (default ":56790")
 ```
 

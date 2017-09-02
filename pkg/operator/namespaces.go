@@ -25,7 +25,7 @@ func (op *Operator) WatchNamespaces() {
 	}
 	_, ctrl := cache.NewInformer(lw,
 		&apiv1.Namespace{},
-		op.SyncPeriod,
+		op.Opt.ResyncPeriod,
 		cache.ResourceEventHandlerFuncs{
 			DeleteFunc: func(obj interface{}) {
 				if ns, ok := obj.(*apiv1.Namespace); ok {

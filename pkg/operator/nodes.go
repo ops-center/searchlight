@@ -31,7 +31,7 @@ func (op *Operator) WatchNodes() {
 	}
 	_, ctrl := cache.NewInformer(lw,
 		&apiv1.Node{},
-		op.SyncPeriod,
+		op.Opt.ResyncPeriod,
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
 				if resource, ok := obj.(*apiv1.Node); ok {
