@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"k8s.io/apimachinery/pkg/runtime"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
@@ -69,7 +68,7 @@ func (a PodAlert) GetReceivers() []Receiver {
 	return a.Spec.Receivers
 }
 
-func (a PodAlert) ObjectReference() runtime.Object {
+func (a PodAlert) ObjectReference() *apiv1.ObjectReference {
 	return &apiv1.ObjectReference{
 		APIVersion:      SchemeGroupVersion.String(),
 		Kind:            ResourceKindPodAlert,

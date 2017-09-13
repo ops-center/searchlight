@@ -3,7 +3,7 @@ package v1alpha1
 import (
 	"time"
 
-	"k8s.io/apimachinery/pkg/runtime"
+	apiv1 "k8s.io/client-go/pkg/api/v1"
 )
 
 type Alert interface {
@@ -15,5 +15,5 @@ type Alert interface {
 	IsValid() (bool, error)
 	GetNotifierSecretName() string
 	GetReceivers() []Receiver
-	ObjectReference() runtime.Object
+	ObjectReference() *apiv1.ObjectReference
 }

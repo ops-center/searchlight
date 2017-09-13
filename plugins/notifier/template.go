@@ -1,11 +1,11 @@
 package notifier
 
 import (
-    "text/template"
+	"text/template"
 )
 
 var (
-    mailTemplate = template.Must(template.New("mail").Parse(`
+	mailTemplate = template.Must(template.New("mail").Parse(`
 
 
 <html>
