@@ -44,8 +44,14 @@ import:
   version: 1fd2e63a9a370677308a42f24fd40c86438afddf
 - package: k8s.io/client-go
   version: v4.0.0
+- package: github.com/appscode/kutil
+  version: release-4.0
 - package: k8s.io/apiextensions-apiserver
   version: 5fa44608f6b9b2180a2fd1ecb52e651fd0397794
+- package: github.com/hashicorp/go-version
+  repo: https://github.com/appscode/go-version.git
+  vcs: git
+  version: master
 testImport:
 - package: github.com/mitchellh/go-homedir
 - package: github.com/onsi/ginkgo
