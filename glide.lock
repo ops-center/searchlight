@@ -1,5 +1,5 @@
 hash: 654494ff3a8354bee775d8d9e2bafe7d4a080d3ba1c27ced4aa1d49bb887fa04
-updated: 2017-09-14T00:28:41.482891228-07:00
+updated: 2017-09-18T18:58:38.519203703-07:00
 imports:
 - name: github.com/appscode/envconfig
   version: a74ef73ab982beb8f0c6060ac44da1c960fea414
@@ -27,10 +27,8 @@ imports:
   - twilio
   - unified
   - webhook
-- name: github.com/appscode/jsonpatch
-  version: 3cdd2454b5443228620ea11294085ec3489936a6
 - name: github.com/appscode/kutil
-  version: d7291a322639efb805f3393bd00618aa00db3d3a
+  version: 1f75c33d081d0e7e1073ed9e8a5774e5c8c93e86
   subpackages:
   - apps/v1beta1
   - core/v1
@@ -177,7 +175,7 @@ imports:
   - models
   - pkg/escape
 - name: github.com/jaytaylor/html2text
-  version: 7c7a33a7a158a5ce395c803d2b6a209b2bbc14c8
+  version: 0ee88d3006305456b84cad14a24b2576f9411965
 - name: github.com/jmoiron/sqlx
   version: 398dd5876282499cdfd4cb8ea0f31a672abe9495
   repo: https://github.com/jmoiron/sqlx
@@ -494,7 +492,7 @@ imports:
   - util/homedir
   - util/integer
 - name: k8s.io/kubernetes
-  version: 17d7182a7ccbb167074be7a87f0a68bd00d58d97
+  version: 4bc5e7f9a6c25dc4c03d4d656f2cefd21540e28c
   subpackages:
   - pkg/api
   - pkg/api/install
