@@ -51,7 +51,7 @@ The following tables lists the configurable parameters of the Searchlight chart 
 | `ido.tag`                 | ido container image tag                                        | `9.5-alpine`           |
 | `ido.pullPolicy`          | ido container image pull policy                                | `IfNotPresent`         |
 | `rbac.create`             | install required rbac service account, roles and rolebindings  | `false`                |
-| `rbac.serviceAccountName` | ServiceAccount Voyager will use (ignored if rbac.create=true)  | `default`              |
+| `rbac.serviceAccountName` | ServiceAccount Searchlight will use (ignored if rbac.create=true)  | `default`              |
 
 Specify each parameter using the `--set key=value[,key=value]` argument to `helm install`. For example:
 
