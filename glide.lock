@@ -1,12 +1,12 @@
 hash: 654494ff3a8354bee775d8d9e2bafe7d4a080d3ba1c27ced4aa1d49bb887fa04
-updated: 2017-09-18T18:58:38.519203703-07:00
+updated: 2017-09-21T15:29:46.409348931-07:00
 imports:
 - name: github.com/appscode/envconfig
-  version: a74ef73ab982beb8f0c6060ac44da1c960fea414
+  version: 8debe51c027cc6d944705e16415fd948cb32824c
 - name: github.com/appscode/errors
   version: 748883e321a9f99fe901bd2663c7af3fcae43ea4
 - name: github.com/appscode/go
-  version: d1fbd14e5c6e78557c12f6d2c9c282b3c0d0c612
+  version: 40c185ab12c60de0218e5e5c319a032498c21695
   subpackages:
   - crypto/rand
   - flags
@@ -28,7 +28,7 @@ imports:
   - unified
   - webhook
 - name: github.com/appscode/kutil
-  version: 1f75c33d081d0e7e1073ed9e8a5774e5c8c93e86
+  version: 6788b3a7e56c2f71e4c41f44835b8f1fafca8c16
   subpackages:
   - apps/v1beta1
   - core/v1
@@ -77,7 +77,7 @@ imports:
 - name: github.com/codeskyblue/go-sh
   version: b097669b1569203c3ce05a6b8717d43140fdb3d5
 - name: github.com/cpuguy83/go-md2man
-  version: 71acacd42f85e5e82f70a55327789582a5200a90
+  version: 1d903dcb749992f3741d744c0f8376b4bd7eb3e1
   subpackages:
   - md2man
 - name: github.com/davecgh/go-spew
@@ -99,6 +99,8 @@ imports:
   - log
 - name: github.com/emicklei/go-restful-swagger12
   version: dcef7f55730566d41eae5db10e7d6981829720f6
+- name: github.com/evanphx/json-patch
+  version: ba18e35c5c1b36ef6334cad706eb681153d2d379
 - name: github.com/facebookgo/stack
   version: 751773369052141c013c6e827a71e8f35c07879c
 - name: github.com/ghodss/yaml
@@ -110,7 +112,7 @@ imports:
 - name: github.com/go-macaron/toolbox
   version: 6766b8f16d1b135b250f09ba4dc4e24ab65b1107
 - name: github.com/go-ole/go-ole
-  version: 085abb85892dc1949567b726dff00fa226c60c45
+  version: 8a4f5c214bfb4475619b8bb7ccbe6fa5c91745f4
   subpackages:
   - oleutil
 - name: github.com/go-openapi/analysis
@@ -199,7 +201,7 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/mattn/go-runewidth
-  version: d6bea18f789704b5f83375793155289da36a3c7f
+  version: 97311d9f7767e3d6f422ea06661bc2c7a19e8a5d
 - name: github.com/matttproud/golang_protobuf_extensions
   version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
@@ -392,6 +394,7 @@ imports:
   - pkg/util/httpstream/spdy
   - pkg/util/intstr
   - pkg/util/json
+  - pkg/util/jsonmergepatch
   - pkg/util/mergepatch
   - pkg/util/net
   - pkg/util/rand
