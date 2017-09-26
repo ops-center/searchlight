@@ -114,7 +114,6 @@ spec:
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: notifier-config
-  receiver:
   receivers:
   - notifier: Mailgun
     state: CRITICAL
@@ -179,7 +178,7 @@ spec:
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: notifier-config
-  receiver:
+  receivers:
   - notifier: SMTP
     state: CRITICAL
     to: ["ops-alerts@example.com"]
@@ -240,7 +239,7 @@ spec:
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: notifier-config
-  receiver:
+  receivers:
   - notifier: Twilio
     state: CRITICAL
     to: ["1-999-888-1234"]
@@ -293,7 +292,7 @@ spec:
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: notifier-config
-  receiver:
+  receivers:
   - notifier: Slack
     state: CRITICAL
     to: ["#ops-alerts"]
@@ -354,7 +353,7 @@ spec:
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: notifier-config
-  receiver:
+  receivers:
   - notifier: Plivo
     state: CRITICAL
     to: ["1-999-888-1234"]
@@ -432,7 +431,7 @@ spec:
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: notifier-config
-  receiver:
+  receivers:
   - notifier: Pushover
     state: CRITICAL
     to: ["my-phone"]
@@ -473,7 +472,7 @@ spec:
   checkInterval: 30s
   alertInterval: 2m
   notifierSecretName: notifier-config
-  receiver:
+  receivers:
   - notifier: Mailgun
     state: WARNING
     to: ["ops-alerts@example.com"]
