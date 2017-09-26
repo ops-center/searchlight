@@ -9,12 +9,12 @@ Searchlight can be installed using YAML files includes in the [/hack/deploy](/ha
 
 ```console
 # Install without RBAC roles
-$ curl https://raw.githubusercontent.com/appscode/searchlight/4.0.0-rc.0/hack/deploy/without-rbac.yaml \
+$ curl https://raw.githubusercontent.com/appscode/searchlight/4.0.0/hack/deploy/without-rbac.yaml \
   | kubectl apply -f -
 
 
 # Install with RBAC roles
-$ curl https://raw.githubusercontent.com/appscode/searchlight/4.0.0-rc.0/hack/deploy/with-rbac.yaml \
+$ curl https://raw.githubusercontent.com/appscode/searchlight/4.0.0/hack/deploy/with-rbac.yaml \
   | kubectl apply -f -
 ```
 
@@ -34,6 +34,11 @@ $ kubectl get pods --all-namespaces -l app=searchlight --watch
 ```
 
 Once the operator pods are running, you can cancel the above command by typing `Ctrl+C`.
+
+Now, to confirm CRD groups have been registered by the operator, run the following command:
+```console
+$ kubectl get crd -l app=searchlight
+```
 
 
 ## Accesing IcingaWeb2
