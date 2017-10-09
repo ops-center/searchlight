@@ -3,7 +3,7 @@ package e2e_test
 import (
 	"strings"
 
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/test/e2e/framework"
 	. "github.com/appscode/searchlight/test/e2e/matcher"
 	. "github.com/onsi/ginkgo"
@@ -14,7 +14,7 @@ var _ = Describe("NodeAlert", func() {
 	var (
 		err                error
 		f                  *framework.Invocation
-		alert              *tapi.NodeAlert
+		alert              *api.NodeAlert
 		totalNode          int32
 		icingaServiceState IcingaServiceState
 		skippingMessage    string
@@ -55,7 +55,7 @@ var _ = Describe("NodeAlert", func() {
 		Context("check_node_status", func() {
 			BeforeEach(func() {
 				icingaServiceState = IcingaServiceState{Ok: totalNode}
-				alert.Spec.Check = tapi.CheckNodeStatus
+				alert.Spec.Check = api.CheckNodeStatus
 			})
 
 			It("should manage icinga service for Ok State", shouldManageIcingaService)
@@ -67,7 +67,7 @@ var _ = Describe("NodeAlert", func() {
 				if strings.ToLower(f.Provider) == "minikube" {
 					skippingMessage = `"node_volume will not work in minikube"`
 				}
-				alert.Spec.Check = tapi.CheckNodeVolume
+				alert.Spec.Check = api.CheckNodeVolume
 			})
 
 			Context("State OK", func() {

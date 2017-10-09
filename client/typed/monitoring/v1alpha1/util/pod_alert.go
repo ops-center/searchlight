@@ -6,7 +6,7 @@ import (
 
 	"github.com/appscode/kutil"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	acs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/golang/glog"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,11 +15,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func EnsurePodAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.PodAlert) *api.PodAlert) (*api.PodAlert, error) {
+func EnsurePodAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.PodAlert) *api.PodAlert) (*api.PodAlert, error) {
 	return CreateOrPatchPodAlert(c, meta, transform)
 }
 
-func CreateOrPatchPodAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.PodAlert) *api.PodAlert) (*api.PodAlert, error) {
+func CreateOrPatchPodAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.PodAlert) *api.PodAlert) (*api.PodAlert, error) {
 	cur, err := c.PodAlerts(meta.Namespace).Get(meta.Name, metav1.GetOptions{})
 	if kerr.IsNotFound(err) {
 		glog.V(3).Infof("Creating PodAlert %s/%s.", meta.Namespace, meta.Name)
@@ -36,7 +36,7 @@ func CreateOrPatchPodAlert(c acs.MonitoringV1alpha1Interface, meta metav1.Object
 	return PatchPodAlert(c, cur, transform)
 }
 
-func PatchPodAlert(c acs.MonitoringV1alpha1Interface, cur *api.PodAlert, transform func(*api.PodAlert) *api.PodAlert) (*api.PodAlert, error) {
+func PatchPodAlert(c cs.MonitoringV1alpha1Interface, cur *api.PodAlert, transform func(*api.PodAlert) *api.PodAlert) (*api.PodAlert, error) {
 	curJson, err := json.Marshal(cur)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func PatchPodAlert(c acs.MonitoringV1alpha1Interface, cur *api.PodAlert, transfo
 	return result, err
 }
 
-func TryPatchPodAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.PodAlert) *api.PodAlert) (result *api.PodAlert, err error) {
+func TryPatchPodAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.PodAlert) *api.PodAlert) (result *api.PodAlert, err error) {
 	attempt := 0
 	err = wait.PollImmediate(kutil.RetryInterval, kutil.RetryTimeout, func() (bool, error) {
 		attempt++
@@ -80,7 +80,7 @@ func TryPatchPodAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta,
 	return
 }
 
-func TryUpdatePodAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.PodAlert) *api.PodAlert) (result *api.PodAlert, err error) {
+func TryUpdatePodAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.PodAlert) *api.PodAlert) (result *api.PodAlert, err error) {
 	attempt := 0
 	err = wait.PollImmediate(kutil.RetryInterval, kutil.RetryTimeout, func() (bool, error) {
 		attempt++

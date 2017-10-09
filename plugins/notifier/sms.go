@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	aci "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 )
 
 const (
@@ -13,7 +13,7 @@ const (
 	EventTypeRecovery        = "RECOVERY"
 )
 
-func RenderSMS(alert aci.Alert, req *Request) string {
+func RenderSMS(alert api.Alert, req *Request) string {
 	if strings.ToUpper(req.Type) == EventTypeAcknowledgement {
 		return fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.\nThis issue is acked.", alert.GetName(), req.HostName, req.State)
 	} else if strings.ToUpper(req.Type) == EventTypeRecovery {

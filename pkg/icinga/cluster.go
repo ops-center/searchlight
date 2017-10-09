@@ -2,19 +2,19 @@ package icinga
 
 import (
 	"github.com/appscode/go/errors"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	tcs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
-	clientset "k8s.io/client-go/kubernetes"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	"k8s.io/client-go/kubernetes"
 )
 
 type ClusterHost struct {
 	commonHost
 
-	KubeClient clientset.Interface
-	ExtClient  tcs.MonitoringV1alpha1Interface
+	KubeClient kubernetes.Interface
+	ExtClient  cs.MonitoringV1alpha1Interface
 }
 
-func NewClusterHost(kubeClient clientset.Interface, extClient tcs.MonitoringV1alpha1Interface, IcingaClient *Client) *ClusterHost {
+func NewClusterHost(kubeClient kubernetes.Interface, extClient cs.MonitoringV1alpha1Interface, IcingaClient *Client) *ClusterHost {
 	return &ClusterHost{
 		KubeClient: kubeClient,
 		ExtClient:  extClient,
@@ -24,7 +24,7 @@ func NewClusterHost(kubeClient clientset.Interface, extClient tcs.MonitoringV1al
 	}
 }
 
-func (h *ClusterHost) getHost(alert tapi.ClusterAlert) IcingaHost {
+func (h *ClusterHost) getHost(alert api.ClusterAlert) IcingaHost {
 	return IcingaHost{
 		Type:           TypeCluster,
 		AlertNamespace: alert.Namespace,
@@ -32,7 +32,7 @@ func (h *ClusterHost) getHost(alert tapi.ClusterAlert) IcingaHost {
 	}
 }
 
-func (h *ClusterHost) Create(alert tapi.ClusterAlert) error {
+func (h *ClusterHost) Create(alert api.ClusterAlert) error {
 	alertSpec := alert.Spec
 	kh := h.getHost(alert)
 
@@ -49,7 +49,7 @@ func (h *ClusterHost) Create(alert tapi.ClusterAlert) error {
 	if alertSpec.CheckInterval.Seconds() > 0 {
 		attrs["check_interval"] = alertSpec.CheckInterval.Seconds()
 	}
-	commandVars := tapi.ClusterCommands[alertSpec.Check].Vars
+	commandVars := api.ClusterCommands[alertSpec.Check].Vars
 	for key, val := range alertSpec.Vars {
 		if _, found := commandVars[key]; found {
 			attrs[IVar(key)] = val
@@ -61,7 +61,7 @@ func (h *ClusterHost) Create(alert tapi.ClusterAlert) error {
 	return h.CreateIcingaNotification(alert, kh)
 }
 
-func (h *ClusterHost) Update(alert tapi.ClusterAlert) error {
+func (h *ClusterHost) Update(alert api.ClusterAlert) error {
 	alertSpec := alert.Spec
 	kh := h.getHost(alert)
 
@@ -69,7 +69,7 @@ func (h *ClusterHost) Update(alert tapi.ClusterAlert) error {
 	if alertSpec.CheckInterval.Seconds() > 0 {
 		attrs["check_interval"] = alertSpec.CheckInterval.Seconds()
 	}
-	commandVars := tapi.ClusterCommands[alertSpec.Check].Vars
+	commandVars := api.ClusterCommands[alertSpec.Check].Vars
 	for key, val := range alertSpec.Vars {
 		if _, found := commandVars[key]; found {
 			attrs[IVar(key)] = val
@@ -82,7 +82,7 @@ func (h *ClusterHost) Update(alert tapi.ClusterAlert) error {
 	return h.UpdateIcingaNotification(alert, kh)
 }
 
-func (h *ClusterHost) Delete(alert tapi.ClusterAlert) error {
+func (h *ClusterHost) Delete(alert api.ClusterAlert) error {
 	kh := h.getHost(alert)
 	if err := h.DeleteIcingaService(alert.Name, kh); err != nil {
 		return errors.FromErr(err).Err()

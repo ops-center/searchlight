@@ -5,7 +5,7 @@ import (
 
 	"github.com/appscode/go/crypto/rand"
 	"github.com/appscode/go/types"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/test/e2e/framework"
 	. "github.com/appscode/searchlight/test/e2e/matcher"
 	. "github.com/onsi/ginkgo"
@@ -23,7 +23,7 @@ var _ = Describe("PodAlert", func() {
 		rs              *extensions.ReplicaSet
 		ss              *apps.StatefulSet
 		pod             *apiv1.Pod
-		alert           *tapi.PodAlert
+		alert           *api.PodAlert
 		skippingMessage string
 	)
 
@@ -159,7 +159,7 @@ var _ = Describe("PodAlert", func() {
 			oldAlertSpec := alert.Spec
 
 			By("Change LabelSelector")
-			alert, err = f.TryPatchPodAlert(alert.ObjectMeta, func(in *tapi.PodAlert) *tapi.PodAlert {
+			alert, err = f.TryPatchPodAlert(alert.ObjectMeta, func(in *api.PodAlert) *api.PodAlert {
 				in.Spec.Selector.MatchLabels = map[string]string{
 					"app": rand.WithUniqSuffix("searchlight-e2e"),
 				}
@@ -238,7 +238,7 @@ var _ = Describe("PodAlert", func() {
 		// Check "pod_status" and basic searchlight functionality
 		Context("check_pod_status", func() {
 			BeforeEach(func() {
-				alert.Spec.Check = tapi.CheckPodStatus
+				alert.Spec.Check = api.CheckPodStatus
 				alert.Spec.Selector = *(rs.Spec.Selector)
 			})
 
@@ -279,7 +279,7 @@ var _ = Describe("PodAlert", func() {
 					"-c",
 					"dd if=/dev/zero of=/source/data/data bs=1024 count=52500 && sleep 1d",
 				}
-				alert.Spec.Check = tapi.CheckPodVolume
+				alert.Spec.Check = api.CheckPodVolume
 				alert.Spec.Selector = *(ss.Spec.Selector)
 				alert.Spec.Vars["volume_name"] = framework.TestSourceDataVolumeName
 			})
@@ -348,7 +348,7 @@ var _ = Describe("PodAlert", func() {
 		// Check "pod_exec"
 		Context("check_pod_exec", func() {
 			BeforeEach(func() {
-				alert.Spec.Check = tapi.CheckPodExec
+				alert.Spec.Check = api.CheckPodExec
 				alert.Spec.Selector = *(rs.Spec.Selector)
 				alert.Spec.Vars["container"] = "busybox"
 				alert.Spec.Vars["cmd"] = "/bin/sh"

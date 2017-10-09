@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"testing"
 
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/data"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetParameterizedNodeVariables(t *testing.T) {
-	alertSpec := tapi.PodAlertSpec{
+	alertSpec := api.PodAlertSpec{
 		Vars: map[string]interface{}{
 			"A": `Fake Query for nodename   =  '?'`,
 			"B": `Fake Query for nodename='?'`,

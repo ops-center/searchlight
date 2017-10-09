@@ -6,7 +6,7 @@ import (
 
 	"github.com/appscode/kutil"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	acs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/golang/glog"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,11 +15,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func EnsureNodeAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.NodeAlert) *api.NodeAlert) (*api.NodeAlert, error) {
+func EnsureNodeAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.NodeAlert) *api.NodeAlert) (*api.NodeAlert, error) {
 	return CreateOrPatchNodeAlert(c, meta, transform)
 }
 
-func CreateOrPatchNodeAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.NodeAlert) *api.NodeAlert) (*api.NodeAlert, error) {
+func CreateOrPatchNodeAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.NodeAlert) *api.NodeAlert) (*api.NodeAlert, error) {
 	cur, err := c.NodeAlerts(meta.Namespace).Get(meta.Name, metav1.GetOptions{})
 	if kerr.IsNotFound(err) {
 		glog.V(3).Infof("Creating NodeAlert %s/%s.", meta.Namespace, meta.Name)
@@ -36,7 +36,7 @@ func CreateOrPatchNodeAlert(c acs.MonitoringV1alpha1Interface, meta metav1.Objec
 	return PatchNodeAlert(c, cur, transform)
 }
 
-func PatchNodeAlert(c acs.MonitoringV1alpha1Interface, cur *api.NodeAlert, transform func(*api.NodeAlert) *api.NodeAlert) (*api.NodeAlert, error) {
+func PatchNodeAlert(c cs.MonitoringV1alpha1Interface, cur *api.NodeAlert, transform func(*api.NodeAlert) *api.NodeAlert) (*api.NodeAlert, error) {
 	curJson, err := json.Marshal(cur)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func PatchNodeAlert(c acs.MonitoringV1alpha1Interface, cur *api.NodeAlert, trans
 	return result, err
 }
 
-func TryPatchNodeAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.NodeAlert) *api.NodeAlert) (result *api.NodeAlert, err error) {
+func TryPatchNodeAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.NodeAlert) *api.NodeAlert) (result *api.NodeAlert, err error) {
 	attempt := 0
 	err = wait.PollImmediate(kutil.RetryInterval, kutil.RetryTimeout, func() (bool, error) {
 		attempt++
@@ -80,7 +80,7 @@ func TryPatchNodeAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta
 	return
 }
 
-func TryUpdateNodeAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.NodeAlert) *api.NodeAlert) (result *api.NodeAlert, err error) {
+func TryUpdateNodeAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.NodeAlert) *api.NodeAlert) (result *api.NodeAlert, err error) {
 	attempt := 0
 	err = wait.PollImmediate(kutil.RetryInterval, kutil.RetryTimeout, func() (bool, error) {
 		attempt++

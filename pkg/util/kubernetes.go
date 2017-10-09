@@ -2,15 +2,15 @@ package util
 
 import (
 	"github.com/appscode/go-notify/unified"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	tcs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	clientset "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes"
 )
 
-func CheckNotifiers(kubeClient clientset.Interface, alert tapi.Alert) error {
+func CheckNotifiers(kubeClient kubernetes.Interface, alert api.Alert) error {
 	if alert.GetNotifierSecretName() == "" && len(alert.GetReceivers()) == 0 {
 		return nil
 	}
@@ -32,7 +32,7 @@ func CheckNotifiers(kubeClient clientset.Interface, alert tapi.Alert) error {
 	return nil
 }
 
-func FindPodAlert(searchlightClient tcs.MonitoringV1alpha1Interface, obj metav1.ObjectMeta) ([]*tapi.PodAlert, error) {
+func FindPodAlert(searchlightClient cs.MonitoringV1alpha1Interface, obj metav1.ObjectMeta) ([]*api.PodAlert, error) {
 	alerts, err := searchlightClient.PodAlerts(obj.Namespace).List(metav1.ListOptions{LabelSelector: labels.Everything().String()})
 	if kerr.IsNotFound(err) {
 		return nil, nil
@@ -40,7 +40,7 @@ func FindPodAlert(searchlightClient tcs.MonitoringV1alpha1Interface, obj metav1.
 		return nil, err
 	}
 
-	result := make([]*tapi.PodAlert, 0)
+	result := make([]*api.PodAlert, 0)
 	for i, alert := range alerts.Items {
 		if ok, _ := alert.IsValid(); !ok {
 			continue
@@ -57,7 +57,7 @@ func FindPodAlert(searchlightClient tcs.MonitoringV1alpha1Interface, obj metav1.
 	return result, nil
 }
 
-func FindNodeAlert(searchlightClient tcs.MonitoringV1alpha1Interface, obj metav1.ObjectMeta) ([]*tapi.NodeAlert, error) {
+func FindNodeAlert(searchlightClient cs.MonitoringV1alpha1Interface, obj metav1.ObjectMeta) ([]*api.NodeAlert, error) {
 	alerts, err := searchlightClient.NodeAlerts(obj.Namespace).List(metav1.ListOptions{LabelSelector: labels.Everything().String()})
 	if kerr.IsNotFound(err) {
 		return nil, nil
@@ -65,7 +65,7 @@ func FindNodeAlert(searchlightClient tcs.MonitoringV1alpha1Interface, obj metav1
 		return nil, err
 	}
 
-	result := make([]*tapi.NodeAlert, 0)
+	result := make([]*api.NodeAlert, 0)
 	for i, alert := range alerts.Items {
 		if ok, _ := alert.IsValid(); !ok {
 			continue

@@ -5,13 +5,13 @@ import (
 	"reflect"
 
 	"github.com/appscode/go/log"
-	acrt "github.com/appscode/go/runtime"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/eventer"
 	"github.com/appscode/searchlight/pkg/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
+	rt "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
@@ -20,10 +20,10 @@ import (
 
 // Blocks caller. Intended to be called as a Go routine.
 func (op *Operator) WatchPodAlerts() {
-	defer acrt.HandleCrash()
+	defer runtime.HandleCrash()
 
 	lw := &cache.ListWatch{
-		ListFunc: func(opts metav1.ListOptions) (runtime.Object, error) {
+		ListFunc: func(opts metav1.ListOptions) (rt.Object, error) {
 			return op.ExtClient.PodAlerts(apiv1.NamespaceAll).List(metav1.ListOptions{})
 		},
 		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
@@ -31,11 +31,11 @@ func (op *Operator) WatchPodAlerts() {
 		},
 	}
 	_, ctrl := cache.NewInformer(lw,
-		&tapi.PodAlert{},
+		&api.PodAlert{},
 		op.Opt.ResyncPeriod,
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
-				if alert, ok := obj.(*tapi.PodAlert); ok {
+				if alert, ok := obj.(*api.PodAlert); ok {
 					if ok, err := alert.IsValid(); !ok {
 						op.recorder.Eventf(
 							alert.ObjectReference(),
@@ -61,12 +61,12 @@ func (op *Operator) WatchPodAlerts() {
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
-				oldAlert, ok := old.(*tapi.PodAlert)
+				oldAlert, ok := old.(*api.PodAlert)
 				if !ok {
 					log.Errorln(errors.New("Invalid PodAlert object"))
 					return
 				}
-				newAlert, ok := new.(*tapi.PodAlert)
+				newAlert, ok := new.(*api.PodAlert)
 				if !ok {
 					log.Errorln(errors.New("Invalid PodAlert object"))
 					return
@@ -97,7 +97,7 @@ func (op *Operator) WatchPodAlerts() {
 				}
 			},
 			DeleteFunc: func(obj interface{}) {
-				if alert, ok := obj.(*tapi.PodAlert); ok {
+				if alert, ok := obj.(*api.PodAlert); ok {
 					if ok, err := alert.IsValid(); !ok {
 						op.recorder.Eventf(
 							alert.ObjectReference(),
@@ -127,7 +127,7 @@ func (op *Operator) WatchPodAlerts() {
 	ctrl.Run(wait.NeverStop)
 }
 
-func (op *Operator) EnsurePodAlert(old, new *tapi.PodAlert) {
+func (op *Operator) EnsurePodAlert(old, new *api.PodAlert) {
 	oldObjs := make(map[string]*apiv1.Pod)
 
 	if old != nil {
@@ -182,7 +182,7 @@ func (op *Operator) EnsurePodAlert(old, new *tapi.PodAlert) {
 	}
 }
 
-func (op *Operator) EnsurePodAlertDeleted(alert *tapi.PodAlert) {
+func (op *Operator) EnsurePodAlertDeleted(alert *api.PodAlert) {
 	sel, err := metav1.LabelSelectorAsSelector(&alert.Spec.Selector)
 	if err != nil {
 		return

@@ -1,7 +1,7 @@
 package e2e_test
 
 import (
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/test/e2e/framework"
 	. "github.com/appscode/searchlight/test/e2e/matcher"
 	. "github.com/onsi/ginkgo"
@@ -15,7 +15,7 @@ var _ = Describe("ClusterAlert", func() {
 		err                error
 		f                  *framework.Invocation
 		rs                 *extensions.ReplicaSet
-		alert              *tapi.ClusterAlert
+		alert              *api.ClusterAlert
 		totalNode          int32
 		icingaServiceState IcingaServiceState
 	)
@@ -47,7 +47,7 @@ var _ = Describe("ClusterAlert", func() {
 
 		Context("check_component_status", func() {
 			BeforeEach(func() {
-				alert.Spec.Check = tapi.CheckComponentStatus
+				alert.Spec.Check = api.CheckComponentStatus
 				icingaServiceState = IcingaServiceState{Ok: 1}
 			})
 
@@ -56,7 +56,7 @@ var _ = Describe("ClusterAlert", func() {
 
 		Context("check_node_exists", func() {
 			BeforeEach(func() {
-				alert.Spec.Check = tapi.CheckNodeExists
+				alert.Spec.Check = api.CheckNodeExists
 				totalNode, _ = f.CountNode()
 			})
 
@@ -88,7 +88,7 @@ var _ = Describe("ClusterAlert", func() {
 
 			BeforeEach(func() {
 				rs = f.ReplicaSet()
-				alert.Spec.Check = tapi.CheckPodExists
+				alert.Spec.Check = api.CheckPodExists
 				alert.Spec.Vars["selector"] = labels.SelectorFromSet(rs.Labels).String()
 			})
 

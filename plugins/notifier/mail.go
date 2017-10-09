@@ -6,11 +6,11 @@ import (
 	"strings"
 	"time"
 
-	aci "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/icinga"
 )
 
-func RenderSubject(alert aci.Alert, req *Request) string {
+func RenderSubject(alert api.Alert, req *Request) string {
 	if strings.ToUpper(req.Type) == EventTypeAcknowledgement {
 		return fmt.Sprintf("Problem Acknowledged: Service [%s] for [%s] is in \"%s\" state", alert.GetName(), req.HostName, req.State)
 	} else if strings.ToUpper(req.Type) == EventTypeRecovery {
@@ -36,7 +36,7 @@ type TemplateData struct {
 	IcingaTime         time.Time
 }
 
-func RenderMail(alert aci.Alert, req *Request) (string, error) {
+func RenderMail(alert api.Alert, req *Request) (string, error) {
 	host, err := icinga.ParseHost(req.HostName)
 	if err != nil {
 		return "", err

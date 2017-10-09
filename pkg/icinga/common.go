@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/appscode/go/errors"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 )
 
 type commonHost struct {
@@ -155,7 +155,7 @@ func (h *commonHost) IcingaServiceSearchQuery(svc string, kids ...IcingaHost) st
 	return fmt.Sprintf(`{"filter": "(%s)&&match(\"%s\",service.name)"}`, matchHost, svc)
 }
 
-func (h *commonHost) CreateIcingaNotification(alert tapi.Alert, kh IcingaHost) error {
+func (h *commonHost) CreateIcingaNotification(alert api.Alert, kh IcingaHost) error {
 	obj := IcingaObject{
 		Templates: []string{"icinga2-notifier-template"},
 		Attrs: map[string]interface{}{
@@ -184,7 +184,7 @@ func (h *commonHost) CreateIcingaNotification(alert tapi.Alert, kh IcingaHost) e
 	return errors.Newf("Can't create Icinga notification: %dd", resp.Status).Err()
 }
 
-func (h *commonHost) UpdateIcingaNotification(alert tapi.Alert, kh IcingaHost) error {
+func (h *commonHost) UpdateIcingaNotification(alert api.Alert, kh IcingaHost) error {
 	obj := IcingaObject{
 		Attrs: map[string]interface{}{
 			"interval": int(alert.GetAlertInterval().Seconds()),

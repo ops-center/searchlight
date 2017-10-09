@@ -5,19 +5,19 @@ import (
 	"testing"
 	"time"
 
-	aci "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestRenderMail(t *testing.T) {
-	alert := aci.ClusterAlert{
+	alert := api.ClusterAlert{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "ca-cert-demo",
 			Namespace: metav1.NamespaceDefault,
 		},
-		Spec: aci.ClusterAlertSpec{
-			Check:              aci.CheckPodExists,
+		Spec: api.ClusterAlertSpec{
+			Check:              api.CheckPodExists,
 			CheckInterval:      metav1.Duration{Duration: 1 * time.Minute},
 			AlertInterval:      metav1.Duration{Duration: 5 * time.Minute},
 			NotifierSecretName: "notifier-conf",

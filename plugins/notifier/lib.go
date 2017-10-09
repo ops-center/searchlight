@@ -12,8 +12,8 @@ import (
 	"github.com/appscode/go/flags"
 	"github.com/appscode/go/log"
 	logs "github.com/appscode/go/log/golog"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	tcs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -42,7 +42,7 @@ type Secret struct {
 	Token     string `json:"token"`
 }
 
-func getLoader(client kubernetes.Interface, alert tapi.Alert) (envconfig.LoaderFunc, error) {
+func getLoader(client kubernetes.Interface, alert api.Alert) (envconfig.LoaderFunc, error) {
 	cfg, err := client.CoreV1().Secrets(alert.GetNamespace()).Get(alert.GetNotifierSecretName(), metav1.GetOptions{})
 	if err != nil {
 		return nil, err
@@ -56,7 +56,7 @@ func getLoader(client kubernetes.Interface, alert tapi.Alert) (envconfig.LoaderF
 	}, nil
 }
 
-func getAlert(kh *icinga.IcingaHost, extClient tcs.MonitoringV1alpha1Interface, alertName string) (tapi.Alert, error) {
+func getAlert(kh *icinga.IcingaHost, extClient cs.MonitoringV1alpha1Interface, alertName string) (api.Alert, error) {
 	switch kh.Type {
 	case icinga.TypePod:
 		return extClient.PodAlerts(kh.AlertNamespace).Get(alertName, metav1.GetOptions{})
@@ -79,7 +79,7 @@ func sendNotification(req *Request) {
 		log.Fatalln(err)
 	}
 
-	alert, err := getAlert(host, tcs.NewForConfigOrDie(config), req.AlertName)
+	alert, err := getAlert(host, cs.NewForConfigOrDie(config), req.AlertName)
 	if err != nil {
 		log.Fatalln(err)
 	}

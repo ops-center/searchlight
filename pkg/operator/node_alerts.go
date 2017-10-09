@@ -5,13 +5,13 @@ import (
 	"reflect"
 
 	"github.com/appscode/go/log"
-	acrt "github.com/appscode/go/runtime"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/eventer"
 	"github.com/appscode/searchlight/pkg/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/apimachinery/pkg/runtime"
+	rt "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
@@ -20,10 +20,10 @@ import (
 
 // Blocks caller. Intended to be called as a Go routine.
 func (op *Operator) WatchNodeAlerts() {
-	defer acrt.HandleCrash()
+	defer runtime.HandleCrash()
 
 	lw := &cache.ListWatch{
-		ListFunc: func(opts metav1.ListOptions) (runtime.Object, error) {
+		ListFunc: func(opts metav1.ListOptions) (rt.Object, error) {
 			return op.ExtClient.NodeAlerts(apiv1.NamespaceAll).List(metav1.ListOptions{})
 		},
 		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
@@ -31,11 +31,11 @@ func (op *Operator) WatchNodeAlerts() {
 		},
 	}
 	_, ctrl := cache.NewInformer(lw,
-		&tapi.NodeAlert{},
+		&api.NodeAlert{},
 		op.Opt.ResyncPeriod,
 		cache.ResourceEventHandlerFuncs{
 			AddFunc: func(obj interface{}) {
-				if alert, ok := obj.(*tapi.NodeAlert); ok {
+				if alert, ok := obj.(*api.NodeAlert); ok {
 					if ok, err := alert.IsValid(); !ok {
 						op.recorder.Eventf(
 							alert.ObjectReference(),
@@ -61,12 +61,12 @@ func (op *Operator) WatchNodeAlerts() {
 				}
 			},
 			UpdateFunc: func(old, new interface{}) {
-				oldAlert, ok := old.(*tapi.NodeAlert)
+				oldAlert, ok := old.(*api.NodeAlert)
 				if !ok {
 					log.Errorln(errors.New("Invalid NodeAlert object"))
 					return
 				}
-				newAlert, ok := new.(*tapi.NodeAlert)
+				newAlert, ok := new.(*api.NodeAlert)
 				if !ok {
 					log.Errorln(errors.New("Invalid NodeAlert object"))
 					return
@@ -97,7 +97,7 @@ func (op *Operator) WatchNodeAlerts() {
 				}
 			},
 			DeleteFunc: func(obj interface{}) {
-				if alert, ok := obj.(*tapi.NodeAlert); ok {
+				if alert, ok := obj.(*api.NodeAlert); ok {
 					if ok, err := alert.IsValid(); !ok {
 						op.recorder.Eventf(
 							alert.ObjectReference(),
@@ -127,7 +127,7 @@ func (op *Operator) WatchNodeAlerts() {
 	ctrl.Run(wait.NeverStop)
 }
 
-func (op *Operator) EnsureNodeAlert(old, new *tapi.NodeAlert) {
+func (op *Operator) EnsureNodeAlert(old, new *api.NodeAlert) {
 	oldObjs := make(map[string]*apiv1.Node)
 
 	if old != nil {
@@ -169,7 +169,7 @@ func (op *Operator) EnsureNodeAlert(old, new *tapi.NodeAlert) {
 	}
 }
 
-func (op *Operator) EnsureNodeAlertDeleted(alert *tapi.NodeAlert) {
+func (op *Operator) EnsureNodeAlertDeleted(alert *api.NodeAlert) {
 	sel := labels.SelectorFromSet(alert.Spec.Selector)
 	if alert.Spec.NodeName != "" {
 		if resource, err := op.KubeClient.CoreV1().Nodes().Get(alert.Spec.NodeName, metav1.GetOptions{}); err == nil {

@@ -7,9 +7,9 @@ import (
 
 	"github.com/appscode/go/log"
 	"github.com/appscode/pat"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	tapi_v1alpha1 "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	tcs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	aci "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/eventer"
 	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -35,7 +35,7 @@ type Options struct {
 type Operator struct {
 	KubeClient       clientset.Interface
 	ApiExtKubeClient apiextensionsclient.Interface
-	ExtClient        tcs.MonitoringV1alpha1Interface
+	ExtClient        cs.MonitoringV1alpha1Interface
 	IcingaClient     *icinga.Client // TODO: init
 
 	Opt         Options
@@ -45,7 +45,7 @@ type Operator struct {
 	recorder    record.EventRecorder
 }
 
-func New(kubeClient clientset.Interface, apiExtKubeClient apiextensionsclient.Interface, extClient tcs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, opt Options) *Operator {
+func New(kubeClient clientset.Interface, apiExtKubeClient apiextensionsclient.Interface, extClient cs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, opt Options) *Operator {
 	return &Operator{
 		KubeClient:       kubeClient,
 		ApiExtKubeClient: apiExtKubeClient,
@@ -62,20 +62,20 @@ func New(kubeClient clientset.Interface, apiExtKubeClient apiextensionsclient.In
 func (op *Operator) Setup() error {
 	log.Infoln("Ensuring CustomResourceDefinition")
 
-	if err := op.ensureCustomResourceDefinition(tapi.ResourceKindClusterAlert, tapi.ResourceTypeClusterAlert); err != nil {
+	if err := op.ensureCustomResourceDefinition(aci.ResourceKindClusterAlert, aci.ResourceTypeClusterAlert); err != nil {
 		return err
 	}
-	if err := op.ensureCustomResourceDefinition(tapi.ResourceKindNodeAlert, tapi.ResourceTypeNodeAlert); err != nil {
+	if err := op.ensureCustomResourceDefinition(aci.ResourceKindNodeAlert, aci.ResourceTypeNodeAlert); err != nil {
 		return err
 	}
-	if err := op.ensureCustomResourceDefinition(tapi.ResourceKindPodAlert, tapi.ResourceTypePodAlert); err != nil {
+	if err := op.ensureCustomResourceDefinition(aci.ResourceKindPodAlert, aci.ResourceTypePodAlert); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (op *Operator) ensureCustomResourceDefinition(resourceKind, resourceType string) error {
-	name := resourceType + "." + tapi_v1alpha1.SchemeGroupVersion.Group
+	name := resourceType + "." + api.SchemeGroupVersion.Group
 	_, err := op.ApiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions().Get(name, metav1.GetOptions{})
 	if !kerr.IsNotFound(err) {
 		return err
@@ -89,8 +89,8 @@ func (op *Operator) ensureCustomResourceDefinition(resourceKind, resourceType st
 			},
 		},
 		Spec: extensionsobj.CustomResourceDefinitionSpec{
-			Group:   tapi_v1alpha1.SchemeGroupVersion.Group,
-			Version: tapi_v1alpha1.SchemeGroupVersion.Version,
+			Group:   api.SchemeGroupVersion.Group,
+			Version: api.SchemeGroupVersion.Version,
 			Scope:   extensionsobj.NamespaceScoped,
 			Names: extensionsobj.CustomResourceDefinitionNames{
 				Plural: resourceType,

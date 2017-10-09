@@ -6,7 +6,7 @@ import (
 
 	"github.com/appscode/kutil"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	acs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/golang/glog"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -15,11 +15,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func EnsureClusterAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.ClusterAlert) *api.ClusterAlert) (*api.ClusterAlert, error) {
+func EnsureClusterAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.ClusterAlert) *api.ClusterAlert) (*api.ClusterAlert, error) {
 	return CreateOrPatchClusterAlert(c, meta, transform)
 }
 
-func CreateOrPatchClusterAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.ClusterAlert) *api.ClusterAlert) (*api.ClusterAlert, error) {
+func CreateOrPatchClusterAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(alert *api.ClusterAlert) *api.ClusterAlert) (*api.ClusterAlert, error) {
 	cur, err := c.ClusterAlerts(meta.Namespace).Get(meta.Name, metav1.GetOptions{})
 	if kerr.IsNotFound(err) {
 		glog.V(3).Infof("Creating ClusterAlert %s/%s.", meta.Namespace, meta.Name)
@@ -36,7 +36,7 @@ func CreateOrPatchClusterAlert(c acs.MonitoringV1alpha1Interface, meta metav1.Ob
 	return PatchClusterAlert(c, cur, transform)
 }
 
-func PatchClusterAlert(c acs.MonitoringV1alpha1Interface, cur *api.ClusterAlert, transform func(*api.ClusterAlert) *api.ClusterAlert) (*api.ClusterAlert, error) {
+func PatchClusterAlert(c cs.MonitoringV1alpha1Interface, cur *api.ClusterAlert, transform func(*api.ClusterAlert) *api.ClusterAlert) (*api.ClusterAlert, error) {
 	curJson, err := json.Marshal(cur)
 	if err != nil {
 		return nil, err
@@ -59,7 +59,7 @@ func PatchClusterAlert(c acs.MonitoringV1alpha1Interface, cur *api.ClusterAlert,
 	return result, err
 }
 
-func TryPatchClusterAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.ClusterAlert) *api.ClusterAlert) (result *api.ClusterAlert, err error) {
+func TryPatchClusterAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.ClusterAlert) *api.ClusterAlert) (result *api.ClusterAlert, err error) {
 	attempt := 0
 	err = wait.PollImmediate(kutil.RetryInterval, kutil.RetryTimeout, func() (bool, error) {
 		attempt++
@@ -80,7 +80,7 @@ func TryPatchClusterAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectM
 	return
 }
 
-func TryUpdateClusterAlert(c acs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.ClusterAlert) *api.ClusterAlert) (result *api.ClusterAlert, err error) {
+func TryUpdateClusterAlert(c cs.MonitoringV1alpha1Interface, meta metav1.ObjectMeta, transform func(*api.ClusterAlert) *api.ClusterAlert) (result *api.ClusterAlert, err error) {
 	attempt := 0
 	err = wait.PollImmediate(kutil.RetryInterval, kutil.RetryTimeout, func() (bool, error) {
 		attempt++

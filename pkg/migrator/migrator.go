@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/appscode/go/log"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	tapi_v1alpha1 "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	tcs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	aci "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/hashicorp/go-version"
 	extensionsobj "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
@@ -28,12 +28,12 @@ type migrationState struct {
 type migrator struct {
 	kubeClient       clientset.Interface
 	apiExtKubeClient apiextensionsclient.Interface
-	extClient        tcs.MonitoringV1alpha1Interface
+	extClient        cs.MonitoringV1alpha1Interface
 
 	migrationState *migrationState
 }
 
-func NewMigrator(kubeClient clientset.Interface, apiExtKubeClient apiextensionsclient.Interface, extClient tcs.MonitoringV1alpha1Interface) *migrator {
+func NewMigrator(kubeClient clientset.Interface, apiExtKubeClient apiextensionsclient.Interface, extClient cs.MonitoringV1alpha1Interface) *migrator {
 	return &migrator{
 		migrationState:   &migrationState{},
 		kubeClient:       kubeClient,
@@ -57,7 +57,7 @@ func (m *migrator) isMigrationNeeded() (bool, error) {
 
 	if mv == 7 {
 		_, err := m.kubeClient.ExtensionsV1beta1().ThirdPartyResources().Get(
-			tapi.ResourceNameClusterAlert+"."+tapi_v1alpha1.SchemeGroupVersion.Group,
+			aci.ResourceNameClusterAlert+"."+api.SchemeGroupVersion.Group,
 			metav1.GetOptions{},
 		)
 		if err != nil {
@@ -69,7 +69,7 @@ func (m *migrator) isMigrationNeeded() (bool, error) {
 		}
 
 		_, err = m.kubeClient.ExtensionsV1beta1().ThirdPartyResources().Get(
-			tapi.ResourceNameNodeAlert+"."+tapi_v1alpha1.SchemeGroupVersion.Group,
+			aci.ResourceNameNodeAlert+"."+api.SchemeGroupVersion.Group,
 			metav1.GetOptions{},
 		)
 		if err != nil {
@@ -81,7 +81,7 @@ func (m *migrator) isMigrationNeeded() (bool, error) {
 		}
 
 		_, err = m.kubeClient.ExtensionsV1beta1().ThirdPartyResources().Get(
-			tapi.ResourceNamePodAlert+"."+tapi_v1alpha1.SchemeGroupVersion.Group,
+			aci.ResourceNamePodAlert+"."+api.SchemeGroupVersion.Group,
 			metav1.GetOptions{},
 		)
 		if err != nil {
@@ -140,33 +140,33 @@ func (m *migrator) deleteTPRs() error {
 	tprClient := m.kubeClient.ExtensionsV1beta1().ThirdPartyResources()
 
 	deleteTPR := func(resourceName string) error {
-		name := resourceName + "." + tapi_v1alpha1.SchemeGroupVersion.Group
+		name := resourceName + "." + api.SchemeGroupVersion.Group
 		if err := tprClient.Delete(name, &metav1.DeleteOptions{}); err != nil {
 			return fmt.Errorf("failed to remove %s TPR", name)
 		}
 		return nil
 	}
 
-	if err := deleteTPR(tapi.ResourceNameClusterAlert); err != nil {
+	if err := deleteTPR(aci.ResourceNameClusterAlert); err != nil {
 		return err
 	}
-	if err := deleteTPR(tapi.ResourceNameNodeAlert); err != nil {
+	if err := deleteTPR(aci.ResourceNameNodeAlert); err != nil {
 		return err
 	}
-	if err := deleteTPR(tapi.ResourceNamePodAlert); err != nil {
+	if err := deleteTPR(aci.ResourceNamePodAlert); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (m *migrator) createCRDs() error {
-	if err := m.createCRD(tapi.ResourceKindClusterAlert, tapi.ResourceTypeClusterAlert); err != nil {
+	if err := m.createCRD(aci.ResourceKindClusterAlert, aci.ResourceTypeClusterAlert); err != nil {
 		return err
 	}
-	if err := m.createCRD(tapi.ResourceKindNodeAlert, tapi.ResourceTypeNodeAlert); err != nil {
+	if err := m.createCRD(aci.ResourceKindNodeAlert, aci.ResourceTypeNodeAlert); err != nil {
 		return err
 	}
-	if err := m.createCRD(tapi.ResourceKindPodAlert, tapi.ResourceTypePodAlert); err != nil {
+	if err := m.createCRD(aci.ResourceKindPodAlert, aci.ResourceTypePodAlert); err != nil {
 		return err
 	}
 	return nil
@@ -175,14 +175,14 @@ func (m *migrator) createCRDs() error {
 func (m *migrator) createCRD(resourceKind, resourceType string) error {
 	crd := &extensionsobj.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: resourceType + "." + tapi_v1alpha1.SchemeGroupVersion.Group,
+			Name: resourceType + "." + api.SchemeGroupVersion.Group,
 			Labels: map[string]string{
 				"app": "searchlight",
 			},
 		},
 		Spec: extensionsobj.CustomResourceDefinitionSpec{
-			Group:   tapi_v1alpha1.SchemeGroupVersion.Group,
-			Version: tapi_v1alpha1.SchemeGroupVersion.Version,
+			Group:   api.SchemeGroupVersion.Group,
+			Version: api.SchemeGroupVersion.Version,
 			Scope:   extensionsobj.NamespaceScoped,
 			Names: extensionsobj.CustomResourceDefinitionNames{
 				Plural: resourceType,
@@ -274,7 +274,7 @@ func (m *migrator) deleteCRDs() error {
 	crdClient := m.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions()
 
 	deleteCRD := func(resourceType string) error {
-		name := resourceType + "." + tapi_v1alpha1.SchemeGroupVersion.Group
+		name := resourceType + "." + api.SchemeGroupVersion.Group
 		err := crdClient.Delete(name, &metav1.DeleteOptions{})
 		if err != nil {
 			return fmt.Errorf(`Failed to delete CRD "%s""`, name)
@@ -282,33 +282,33 @@ func (m *migrator) deleteCRDs() error {
 		return nil
 	}
 
-	if err := deleteCRD(tapi.ResourceTypeClusterAlert); err != nil {
+	if err := deleteCRD(aci.ResourceTypeClusterAlert); err != nil {
 		return err
 	}
-	if err := deleteCRD(tapi.ResourceTypeNodeAlert); err != nil {
+	if err := deleteCRD(aci.ResourceTypeNodeAlert); err != nil {
 		return err
 	}
-	if err := deleteCRD(tapi.ResourceTypePodAlert); err != nil {
+	if err := deleteCRD(aci.ResourceTypePodAlert); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (m *migrator) createTPRs() error {
-	if err := m.createTPR(tapi.ResourceNameClusterAlert); err != nil {
+	if err := m.createTPR(aci.ResourceNameClusterAlert); err != nil {
 		return err
 	}
-	if err := m.createTPR(tapi.ResourceNameNodeAlert); err != nil {
+	if err := m.createTPR(aci.ResourceNameNodeAlert); err != nil {
 		return err
 	}
-	if err := m.createTPR(tapi.ResourceNamePodAlert); err != nil {
+	if err := m.createTPR(aci.ResourceNamePodAlert); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (m *migrator) createTPR(resourceName string) error {
-	name := resourceName + "." + tapi_v1alpha1.SchemeGroupVersion.Group
+	name := resourceName + "." + api.SchemeGroupVersion.Group
 	_, err := m.kubeClient.ExtensionsV1beta1().ThirdPartyResources().Get(name, metav1.GetOptions{})
 	if !kerr.IsNotFound(err) {
 		return err
@@ -328,7 +328,7 @@ func (m *migrator) createTPR(resourceName string) error {
 		Description: "Searchlight by AppsCode - Alerts for Kubernetes",
 		Versions: []extensions.APIVersion{
 			{
-				Name: tapi_v1alpha1.SchemeGroupVersion.Version,
+				Name: api.SchemeGroupVersion.Version,
 			},
 		},
 	}

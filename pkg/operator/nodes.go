@@ -5,12 +5,12 @@ import (
 	"reflect"
 
 	"github.com/appscode/go/log"
-	acrt "github.com/appscode/go/runtime"
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/eventer"
 	"github.com/appscode/searchlight/pkg/util"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
+	rt "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/util/runtime"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/watch"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
@@ -19,10 +19,10 @@ import (
 
 // Blocks caller. Intended to be called as a Go routine.
 func (op *Operator) WatchNodes() {
-	defer acrt.HandleCrash()
+	defer runtime.HandleCrash()
 
 	lw := &cache.ListWatch{
-		ListFunc: func(opts metav1.ListOptions) (runtime.Object, error) {
+		ListFunc: func(opts metav1.ListOptions) (rt.Object, error) {
 			return op.KubeClient.CoreV1().Nodes().List(metav1.ListOptions{})
 		},
 		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
@@ -79,8 +79,8 @@ func (op *Operator) WatchNodes() {
 					}
 
 					type change struct {
-						old *tapi.NodeAlert
-						new *tapi.NodeAlert
+						old *api.NodeAlert
+						new *api.NodeAlert
 					}
 					diff := make(map[string]*change)
 					for i := range oldAlerts {
@@ -132,7 +132,7 @@ func (op *Operator) WatchNodes() {
 	ctrl.Run(wait.NeverStop)
 }
 
-func (op *Operator) EnsureNode(node *apiv1.Node, old, new *tapi.NodeAlert) (err error) {
+func (op *Operator) EnsureNode(node *apiv1.Node, old, new *api.NodeAlert) (err error) {
 	defer func() {
 		if err == nil {
 			op.recorder.Eventf(
@@ -165,7 +165,7 @@ func (op *Operator) EnsureNode(node *apiv1.Node, old, new *tapi.NodeAlert) (err 
 	return
 }
 
-func (op *Operator) EnsureNodeDeleted(node *apiv1.Node, alert *tapi.NodeAlert) (err error) {
+func (op *Operator) EnsureNodeDeleted(node *apiv1.Node, alert *api.NodeAlert) (err error) {
 	defer func() {
 		if err == nil {
 			op.recorder.Eventf(

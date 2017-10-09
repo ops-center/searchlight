@@ -1,7 +1,7 @@
 package framework
 
 import (
-	tapi "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
+	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	. "github.com/onsi/gomega"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apiv1 "k8s.io/client-go/pkg/api/v1"
@@ -9,7 +9,7 @@ import (
 
 func (f *Framework) EventuallyClusterAlert() GomegaAsyncAssertion {
 	client := f.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions()
-	name := tapi.ResourceTypeClusterAlert + "." + tapi.SchemeGroupVersion.Group
+	name := api.ResourceTypeClusterAlert + "." + api.SchemeGroupVersion.Group
 	return Eventually(func() error {
 		_, err := client.Get(name, metav1.GetOptions{})
 		if err != nil {
@@ -23,7 +23,7 @@ func (f *Framework) EventuallyClusterAlert() GomegaAsyncAssertion {
 
 func (f *Framework) EventuallyNodeAlert() GomegaAsyncAssertion {
 	client := f.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions()
-	name := tapi.ResourceTypeNodeAlert + "." + tapi.SchemeGroupVersion.Group
+	name := api.ResourceTypeNodeAlert + "." + api.SchemeGroupVersion.Group
 	return Eventually(func() error {
 		_, err := client.Get(name, metav1.GetOptions{})
 		if err != nil {
@@ -37,7 +37,7 @@ func (f *Framework) EventuallyNodeAlert() GomegaAsyncAssertion {
 
 func (f *Framework) EventuallyPodAlert() GomegaAsyncAssertion {
 	client := f.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions()
-	name := tapi.ResourceTypePodAlert + "." + tapi.SchemeGroupVersion.Group
+	name := api.ResourceTypePodAlert + "." + api.SchemeGroupVersion.Group
 	return Eventually(func() error {
 		_, err := client.Get(name, metav1.GetOptions{})
 		if err != nil {
