@@ -45,8 +45,9 @@ FROM alpine
 RUN set -x \
   && apk add --update --no-cache ca-certificates
 
-COPY searchlight /searchlight
-ENTRYPOINT ["/searchlight"]
+COPY searchlight /usr/bin/searchlight
+
+ENTRYPOINT ["searchlight"]
 EOL
 	local cmd="docker build -t appscode/$IMG:$TAG ."
 	echo $cmd; $cmd
