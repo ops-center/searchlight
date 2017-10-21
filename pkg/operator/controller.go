@@ -17,7 +17,7 @@ import (
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	clientset "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
 )
 
@@ -33,7 +33,7 @@ type Options struct {
 }
 
 type Operator struct {
-	KubeClient   clientset.Interface
+	KubeClient   kubernetes.Interface
 	CRDClient    apiextensionsclient.Interface
 	ExtClient    cs.MonitoringV1alpha1Interface
 	IcingaClient *icinga.Client // TODO: init
@@ -45,7 +45,7 @@ type Operator struct {
 	recorder    record.EventRecorder
 }
 
-func New(kubeClient clientset.Interface, crdClient apiextensionsclient.Interface, extClient cs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, opt Options) *Operator {
+func New(kubeClient kubernetes.Interface, crdClient apiextensionsclient.Interface, extClient cs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, opt Options) *Operator {
 	return &Operator{
 		KubeClient:   kubeClient,
 		CRDClient:    crdClient,

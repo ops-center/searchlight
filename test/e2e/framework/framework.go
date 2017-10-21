@@ -5,11 +5,11 @@ import (
 	tcs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/icinga"
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
-	clientset "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/kubernetes"
 )
 
 type Framework struct {
-	kubeClient       clientset.Interface
+	kubeClient       kubernetes.Interface
 	apiExtKubeClient apiextensionsclient.Interface
 	extClient        tcs.MonitoringV1alpha1Interface
 	icingaClient     *icinga.Client
@@ -19,7 +19,7 @@ type Framework struct {
 	storageClass     string
 }
 
-func New(kubeClient clientset.Interface, apiExtKubeClient apiextensionsclient.Interface, extClient tcs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, provider, storageClass string) *Framework {
+func New(kubeClient kubernetes.Interface, apiExtKubeClient apiextensionsclient.Interface, extClient tcs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, provider, storageClass string) *Framework {
 	return &Framework{
 		kubeClient:       kubeClient,
 		apiExtKubeClient: apiExtKubeClient,
