@@ -2,16 +2,16 @@ package framework
 
 import (
 	"github.com/appscode/go/crypto/rand"
-	tcs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/icinga"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/client-go/kubernetes"
 )
 
 type Framework struct {
 	kubeClient       kubernetes.Interface
-	apiExtKubeClient apiextensionsclient.Interface
-	extClient        tcs.MonitoringV1alpha1Interface
+	apiExtKubeClient crd_cs.ApiextensionsV1beta1Interface
+	extClient        cs.MonitoringV1alpha1Interface
 	icingaClient     *icinga.Client
 	namespace        string
 	name             string
@@ -19,7 +19,7 @@ type Framework struct {
 	storageClass     string
 }
 
-func New(kubeClient kubernetes.Interface, apiExtKubeClient apiextensionsclient.Interface, extClient tcs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, provider, storageClass string) *Framework {
+func New(kubeClient kubernetes.Interface, apiExtKubeClient crd_cs.ApiextensionsV1beta1Interface, extClient cs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, provider, storageClass string) *Framework {
 	return &Framework{
 		kubeClient:       kubeClient,
 		apiExtKubeClient: apiExtKubeClient,

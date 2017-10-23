@@ -6,12 +6,12 @@ import (
 
 	"github.com/appscode/go/log"
 	"github.com/appscode/kutil"
-	tcs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/appscode/searchlight/pkg/migrator"
 	"github.com/appscode/searchlight/pkg/operator"
 	"github.com/spf13/cobra"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -51,8 +51,8 @@ func run(opt operator.Options) {
 	}
 
 	kubeClient := kubernetes.NewForConfigOrDie(config)
-	apiExtKubeClient := apiextensionsclient.NewForConfigOrDie(config)
-	extClient := tcs.NewForConfigOrDie(config)
+	apiExtKubeClient := crd_cs.NewForConfigOrDie(config)
+	extClient := cs.NewForConfigOrDie(config)
 
 	secret, err := kubeClient.CoreV1().Secrets(kutil.Namespace()).Get(opt.ConfigSecretName, metav1.GetOptions{})
 	if err != nil {

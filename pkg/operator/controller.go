@@ -13,8 +13,8 @@ import (
 	"github.com/appscode/searchlight/pkg/eventer"
 	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	apiextensions "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	crd_api "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -34,7 +34,7 @@ type Options struct {
 
 type Operator struct {
 	KubeClient   kubernetes.Interface
-	CRDClient    apiextensionsclient.Interface
+	CRDClient    crd_cs.ApiextensionsV1beta1Interface
 	ExtClient    cs.MonitoringV1alpha1Interface
 	IcingaClient *icinga.Client // TODO: init
 
@@ -45,7 +45,7 @@ type Operator struct {
 	recorder    record.EventRecorder
 }
 
-func New(kubeClient kubernetes.Interface, crdClient apiextensionsclient.Interface, extClient cs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, opt Options) *Operator {
+func New(kubeClient kubernetes.Interface, crdClient crd_cs.ApiextensionsV1beta1Interface, extClient cs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, opt Options) *Operator {
 	return &Operator{
 		KubeClient:   kubeClient,
 		CRDClient:    crdClient,
@@ -64,15 +64,15 @@ func (op *Operator) Setup() error {
 }
 
 func (op *Operator) ensureCustomResourceDefinitions() error {
-	crds := []*apiextensions.CustomResourceDefinition{
+	crds := []*crd_api.CustomResourceDefinition{
 		api.ClusterAlert{}.CustomResourceDefinition(),
 		api.NodeAlert{}.CustomResourceDefinition(),
 		api.PodAlert{}.CustomResourceDefinition(),
 	}
 	for _, crd := range crds {
-		_, err := op.CRDClient.ApiextensionsV1beta1().CustomResourceDefinitions().Get(crd.Name, metav1.GetOptions{})
+		_, err := op.CRDClient.CustomResourceDefinitions().Get(crd.Name, metav1.GetOptions{})
 		if kerr.IsNotFound(err) {
-			_, err = op.CRDClient.ApiextensionsV1beta1().CustomResourceDefinitions().Create(crd)
+			_, err = op.CRDClient.CustomResourceDefinitions().Create(crd)
 			if err != nil {
 				return err
 			}

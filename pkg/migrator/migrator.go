@@ -11,8 +11,8 @@ import (
 	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/hashicorp/go-version"
 	extensions "k8s.io/api/extensions/v1beta1"
-	extensionsobj "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	crd_api "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
@@ -27,13 +27,13 @@ type migrationState struct {
 
 type migrator struct {
 	kubeClient       kubernetes.Interface
-	apiExtKubeClient apiextensionsclient.Interface
+	apiExtKubeClient crd_cs.ApiextensionsV1beta1Interface
 	extClient        cs.MonitoringV1alpha1Interface
 
 	migrationState *migrationState
 }
 
-func NewMigrator(kubeClient kubernetes.Interface, apiExtKubeClient apiextensionsclient.Interface, extClient cs.MonitoringV1alpha1Interface) *migrator {
+func NewMigrator(kubeClient kubernetes.Interface, apiExtKubeClient crd_cs.ApiextensionsV1beta1Interface, extClient cs.MonitoringV1alpha1Interface) *migrator {
 	return &migrator{
 		migrationState:   &migrationState{},
 		kubeClient:       kubeClient,
@@ -173,25 +173,25 @@ func (m *migrator) createCRDs() error {
 }
 
 func (m *migrator) createCRD(resourceKind, resourceType string) error {
-	crd := &extensionsobj.CustomResourceDefinition{
+	crd := &crd_api.CustomResourceDefinition{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: resourceType + "." + api.SchemeGroupVersion.Group,
 			Labels: map[string]string{
 				"app": "searchlight",
 			},
 		},
-		Spec: extensionsobj.CustomResourceDefinitionSpec{
+		Spec: crd_api.CustomResourceDefinitionSpec{
 			Group:   api.SchemeGroupVersion.Group,
 			Version: api.SchemeGroupVersion.Version,
-			Scope:   extensionsobj.NamespaceScoped,
-			Names: extensionsobj.CustomResourceDefinitionNames{
+			Scope:   crd_api.NamespaceScoped,
+			Names: crd_api.CustomResourceDefinitionNames{
 				Plural: resourceType,
 				Kind:   resourceKind,
 			},
 		},
 	}
 
-	crdClient := m.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions()
+	crdClient := m.apiExtKubeClient.CustomResourceDefinitions()
 	_, err := crdClient.Create(crd)
 	if err != nil && !kerr.IsAlreadyExists(err) {
 		return fmt.Errorf(`Failed to create CRD "%v"`, crd.Spec.Names.Kind)
@@ -204,12 +204,12 @@ func (m *migrator) createCRD(resourceKind, resourceType string) error {
 		}
 		for _, cond := range crdEst.Status.Conditions {
 			switch cond.Type {
-			case extensionsobj.Established:
-				if cond.Status == extensionsobj.ConditionTrue {
+			case crd_api.Established:
+				if cond.Status == crd_api.ConditionTrue {
 					return true, err
 				}
-			case extensionsobj.NamesAccepted:
-				if cond.Status == extensionsobj.ConditionFalse {
+			case crd_api.NamesAccepted:
+				if cond.Status == crd_api.ConditionFalse {
 					fmt.Printf("Name conflict. Reason: %v\n", cond.Reason)
 				}
 			}
@@ -226,7 +226,7 @@ func (m *migrator) waitForCRDsReady() error {
 	}
 
 	return wait.Poll(3*time.Second, 10*time.Minute, func() (bool, error) {
-		crdList, err := m.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions().List(metav1.ListOptions{
+		crdList, err := m.apiExtKubeClient.CustomResourceDefinitions().List(metav1.ListOptions{
 			LabelSelector: labels.SelectorFromSet(labelMap).String(),
 		})
 		if err != nil {
@@ -271,7 +271,7 @@ func (m *migrator) rollback() error {
 }
 
 func (m *migrator) deleteCRDs() error {
-	crdClient := m.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions()
+	crdClient := m.apiExtKubeClient.CustomResourceDefinitions()
 
 	deleteCRD := func(resourceType string) error {
 		name := resourceType + "." + api.SchemeGroupVersion.Group

@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	tcs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/appscode/searchlight/pkg/operator"
 	"github.com/appscode/searchlight/test/e2e"
@@ -16,7 +16,7 @@ import (
 	. "github.com/onsi/ginkgo"
 	"github.com/onsi/ginkgo/reporters"
 	. "github.com/onsi/gomega"
-	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
+	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/util/homedir"
@@ -55,8 +55,8 @@ var _ = BeforeSuite(func() {
 	Expect(err).NotTo(HaveOccurred())
 	// Clients
 	kubeClient := kubernetes.NewForConfigOrDie(config)
-	apiExtKubeClient := apiextensionsclient.NewForConfigOrDie(config)
-	extClient := tcs.NewForConfigOrDie(config)
+	apiExtKubeClient := crd_cs.NewForConfigOrDie(config)
+	extClient := cs.NewForConfigOrDie(config)
 	// Framework
 	root = framework.New(kubeClient, apiExtKubeClient, extClient, nil, provider, storageClass)
 

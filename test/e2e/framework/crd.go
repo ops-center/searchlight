@@ -8,7 +8,7 @@ import (
 )
 
 func (f *Framework) EventuallyClusterAlert() GomegaAsyncAssertion {
-	client := f.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions()
+	client := f.apiExtKubeClient.CustomResourceDefinitions()
 	name := api.ResourceTypeClusterAlert + "." + api.SchemeGroupVersion.Group
 	return Eventually(func() error {
 		_, err := client.Get(name, metav1.GetOptions{})
@@ -22,7 +22,7 @@ func (f *Framework) EventuallyClusterAlert() GomegaAsyncAssertion {
 }
 
 func (f *Framework) EventuallyNodeAlert() GomegaAsyncAssertion {
-	client := f.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions()
+	client := f.apiExtKubeClient.CustomResourceDefinitions()
 	name := api.ResourceTypeNodeAlert + "." + api.SchemeGroupVersion.Group
 	return Eventually(func() error {
 		_, err := client.Get(name, metav1.GetOptions{})
@@ -36,7 +36,7 @@ func (f *Framework) EventuallyNodeAlert() GomegaAsyncAssertion {
 }
 
 func (f *Framework) EventuallyPodAlert() GomegaAsyncAssertion {
-	client := f.apiExtKubeClient.ApiextensionsV1beta1().CustomResourceDefinitions()
+	client := f.apiExtKubeClient.CustomResourceDefinitions()
 	name := api.ResourceTypePodAlert + "." + api.SchemeGroupVersion.Group
 	return Eventually(func() error {
 		_, err := client.Get(name, metav1.GetOptions{})
