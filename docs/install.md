@@ -9,13 +9,11 @@ Searchlight can be installed using YAML files includes in the [/hack/deploy](/ha
 
 ```console
 # Install without RBAC roles
-$ curl https://raw.githubusercontent.com/appscode/searchlight/4.0.0/hack/deploy/without-rbac.yaml \
-  | kubectl apply -f -
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/searchlight/4.0.0/hack/deploy/without-rbac.yaml
 
 
 # Install with RBAC roles
-$ curl https://raw.githubusercontent.com/appscode/searchlight/4.0.0/hack/deploy/with-rbac.yaml \
-  | kubectl apply -f -
+$ kubectl apply -f https://raw.githubusercontent.com/appscode/searchlight/4.0.0/hack/deploy/with-rbac.yaml
 ```
 
 
