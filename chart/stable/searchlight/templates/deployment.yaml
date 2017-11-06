@@ -23,7 +23,7 @@ spec:
       containers:
       - name: operator
         image: {{ .Values.operator.image }}:{{ .Values.operator.tag }}
-        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.imagePullSecrets }}
         imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
@@ -47,7 +47,7 @@ spec:
           mountPath: /srv
       - name: icinga
         image: {{ .Values.icinga.image }}:{{ .Values.icinga.tag }}
-        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.imagePullSecrets }}
         imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}
@@ -74,7 +74,7 @@ spec:
           mountPath: /srv
       - name: ido
         image: {{ .Values.ido.image }}:{{ .Values.ido.tag }}
-        imagePullPolicy: {{ default "" .Values.imagePullPolicy | quote }}
+        imagePullPolicy: {{ .Values.imagePullPolicy }}
         {{- if .Values.imagePullSecrets }}
         imagePullSecrets:
 {{ toYaml .Values.imagePullSecrets | indent 8 }}

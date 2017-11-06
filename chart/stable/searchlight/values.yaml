@@ -4,18 +4,35 @@
 
 operator:
   image: appscode/searchlight
-  pullPolicy: IfNotPresent
   tag: 4.0.0
 
 ido:
   image: appscode/postgres
-  pullPolicy: IfNotPresent
   tag: 9.5-alpine
 
 icinga:
   image: appscode/icinga
-  pullPolicy: IfNotPresent
   tag: 4.0.0-k8s
+
+## Optionally specify an array of imagePullSecrets.
+## Secrets must be manually created in the namespace.
+## ref: https://kubernetes.io/docs/concepts/containers/images/#specifying-imagepullsecrets-on-a-pod
+##
+# imagePullSecrets:
+
+#   - name: myRegistryKeySecretName
+## Specify a imagePullPolicy
+## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
+##
+imagePullPolicy: IfNotPresent
+
+## Node labels for pod assignment
+## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+##
+nodeSelector: {}
+
+## Log level for proxy
+logLevel: 3
 
 ## Icinga configaration
 ## https://github.com/appscode/searchlight/blob/master/docs/icinga2/deployment.md#create-deployment
