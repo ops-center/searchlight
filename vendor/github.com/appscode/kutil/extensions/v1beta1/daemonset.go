@@ -14,6 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
+	"github.com/appscode/kutil/meta"
 )
 
 func CreateOrPatchDaemonSet(c kubernetes.Interface, meta metav1.ObjectMeta, transform func(*extensions.DaemonSet) *extensions.DaemonSet) (*extensions.DaemonSet, error) {
@@ -39,7 +40,7 @@ func PatchDaemonSet(c kubernetes.Interface, cur *extensions.DaemonSet, transform
 		return nil, err
 	}
 
-	modJson, err := json.Marshal(transform(cur))
+	modJson, err := json.Marshal(transform(cur.DeepCopy()))
 	if err != nil {
 		return nil, err
 	}
@@ -53,7 +54,7 @@ func PatchDaemonSet(c kubernetes.Interface, cur *extensions.DaemonSet, transform
 	}
 	glog.V(3).Infof("Patching DaemonSet %s/%s with %s.", cur.Namespace, cur.Name, string(patch))
 	result, err := c.ExtensionsV1beta1().DaemonSets(cur.Namespace).Patch(cur.Name, types.StrategicMergePatchType, patch)
-	if ok, err := kutil.CheckAPIVersion(c, "<= 1.5"); err == nil && ok {
+	if ok, err := meta.CheckAPIVersion(c, "<= 1.5"); err == nil && ok {
 		// https://kubernetes.io/docs/tasks/manage-daemon/update-daemon-set/
 		core_util.RestartPods(c, cur.Namespace, cur.Spec.Selector)
 	}
@@ -89,7 +90,7 @@ func TryUpdateDaemonSet(c kubernetes.Interface, meta metav1.ObjectMeta, transfor
 		if kerr.IsNotFound(e2) {
 			return false, e2
 		} else if e2 == nil {
-			result, e2 = c.ExtensionsV1beta1().DaemonSets(cur.Namespace).Update(transform(cur))
+			result, e2 = c.ExtensionsV1beta1().DaemonSets(cur.Namespace).Update(transform(cur.DeepCopy()))
 			return e2 == nil, nil
 		}
 		glog.Errorf("Attempt %d failed to update DaemonSet %s/%s due to %v.", attempt, cur.Namespace, cur.Name, e2)

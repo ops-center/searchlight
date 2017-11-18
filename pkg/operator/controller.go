@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/appscode/go/log"
-	"github.com/appscode/kutil"
+	apiext_util "github.com/appscode/kutil/apiextensions/v1beta1"
 	"github.com/appscode/pat"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
@@ -14,7 +14,7 @@ import (
 	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	crd_api "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
+	ecs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	kerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -34,7 +34,7 @@ type Options struct {
 
 type Operator struct {
 	KubeClient   kubernetes.Interface
-	CRDClient    crd_cs.ApiextensionsV1beta1Interface
+	CRDClient    ecs.ApiextensionsV1beta1Interface
 	ExtClient    cs.MonitoringV1alpha1Interface
 	IcingaClient *icinga.Client // TODO: init
 
@@ -45,7 +45,7 @@ type Operator struct {
 	recorder    record.EventRecorder
 }
 
-func New(kubeClient kubernetes.Interface, crdClient crd_cs.ApiextensionsV1beta1Interface, extClient cs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, opt Options) *Operator {
+func New(kubeClient kubernetes.Interface, crdClient ecs.ApiextensionsV1beta1Interface, extClient cs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, opt Options) *Operator {
 	return &Operator{
 		KubeClient:   kubeClient,
 		CRDClient:    crdClient,
@@ -78,7 +78,7 @@ func (op *Operator) ensureCustomResourceDefinitions() error {
 			}
 		}
 	}
-	return kutil.WaitForCRDReady(op.KubeClient.CoreV1().RESTClient(), crds)
+	return apiext_util.WaitForCRDReady(op.KubeClient.CoreV1().RESTClient(), crds)
 }
 
 func (op *Operator) RunAPIServer() {

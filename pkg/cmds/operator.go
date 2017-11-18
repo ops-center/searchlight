@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/appscode/go/log"
-	"github.com/appscode/kutil"
+	"github.com/appscode/kutil/meta"
 	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/appscode/searchlight/pkg/migrator"
@@ -54,7 +54,7 @@ func run(opt operator.Options) {
 	apiExtKubeClient := crd_cs.NewForConfigOrDie(config)
 	extClient := cs.NewForConfigOrDie(config)
 
-	secret, err := kubeClient.CoreV1().Secrets(kutil.Namespace()).Get(opt.ConfigSecretName, metav1.GetOptions{})
+	secret, err := kubeClient.CoreV1().Secrets(meta.Namespace()).Get(opt.ConfigSecretName, metav1.GetOptions{})
 	if err != nil {
 		log.Fatalf("Failed to load secret: %s", err)
 	}
