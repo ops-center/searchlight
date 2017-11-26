@@ -184,6 +184,7 @@ spec:
     to: ["ops-alerts@example.com"]
 ```
 
+*NB: According to https://cloud.google.com/compute/docs/tutorials/sending-mail/ , Google Compute Engine does not allow outbound connections on ports 25, 465, and 587. So, try [Mailgun](#mailgun) to receive alert notifications via email with your GCE or GKE clusters.*
 
 ## Twilio
 To receive SMS notifications via Twilio, create a Secret with the following keys:
