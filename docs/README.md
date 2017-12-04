@@ -1,3 +1,21 @@
+---
+title: Overview | Searchlight
+description: Overview of Searchlight
+menu:
+  product_searchlight_4.0.0:
+    identifier: overview-searchlight
+    name: Overview
+    parent: getting-started
+    weight: 20
+product_name: searchlight
+menu_name: product_searchlight_4.0.1
+section_menu_id: getting-started
+url: /products/searchlight/4.0.0/getting-started/
+aliases:
+  - /products/searchlight/4.0.0/
+  - /products/searchlight/4.0.0/README/
+---
+
 [![Go Report Card](https://goreportcard.com/badge/github.com/appscode/searchlight)](https://goreportcard.com/report/github.com/appscode/searchlight)
 
 # Searchlight
@@ -17,7 +35,7 @@ Please pick a version of Searchlight that matches your Kubernetes installation.
 
 | Searchlight Version                                                                      | Docs                                                                       | Kubernetes Version |
 |------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|--------------------|
-| [4.0.0](https://github.com/appscode/searchlight/releases/tag/4.0.0) (uses CRD) | [User Guide](https://github.com/appscode/searchlight/tree/4.0.0/docs) | 1.7.x+             |
+| [4.0.1](https://github.com/appscode/searchlight/releases/tag/4.0.0) (uses CRD) | [User Guide](https://github.com/appscode/searchlight/tree/4.0.0/docs) | 1.7.x+             |
 | [3.0.1](https://github.com/appscode/searchlight/releases/tag/3.0.1) (uses TPR)           | [User Guide](https://github.com/appscode/searchlight/tree/3.0.1/docs)      | 1.5.x - 1.7.x      |
 
 ## Installation

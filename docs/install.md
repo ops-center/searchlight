@@ -1,3 +1,20 @@
+---
+title: Install
+description: Searchlight Install
+menu:
+  product_searchlight_4.0.0:
+    identifier: install-searchlight
+    name: Install
+    parent: getting-started
+    weight: 30
+product_name: searchlight
+menu_name: product_searchlight_4.0.1
+section_menu_id: getting-started
+url: /products/searchlight/4.0.0/getting-started/install/
+aliases:
+  - /products/searchlight/4.0.0/install/
+---
+
 > New to Searchlight? Please start [here](/docs/tutorials/README.md).
 
 # Installation Guide
@@ -115,12 +132,12 @@ $ POD_NAMESPACE=kube-system
 $ POD_NAME=$(kubectl get pods -n $POD_NAMESPACE -l app=searchlight -o jsonpath={.items[0].metadata.name})
 $ kubectl exec -it $POD_NAME -c operator -n $POD_NAMESPACE searchlight version
 
-Version = 4.0.0
+Version = 4.0.1
 VersionStrategy = tag
 Os = alpine
 Arch = amd64
 CommitHash = 9442863beb09a50a2c3818ab586fa5b1541fddf1
 GitBranch = release-4.0
-GitTag = 4.0.0
+GitTag = 4.0.1
 CommitTimestamp = 2017-09-26T03:00:58
 ```
