@@ -15,8 +15,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	crd_api "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	ecs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
-	kerr "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/record"
 )
@@ -69,16 +67,7 @@ func (op *Operator) ensureCustomResourceDefinitions() error {
 		api.NodeAlert{}.CustomResourceDefinition(),
 		api.PodAlert{}.CustomResourceDefinition(),
 	}
-	for _, crd := range crds {
-		_, err := op.CRDClient.CustomResourceDefinitions().Get(crd.Name, metav1.GetOptions{})
-		if kerr.IsNotFound(err) {
-			_, err = op.CRDClient.CustomResourceDefinitions().Create(crd)
-			if err != nil {
-				return err
-			}
-		}
-	}
-	return apiext_util.WaitForCRDReady(op.KubeClient.CoreV1().RESTClient(), crds)
+	return apiext_util.RegisterCRDs(op.CRDClient, crds)
 }
 
 func (op *Operator) RunAPIServer() {
