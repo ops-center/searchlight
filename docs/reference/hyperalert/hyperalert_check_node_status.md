@@ -4,8 +4,7 @@ menu:
   product_searchlight_4.0.0:
     identifier: hyperalert-check-node-status
     name: Check Node Status
-    parent: hyperalert
-    weight: 50
+    parent: hyperalert-cli
 product_name: searchlight
 section_menu_id: reference
 menu_name: product_searchlight_4.0.0
@@ -15,7 +14,6 @@ menu_name: product_searchlight_4.0.0
 Check Kubernetes Node
 
 ### Synopsis
-
 
 Check Kubernetes Node
 
@@ -46,6 +44,7 @@ hyperalert check_node_status [flags]
 ```
 
 ### SEE ALSO
-* [hyperalert](hyperalert.md)	 - AppsCode Icinga2 plugin
+
+* [hyperalert](/docs/reference/hyperalert/hyperalert.md)	 - AppsCode Icinga2 plugin
 
 

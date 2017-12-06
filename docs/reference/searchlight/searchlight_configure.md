@@ -1,22 +1,19 @@
 ---
-title: Searchlight Configure
+title: Configure
 menu:
   product_searchlight_4.0.0:
     identifier: searchlight-configure
-    name: Searchlight Configure
-    parent: searchlight
-    weight: 20
+    name: Configure
+    parent: searchlight-cli
 product_name: searchlight
 section_menu_id: reference
 menu_name: product_searchlight_4.0.0
 ---
-
 ## searchlight configure
 
 Generate icinga configuration
 
 ### Synopsis
-
 
 Generate icinga configuration
 
@@ -46,6 +43,7 @@ searchlight configure [flags]
 ```
 
 ### SEE ALSO
-* [searchlight](searchlight.md)	 - Searchlight by AppsCode - Alerts for Kubernetes
+
+* [searchlight](/docs/reference/searchlight/searchlight.md)	 - Searchlight by AppsCode - Alerts for Kubernetes
 
 

@@ -1,22 +1,19 @@
 ---
-title: Hostfacts Run
+title: Run
 menu:
   product_searchlight_4.0.0:
     identifier: hostfacts-run
-    name: Hostfacts Run
-    parent: hostfacts
-    weight: 20
+    name: Run
+    parent: hostfacts-cli
 product_name: searchlight
 section_menu_id: reference
 menu_name: product_searchlight_4.0.0
 ---
-
 ## hostfacts run
 
 Run server
 
 ### Synopsis
-
 
 Run server
 
@@ -52,6 +49,7 @@ hostfacts run [flags]
 ```
 
 ### SEE ALSO
-* [hostfacts](hostfacts.md)	 - Hostfacts by AppsCode - Expose node metrics
+
+* [hostfacts](/docs/reference/hostfacts/hostfacts.md)	 - Hostfacts by AppsCode - Expose node metrics
 
 

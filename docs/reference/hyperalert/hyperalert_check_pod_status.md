@@ -4,8 +4,7 @@ menu:
   product_searchlight_4.0.0:
     identifier: hyperalert-check-pod-status
     name: Check Pod Status
-    parent: hyperalert
-    weight: 65
+    parent: hyperalert-cli
 product_name: searchlight
 section_menu_id: reference
 menu_name: product_searchlight_4.0.0
@@ -15,7 +14,6 @@ menu_name: product_searchlight_4.0.0
 Check Kubernetes Pod(s) status
 
 ### Synopsis
-
 
 Check Kubernetes Pod(s) status
 
@@ -46,6 +44,7 @@ hyperalert check_pod_status [flags]
 ```
 
 ### SEE ALSO
-* [hyperalert](hyperalert.md)	 - AppsCode Icinga2 plugin
+
+* [hyperalert](/docs/reference/hyperalert/hyperalert.md)	 - AppsCode Icinga2 plugin
 
 
