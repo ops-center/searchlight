@@ -32,13 +32,13 @@ contribution. See the [DCO](https://github.com/appscode/searchlight/blob/master/
 
 ## Developer Guide
 
-We have a [Developer Guide](/docs/setup/developer-guide/README.md) that outlines everything you need to know from setting up your
+We have a [Developer Guide](/docs/setup/developer-guide/overview.md) that outlines everything you need to know from setting up your
 dev environment to how to build and test Searchlight. If you find something undocumented or incorrect along the way,
 please feel free to send a Pull Request.
 
 ## Getting Help
 
-If you have a question about Searchlight or having problem using it, you can contact us on our public Slack channel. Follow [this link](https://slack.appscode.com) to get invitation to our Slack channel.
+If you have a question about Searchlight or having problem using it, you can contact us on the [AppsCode Slack team](https://appscode.slack.com/messages/C8M7LT2QK/details/) channel `#searchlight_`. Follow [this link](https://slack.appscode.com) to get invitation to our Slack channel.
 
 ## Bugs/Feature request
 
@@ -46,7 +46,7 @@ If you have found a bug with Searchlight or want to request for new features, pl
 
 ## Submit PR
 
-If you fix a bug or developed a new feature, feel free to submit a PR. In either case, please file a [Github issue]((https://github.com/appscode/searchlight/issues/new)) first, so that we can have a discussion on it. This is a rough outline of what a contributor's workflow looks like:
+If you fix a bug or developed a new feature, feel free to submit a PR. In either case, please file a [Github issue](https://github.com/appscode/searchlight/issues/new) first, so that we can have a discussion on it. This is a rough outline of what a contributor's workflow looks like:
 
 
 - Create a topic branch from where you want to base your work (usually master).
@@ -59,4 +59,4 @@ Thanks for your contributions!
 
 ## Spread the word
 
-If you have written blog post or tutorial on Kubed, please share it with us on [Twitter](https://twitter.com/AppsCodeHQ) or [Slack](https://slack.appscode.com).
+If you have written blog post or tutorial on Searchlight, please share it with us on [Twitter](https://twitter.com/AppsCodeHQ) or [Slack](https://slack.appscode.com).
