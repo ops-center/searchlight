@@ -43,7 +43,7 @@ how we can improve it. To disable stats collection, run the operator with the fl
  - Many thanks to [Icinga](https://www.icinga.com/) project.
 
 ## Support
-If you have any questions, you can reach out to us.
-* [Slack](https://slack.appscode.com)
-* [Twitter](https://twitter.com/AppsCodeHQ)
-* [Website](https://appscode.com)
+We use Slack for public discussions. To chit chat with us or the rest of the community, join us in the [AppsCode Slack team](https://appscode.slack.com/messages/C8M7LT2QK/details/) channel `#searchlight_`. To sign up, use our [Slack inviter](https://slack.appscode.com/).
+
+If you have found a bug with Searchlight or want to request for new features, please [file an issue](https://github.com/appscode/searchlight/issues/new).
+
