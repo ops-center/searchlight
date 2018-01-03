@@ -1,6 +1,6 @@
 ---
-title: Readme | Searchlight
-description: Readme of Searchlight
+title: Weclome | Searchlight
+description: Welcome to Searchlight
 menu:
   product_searchlight_5.0.0:
     identifier: readme-searchlight
