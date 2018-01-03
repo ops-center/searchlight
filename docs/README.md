@@ -30,7 +30,7 @@ From here you can learn all about Searchlight's architecture and how to deploy a
 
 - [Guides](/docs/guides/). Guides show you how to perform tasks with Searchlight.
 
-- [Reference](/docs/reference/). Detailed exhaustive lists of command-line options, configuration options, API definitions, and procedures.
+- [Reference](/docs/reference/searchlight). Detailed exhaustive lists of command-line options for various Searchlight binaries.
 
 We're always looking for help improving our documentation, so please don't hesitate to
 [file an issue](https://github.com/appscode/searchlight/issues/new) if you see some problem.
