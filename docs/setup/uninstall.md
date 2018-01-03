@@ -18,9 +18,11 @@ section_menu_id: setup
 # Uninstall Searchlight
 Please follow the steps below to uninstall Searchlight:
 
-1. Delete the various objects created for Searchlight operator.
+- Delete the various objects created for Searchlight operator.
+
 ```console
-$ ./hack/deploy/uninstall.sh 
+$ curl -fsSL https://raw.githubusercontent.com/appscode/searchlight/5.0.0/hack/deploy/uninstall.sh | bash
+
 + kubectl delete deployment -l app=searchlight -n kube-system
 deployment "searchlight-operator" deleted
 + kubectl delete service -l app=searchlight -n kube-system
@@ -35,7 +37,8 @@ No resources found
 No resources found
 ```
 
-2. Now, wait several seconds for Searchlight to stop running. To confirm that Searchlight operator pod(s) have stopped running, run:
+- Now, wait several seconds for Searchlight to stop running. To confirm that Searchlight operator pod(s) have stopped running, run:
+
 ```console
 $ kubectl get pods --all-namespaces -l app=searchlight
 ```
