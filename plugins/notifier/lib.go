@@ -65,7 +65,7 @@ func getAlert(kh *icinga.IcingaHost, extClient cs.MonitoringV1alpha1Interface, a
 	case icinga.TypeCluster:
 		return extClient.ClusterAlerts(kh.AlertNamespace).Get(alertName, metav1.GetOptions{})
 	}
-	return nil, fmt.Errorf("Unknown host type %s", kh.Type)
+	return nil, fmt.Errorf("unknown host type %s", kh.Type)
 }
 
 func sendNotification(req *Request) {
@@ -144,7 +144,7 @@ func NewCmd() *cobra.Command {
 		Use:   "notifier",
 		Short: "AppsCode Icinga2 Notifier",
 		Run: func(cmd *cobra.Command, args []string) {
-			flags.EnsureRequiredFlags(cmd, "alert", "host", "type", "state", "output", "time")
+			flags.EnsureRequiredFlags(cmd, "alert", "host", "type", "state", "time")
 			t, err := time.Parse("2006-01-02 15:04:05 +0000", eventTime)
 			if err != nil {
 				log.Errorln(err)
