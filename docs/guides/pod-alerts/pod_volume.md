@@ -21,7 +21,7 @@ Check command `pod_volume` is used to check percentage of available space in Kub
 `pod_volume` check command has the following variables:
 
 - `volumeName` - Name of volume whose usage stats will be checked
-- `secretName` - Name of Kubernetes Secret used to pass [hostfacts auth info](/docs/concepts/hostfacts.md#create-hostfacts-secret)
+- `secretName` - Name of Kubernetes Secret used to pass [hostfacts auth info](/docs/setup/hostfacts.md#create-hostfacts-secret)
 - `warning` - Warning level value (usage percentage defaults to 80.0)
 - `critical` - Critical level value (usage percentage defaults to 95.0)
 
@@ -38,7 +38,7 @@ Execution of this command can result in following states:
 ### Before You Begin
 At first, you need to have a Kubernetes cluster, and the kubectl command-line tool must be configured to communicate with your cluster. If you do not already have a cluster, you can create one by using [Minikube](https://github.com/kubernetes/minikube).
 
-Now, install Searchlight operator in your cluster following the steps [here](/docs/setup/install.md). To use `pod_volume` command, please also [install Hostfacts](/docs/concepts/hostfacts.md) server in your cluster.
+Now, install Searchlight operator in your cluster following the steps [here](/docs/setup/install.md). To use `pod_volume` command, please also [install Hostfacts](/docs/setup/hostfacts.md) server in your cluster.
 
 To keep things isolated, this tutorial uses a separate namespace called `demo` throughout this tutorial. Run the following command to prepare your cluster for this tutorial:
 
