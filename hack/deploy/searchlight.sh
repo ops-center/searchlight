@@ -149,12 +149,12 @@ export TLS_SERVING_KEY=$(cat server.key | $ONESSL base64)
 export KUBE_CA=$($ONESSL get kube-ca | $ONESSL base64)
 rm -rf $ONESSL ca.crt ca.key server.crt server.key
 
-curl -fsSL https://raw.githubusercontent.com/appscode/searchlight/6.0.0-alpha.0/hack/deploy/operator.yaml | envsubst | kubectl apply -f -
+curl -fsSL https://raw.githubusercontent.com/appscode/searchlight/6.0.0-alpha.0/hack/deploy/operator.yaml | $ONESSL envsubst | kubectl apply -f -
 
 if [ "$SEARCHLIGHT_ENABLE_RBAC" = true ]; then
     kubectl create serviceaccount $SEARCHLIGHT_SERVICE_ACCOUNT --namespace $SEARCHLIGHT_NAMESPACE
     kubectl label serviceaccount $SEARCHLIGHT_SERVICE_ACCOUNT app=searchlight --namespace $SEARCHLIGHT_NAMESPACE
-    curl -fsSL https://raw.githubusercontent.com/appscode/searchlight/6.0.0-alpha.0/hack/deploy/rbac-list.yaml | envsubst | kubectl auth reconcile -f -
+    curl -fsSL https://raw.githubusercontent.com/appscode/searchlight/6.0.0-alpha.0/hack/deploy/rbac-list.yaml | $ONESSL envsubst | kubectl auth reconcile -f -
 fi
 
 if [ "$SEARCHLIGHT_RUN_ON_MASTER" -eq 1 ]; then
@@ -163,5 +163,5 @@ if [ "$SEARCHLIGHT_RUN_ON_MASTER" -eq 1 ]; then
 fi
 
 if [ "$SEARCHLIGHT_ENABLE_ADMISSION_WEBHOOK" = true ]; then
-    curl -fsSL https://raw.githubusercontent.com/appscode/searchlight/6.0.0-alpha.0/hack/deploy/admission.yaml | envsubst | kubectl apply -f -
+    curl -fsSL https://raw.githubusercontent.com/appscode/searchlight/6.0.0-alpha.0/hack/deploy/admission.yaml | $ONESSL envsubst | kubectl apply -f -
 fi
