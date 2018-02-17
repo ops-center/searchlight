@@ -9,7 +9,7 @@ import (
 	apiext_util "github.com/appscode/kutil/apiextensions/v1beta1"
 	"github.com/appscode/pat"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	cs "github.com/appscode/searchlight/client/typed/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/clientset/versioned/typed/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/eventer"
 	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
