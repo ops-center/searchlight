@@ -606,7 +606,7 @@ type: Opaque
 Now, to receiver notifications via Webhook, configure receiver as below:
 
 - notifier: `Webhook`
-- to: a list of chat room names
+- to: a list of receiver names
 
 ```yaml
 apiVersion: monitoring.appscode.com/v1alpha1
