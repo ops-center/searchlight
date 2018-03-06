@@ -17,7 +17,7 @@ Please pick a version of Searchlight that matches your Kubernetes installation.
 
 | Searchlight Version                                                                      | Docs                                                                       | Kubernetes Version |
 |------------------------------------------------------------------------------------------|----------------------------------------------------------------------------|--------------------|
-| [5.1.1](https://github.com/appscode/searchlight/releases/tag/5.1.1) (uses CRD)           | [User Guide](https://github.com/appscode/searchlight/tree/5.1.1/docs) | 1.7.x+             |
+| [5.1.1](https://github.com/appscode/searchlight/releases/tag/5.1.1) (uses CRD)           | [User Guide](https://appscode.com/products/searchlight/5.1.1/welcome/)     | 1.7.x+             |
 | [3.0.1](https://github.com/appscode/searchlight/releases/tag/3.0.1) (uses TPR)           | [User Guide](https://github.com/appscode/searchlight/tree/3.0.1/docs)      | 1.5.x - 1.7.x      |
 
 ## Installation
