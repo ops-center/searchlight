@@ -1,14 +1,17 @@
 package cmds
 
 import (
+	"net/http"
 	_ "net/http/pprof"
 	"time"
 
 	"github.com/appscode/go/log"
 	"github.com/appscode/kutil/meta"
-	cs "github.com/appscode/searchlight/client/clientset/versioned/typed/monitoring/v1alpha1"
+	"github.com/appscode/pat"
+	cs "github.com/appscode/searchlight/client/clientset/versioned"
 	"github.com/appscode/searchlight/pkg/icinga"
 	"github.com/appscode/searchlight/pkg/operator"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,6 +26,8 @@ func NewCmdOperator() *cobra.Command {
 		APIAddress:       ":8080",
 		WebAddress:       ":56790",
 		ResyncPeriod:     5 * time.Minute,
+		MaxNumRequeues:   5,
+		NumThreads:       1,
 	}
 	cmd := &cobra.Command{
 		Use:   "run",
@@ -50,7 +55,7 @@ func run(opt operator.Options) {
 	}
 
 	kubeClient := kubernetes.NewForConfigOrDie(config)
-	apiExtKubeClient := crd_cs.NewForConfigOrDie(config)
+	crdClient := crd_cs.NewForConfigOrDie(config)
 	extClient := cs.NewForConfigOrDie(config)
 
 	secret, err := kubeClient.CoreV1().Secrets(meta.Namespace()).Get(opt.ConfigSecretName, metav1.GetOptions{})
@@ -72,6 +77,7 @@ func run(opt operator.Options) {
 	if err != nil {
 		log.Fatalln(err)
 	}
+
 	icingaClient := icinga.NewClient(*cfg)
 	for {
 		if icingaClient.Check().Get(nil).Do().Status == 200 {
@@ -82,11 +88,22 @@ func run(opt operator.Options) {
 		time.Sleep(2 * time.Second)
 	}
 
-	op := operator.New(kubeClient, apiExtKubeClient, extClient, icingaClient, opt)
+	op := operator.New(kubeClient, crdClient, extClient, icingaClient, opt)
 	if err := op.Setup(); err != nil {
 		log.Fatalln(err)
 	}
 
 	log.Infoln("Starting Searchlight operator...")
-	op.RunAndHold()
+	// Now let's start the controller
+	stop := make(chan struct{})
+	defer close(stop)
+	go op.Run(stop)
+
+	go op.RunAPIServer()
+
+	m := pat.New()
+	m.Get("/metrics", promhttp.Handler())
+	http.Handle("/", m)
+	log.Infoln("Listening on", opt.WebAddress)
+	log.Fatal(http.ListenAndServe(opt.WebAddress, nil))
 }

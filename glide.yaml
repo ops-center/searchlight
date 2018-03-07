@@ -30,7 +30,7 @@ import:
 - package: github.com/prometheus/client_golang
   version: v0.8.0
 - package: github.com/shirou/gopsutil
-  version: v2.17.08
+  version: v2.18.01
 - package: github.com/spf13/cobra
   version: master
 - package: github.com/spf13/pflag
@@ -52,6 +52,10 @@ import:
   version: v6.0.0
 - package: github.com/appscode/kutil
   version: release-6.0
+- package: github.com/pkg/errors
+  version: master
+- package: github.com/nlopes/slack
+  version: v0.2.0
 testImport:
 - package: github.com/onsi/ginkgo
   version: v1.4.0

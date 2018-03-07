@@ -5,11 +5,11 @@ import (
 	"time"
 
 	core "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
 	ResourceKindNodeAlert = "NodeAlert"
-	ResourceNameNodeAlert = "node-alert"
 	ResourceTypeNodeAlert = "nodealerts"
 )
 
@@ -35,14 +35,18 @@ func (a NodeAlert) GetAlertInterval() time.Duration {
 	return a.Spec.AlertInterval.Duration
 }
 
-func (a NodeAlert) IsValid() (bool, error) {
+func (a NodeAlert) IsValid(kc kubernetes.Interface) error {
+	if a.Spec.NodeName != nil && len(a.Spec.Selector) > 0 {
+		return fmt.Errorf("can't specify both node name and selector")
+	}
+
 	cmd, ok := NodeCommands[a.Spec.Check]
 	if !ok {
-		return false, fmt.Errorf("%s is not a valid node check command", a.Spec.Check)
+		return fmt.Errorf("%s is not a valid node check command", a.Spec.Check)
 	}
 	for k := range a.Spec.Vars {
 		if _, ok := cmd.Vars[k]; !ok {
-			return false, fmt.Errorf("var %s is unsupported for check command %s", k, a.Spec.Check)
+			return fmt.Errorf("var %s is unsupported for check command %s", k, a.Spec.Check)
 		}
 	}
 	for _, rcv := range a.Spec.Receivers {
@@ -54,10 +58,11 @@ func (a NodeAlert) IsValid() (bool, error) {
 			}
 		}
 		if !found {
-			return false, fmt.Errorf("state %s is unsupported for check command %s", rcv.State, a.Spec.Check)
+			return fmt.Errorf("state %s is unsupported for check command %s", rcv.State, a.Spec.Check)
 		}
 	}
-	return true, nil
+
+	return checkNotifiers(kc, a)
 }
 
 func (a NodeAlert) GetNotifierSecretName() string {

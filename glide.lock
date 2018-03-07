@@ -1,17 +1,16 @@
-hash: 2d36315b0e0f249810c86f4b17bb9c4227b6a35ebe49f203799e45900f7b922c
-updated: 2018-02-05T15:48:25.742097654-08:00
+hash: 83ba78bb428e3de40e49f9edae4ac82f5c2c4a1cc2a184cfc3883e6d42236bb2
+updated: 2018-03-07T03:33:16.742561564-08:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
 - name: github.com/appscode/envconfig
   version: 183bbe643a2875eaa69c85627ac6b25813983203
 - name: github.com/appscode/go
-  version: fe2dd84a755c383d0516595f4537c2298be9fce5
+  version: c312c0a1fe0d4988480073287b8633fc5a244647
   subpackages:
   - analytics
   - context
   - crypto/rand
-  - errors
   - flags
   - homedir
   - log
@@ -19,6 +18,7 @@ imports:
   - net/httpclient
   - runtime
   - types
+  - util/errors
   - version
 - name: github.com/appscode/go-notify
   version: 58a0d1c562d8ddda5d97cf8723a56d15124700f3
@@ -34,15 +34,20 @@ imports:
   - twilio
   - unified
   - webhook
+- name: github.com/appscode/jsonpatch
+  version: ee757872f6aca6d412d0d80543725bd4cf48f793
 - name: github.com/appscode/kutil
-  version: 3037bd8a4c122f37b93108e0ef1f7b874079b93a
+  version: f172210ba205d36800506b5f6d86a3161558481c
   subpackages:
+  - admission/api
   - apiextensions/v1beta1
   - core/v1
   - discovery
   - extensions/v1beta1
   - meta
+  - registry/admissionreview/v1beta1
   - tools/analytics
+  - tools/queue
 - name: github.com/appscode/mergo
   version: e3000cb3d28c72b837601cac94debd91032d19fe
 - name: github.com/appscode/pat
@@ -128,10 +133,8 @@ imports:
   version: dcef7f55730566d41eae5db10e7d6981829720f6
 - name: github.com/evanphx/json-patch
   version: 944e07253867aacae43c04b2e6a239005443f33a
-- name: github.com/facebookgo/stack
-  version: 751773369052141c013c6e827a71e8f35c07879c
 - name: github.com/ghodss/yaml
-  version: 73d445a93680fa1a78ae23a5839bad48f32ba1ee
+  version: 0ca9ea5df5451ffdf184b4428c902747c2c11cd7
 - name: github.com/go-macaron/auth
   version: 884c0e6c9b92ceebf12101d6cf1417fe0f61bcac
 - name: github.com/go-macaron/inject
@@ -139,7 +142,7 @@ imports:
 - name: github.com/go-macaron/toolbox
   version: 6766b8f16d1b135b250f09ba4dc4e24ab65b1107
 - name: github.com/go-ole/go-ole
-  version: a41e3c4b706f6ae8dfbff342b06e40fa4d2d0506
+  version: a1ec82a652ebc7e784d7df887cfb31061aeabbcc
   subpackages:
   - oleutil
 - name: github.com/go-openapi/jsonpointer
@@ -182,7 +185,7 @@ imports:
   - go/x509
   - go/x509/pkix
 - name: github.com/google/go-cmp
-  version: 3af367b6b30c263d47e8895973edcca9a49cf029
+  version: 0c93777250bd58222171888d1651979319d8b381
   subpackages:
   - cmp
   - cmp/internal/diff
@@ -203,7 +206,7 @@ imports:
   - compiler
   - extensions
 - name: github.com/gorilla/websocket
-  version: 6eb6ad425a89d9da7a5549bc6da8f79ba5c17844
+  version: 2d1e4548da234d9cb742cc3628556fef86aafbac
 - name: github.com/gregjones/httpcache
   version: 787624de3eb7bd915c329cba748687a3b22666a6
   subpackages:
@@ -237,7 +240,7 @@ imports:
   - models
   - pkg/escape
 - name: github.com/jaytaylor/html2text
-  version: e76a2f8aa970543f8f3dcadaa2223682ef582086
+  version: 190166da35878a77103b951ae035a473531c1fc2
 - name: github.com/jmoiron/sqlx
   version: 398dd5876282499cdfd4cb8ea0f31a672abe9495
   repo: https://github.com/jmoiron/sqlx
@@ -263,7 +266,7 @@ imports:
   - jlexer
   - jwriter
 - name: github.com/mattn/go-runewidth
-  version: 97311d9f7767e3d6f422ea06661bc2c7a19e8a5d
+  version: a9d6d1e4dc51df2130326793d49971f238839169
 - name: github.com/matttproud/golang_protobuf_extensions
   version: fc2b8d3a73c4867e51861bbdd5ae3c1f0869dd6a
   subpackages:
@@ -273,7 +276,7 @@ imports:
   subpackages:
   - flowrate
 - name: github.com/nlopes/slack
-  version: db1988bcee7431c807305524daebdfaa323dbb6a
+  version: 8ab4d0b364ef1e9af5d102531da20d5ec902b6c4
 - name: github.com/NYTimes/gziphandler
   version: 56545f4a5d46df9a6648819d1664c3a03a13ffdb
 - name: github.com/olekukonko/tablewriter
@@ -297,7 +300,7 @@ imports:
 - name: github.com/peterbourgon/diskv
   version: 5f041e8faa004a95c88a202771f4cc3e991971e6
 - name: github.com/pkg/errors
-  version: 645ef00459ed84a119197bfb8d8205042c6df63d
+  version: 30136e27e2ac8d167177e8a583aa4c3fea5be833
 - name: github.com/prometheus/client_golang
   version: c5b7fccd204277076155f10851dad72b76a49317
   subpackages:
@@ -328,7 +331,7 @@ imports:
   subpackages:
   - diffmatchpatch
 - name: github.com/shirou/gopsutil
-  version: a452de7c734a0fa0f16d2e5725b0fa5934d9fbec
+  version: c432be29ccce470088d07eea25b3ea7e68a8afbb
   subpackages:
   - cpu
   - disk
@@ -343,7 +346,7 @@ imports:
 - name: github.com/shurcooL/sanitized_anchor_name
   version: 10ef21a441db47d8b13ebcc5fd2310f636973c77
 - name: github.com/spf13/cobra
-  version: 93959269ad99e80983c9ba742a7e01203a4c0e4f
+  version: c6c44e6fdcc30161c7f4480754da7230d01c06e3
   subpackages:
   - doc
 - name: github.com/spf13/pflag
@@ -481,7 +484,7 @@ imports:
   - policy/v1beta1
   - rbac/v1
   - rbac/v1alpha1
-  - rbac/v1
+  - rbac/v1beta1
   - scheduling/v1alpha1
   - settings/v1alpha1
   - storage/v1
@@ -678,7 +681,7 @@ imports:
   - informers/rbac
   - informers/rbac/v1
   - informers/rbac/v1alpha1
-  - informers/rbac/v1
+  - informers/rbac/v1beta1
   - informers/scheduling
   - informers/scheduling/v1alpha1
   - informers/settings
@@ -734,8 +737,8 @@ imports:
   - kubernetes/typed/rbac/v1/fake
   - kubernetes/typed/rbac/v1alpha1
   - kubernetes/typed/rbac/v1alpha1/fake
-  - kubernetes/typed/rbac/v1
-  - kubernetes/typed/rbac/v1/fake
+  - kubernetes/typed/rbac/v1beta1
+  - kubernetes/typed/rbac/v1beta1/fake
   - kubernetes/typed/scheduling/v1alpha1
   - kubernetes/typed/scheduling/v1alpha1/fake
   - kubernetes/typed/settings/v1alpha1
@@ -764,7 +767,7 @@ imports:
   - listers/policy/v1beta1
   - listers/rbac/v1
   - listers/rbac/v1alpha1
-  - listers/rbac/v1
+  - listers/rbac/v1beta1
   - listers/scheduling/v1alpha1
   - listers/settings/v1alpha1
   - listers/storage/v1
@@ -793,6 +796,7 @@ imports:
   - util/flowcontrol
   - util/homedir
   - util/integer
+  - util/workqueue
 - name: k8s.io/kube-openapi
   version: 39a7bf85c140f972372c2a0d1ee40adbf0c8bfe1
   subpackages:

@@ -29,16 +29,16 @@ func (f *Invocation) NodeAlert() *api.NodeAlert {
 }
 
 func (f *Framework) CreateNodeAlert(obj *api.NodeAlert) error {
-	_, err := f.extClient.NodeAlerts(obj.Namespace).Create(obj)
+	_, err := f.extClient.MonitoringV1alpha1().NodeAlerts(obj.Namespace).Create(obj)
 	return err
 }
 
 func (f *Framework) GetNodeAlert(meta metav1.ObjectMeta) (*api.NodeAlert, error) {
-	return f.extClient.NodeAlerts(meta.Namespace).Get(meta.Name, metav1.GetOptions{})
+	return f.extClient.MonitoringV1alpha1().NodeAlerts(meta.Namespace).Get(meta.Name, metav1.GetOptions{})
 }
 
 func (f *Framework) DeleteNodeAlert(meta metav1.ObjectMeta) error {
-	return f.extClient.NodeAlerts(meta.Namespace).Delete(meta.Name, &metav1.DeleteOptions{})
+	return f.extClient.MonitoringV1alpha1().NodeAlerts(meta.Namespace).Delete(meta.Name, &metav1.DeleteOptions{})
 }
 
 func (f *Framework) getNodeAlertObjects(meta metav1.ObjectMeta, nodeAlertSpec api.NodeAlertSpec) ([]icinga.IcingaHost, error) {
@@ -74,7 +74,7 @@ func (f *Framework) EventuallyNodeAlertIcingaService(meta metav1.ObjectMeta, nod
 	objectList, err := f.getNodeAlertObjects(meta, nodeAlertSpec)
 	Expect(err).NotTo(HaveOccurred())
 
-	in := icinga.NewNodeHost(nil, nil, f.icingaClient).
+	in := icinga.NewNodeHost(f.icingaClient).
 		IcingaServiceSearchQuery(meta.Name, objectList...)
 
 	return Eventually(
@@ -106,4 +106,14 @@ func (f *Framework) EventuallyNodeAlertIcingaService(meta metav1.ObjectMeta, nod
 		time.Minute*5,
 		time.Second*5,
 	)
+}
+
+func (f *Framework) CleanNodeAlert() {
+	caList, err := f.extClient.MonitoringV1alpha1().NodeAlerts(f.namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return
+	}
+	for _, e := range caList.Items {
+		f.extClient.MonitoringV1alpha1().NodeAlerts(f.namespace).Delete(e.Name, &metav1.DeleteOptions{})
+	}
 }

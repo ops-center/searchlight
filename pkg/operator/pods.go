@@ -1,204 +1,142 @@
 package operator
 
 import (
-	"errors"
 	"reflect"
+	"strings"
 
 	"github.com/appscode/go/log"
+	utilerrors "github.com/appscode/go/util/errors"
+	core_util "github.com/appscode/kutil/core/v1"
+	"github.com/appscode/kutil/tools/queue"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/eventer"
-	"github.com/appscode/searchlight/pkg/util"
+	"github.com/appscode/searchlight/pkg/icinga"
+	"github.com/golang/glog"
 	core "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	rt "k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/client-go/tools/cache"
 )
 
-// Blocks caller. Intended to be called as a Go routine.
-func (op *Operator) WatchPods() {
-	defer runtime.HandleCrash()
-
-	lw := &cache.ListWatch{
-		ListFunc: func(opts metav1.ListOptions) (rt.Object, error) {
-			return op.KubeClient.CoreV1().Pods(core.NamespaceAll).List(metav1.ListOptions{})
+func (op *Operator) initPodWatcher() {
+	op.podInformer = op.kubeInformerFactory.Core().V1().Pods().Informer()
+	op.podQueue = queue.New("Pod", op.options.MaxNumRequeues, op.options.NumThreads, op.reconcilePod)
+	op.podInformer.AddEventHandler(&cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			pod := obj.(*core.Pod)
+			if pod.Status.PodIP != "" {
+				log.Warningf("Skipping pod %s/%s, since it has no IP", pod.Namespace, pod.Name)
+				return
+			}
+			queue.Enqueue(op.podQueue.GetQueue(), obj)
 		},
-		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-			return op.KubeClient.CoreV1().Pods(core.NamespaceAll).Watch(metav1.ListOptions{})
+		UpdateFunc: func(oldObj interface{}, newObj interface{}) {
+			old := oldObj.(*core.Pod)
+			nu := newObj.(*core.Pod)
+			if !reflect.DeepEqual(old.Labels, nu.Labels) || old.Status.PodIP != nu.Status.PodIP {
+				queue.Enqueue(op.podQueue.GetQueue(), newObj)
+			}
 		},
-	}
-	_, ctrl := cache.NewInformer(lw,
-		&core.Pod{},
-		op.Opt.ResyncPeriod,
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				if pod, ok := obj.(*core.Pod); ok {
-					log.Infof("Pod %s@%s added", pod.Name, pod.Namespace)
-					if pod.Status.PodIP == "" {
-						log.Warningf("Skipping pod %s@%s, since it has no IP", pod.Name, pod.Namespace)
-						return
-					}
-
-					alerts, err := util.FindPodAlert(op.ExtClient, pod.ObjectMeta)
-					if err != nil {
-						log.Errorf("Error while searching PodAlert for Pod %s@%s.", pod.Name, pod.Namespace)
-						return
-					}
-					if len(alerts) == 0 {
-						log.Errorf("No PodAlert found for Pod %s@%s.", pod.Name, pod.Namespace)
-						return
-					}
-					for i := range alerts {
-						err = op.EnsurePod(pod, nil, alerts[i])
-						if err != nil {
-							log.Errorf("Failed to add icinga2 alert for Pod %s@%s.", pod.Name, pod.Namespace)
-							// return
-						}
-					}
-				}
-			},
-			UpdateFunc: func(old, new interface{}) {
-				oldPod, ok := old.(*core.Pod)
-				if !ok {
-					log.Errorln(errors.New("Invalid Pod object"))
-					return
-				}
-				newPod, ok := new.(*core.Pod)
-				if !ok {
-					log.Errorln(errors.New("Invalid Pod object"))
-					return
-				}
-
-				log.Infof("Pod %s@%s updated", newPod.Name, newPod.Namespace)
-
-				if !reflect.DeepEqual(oldPod.Labels, newPod.Labels) || oldPod.Status.PodIP != newPod.Status.PodIP {
-					oldAlerts, err := util.FindPodAlert(op.ExtClient, oldPod.ObjectMeta)
-					if err != nil {
-						log.Errorf("Error while searching PodAlert for Pod %s@%s.", oldPod.Name, oldPod.Namespace)
-						return
-					}
-					newAlerts, err := util.FindPodAlert(op.ExtClient, newPod.ObjectMeta)
-					if err != nil {
-						log.Errorf("Error while searching PodAlert for Pod %s@%s.", newPod.Name, newPod.Namespace)
-						return
-					}
-
-					type change struct {
-						old *api.PodAlert
-						new *api.PodAlert
-					}
-					diff := make(map[string]*change)
-					for i := range oldAlerts {
-						diff[oldAlerts[i].Name] = &change{old: oldAlerts[i]}
-					}
-					for i := range newAlerts {
-						if ch, ok := diff[newAlerts[i].Name]; ok {
-							ch.new = newAlerts[i]
-						} else {
-							diff[newAlerts[i].Name] = &change{new: newAlerts[i]}
-						}
-					}
-
-					for alert := range diff {
-						ch := diff[alert]
-						if oldPod.Status.PodIP == "" && newPod.Status.PodIP != "" {
-							go op.EnsurePod(newPod, nil, ch.new)
-						} else if ch.old == nil && ch.new != nil {
-							go op.EnsurePod(newPod, nil, ch.new)
-						} else if ch.old != nil && ch.new == nil {
-							go op.EnsurePodDeleted(newPod, ch.old)
-						} else if ch.old != nil && ch.new != nil && !reflect.DeepEqual(ch.old.Spec, ch.new.Spec) {
-							go op.EnsurePod(newPod, ch.old, ch.new)
-						}
-					}
-				}
-			},
-			DeleteFunc: func(obj interface{}) {
-				if pod, ok := obj.(*core.Pod); ok {
-					log.Infof("Pod %s@%s deleted", pod.Name, pod.Namespace)
-
-					alerts, err := util.FindPodAlert(op.ExtClient, pod.ObjectMeta)
-					if err != nil {
-						log.Errorf("Error while searching PodAlert for Pod %s@%s.", pod.Name, pod.Namespace)
-						return
-					}
-					if len(alerts) == 0 {
-						log.Errorf("No PodAlert found for Pod %s@%s.", pod.Name, pod.Namespace)
-						return
-					}
-					for i := range alerts {
-						err = op.EnsurePodDeleted(pod, alerts[i])
-						if err != nil {
-							log.Errorf("Failed to delete icinga2 alert for Pod %s@%s.", pod.Name, pod.Namespace)
-							// return
-						}
-					}
-				}
-			},
+		DeleteFunc: func(obj interface{}) {
+			queue.Enqueue(op.podQueue.GetQueue(), obj)
 		},
-	)
-	ctrl.Run(wait.NeverStop)
+	})
+	op.podLister = op.kubeInformerFactory.Core().V1().Pods().Lister()
 }
 
-func (op *Operator) EnsurePod(pod *core.Pod, old, new *api.PodAlert) (err error) {
-	defer func() {
-		if err == nil {
+func (op *Operator) reconcilePod(key string) error {
+	obj, exists, err := op.podInformer.GetIndexer().GetByKey(key)
+	if err != nil {
+		glog.Errorf("Fetching object with key %s from store failed with %v", key, err)
+		return err
+	}
+
+	if !exists {
+		log.Debugf("Pod %s does not exist anymore\n", key)
+
+		namespace, name, err := cache.SplitMetaNamespaceKey(key)
+		if err != nil {
+			return err
+		}
+		return op.podHost.ForceDeleteIcingaHost(icinga.IcingaHost{
+			Type:           icinga.TypePod,
+			AlertNamespace: namespace,
+			ObjectName:     name,
+		})
+	}
+
+	log.Infof("Sync/Add/Update for Pod %s\n", key)
+	pod := obj.(*core.Pod).DeepCopy()
+	err = op.ensurePod(pod)
+	if err != nil {
+		log.Errorf("failed to reconcile alert for pod %s. reason: %s", key, err)
+	}
+	return err
+}
+
+func (op *Operator) ensurePod(pod *core.Pod) error {
+	var errlist []error
+
+	oldAlerts := sets.NewString()
+	if val, ok := pod.Annotations[api.AnnotationKeyAlerts]; ok {
+		names := strings.Split(val, ",")
+		oldAlerts.Insert(names...)
+	}
+
+	newAlerts, err := findPodAlert(op.KubeClient, op.paLister, pod.ObjectMeta)
+	if err != nil {
+		return err
+	}
+	newNames := make([]string, len(newAlerts))
+	for i := range newAlerts {
+		alert := newAlerts[i]
+
+		err = op.podHost.Apply(alert, pod)
+		if err != nil {
 			op.recorder.Eventf(
-				new.ObjectReference(),
-				core.EventTypeNormal,
-				eventer.EventReasonSuccessfulSync,
-				`Applied PodAlert: "%v"`,
-				new.Name,
-			)
-			return
-		} else {
-			op.recorder.Eventf(
-				new.ObjectReference(),
+				alert.ObjectReference(),
 				core.EventTypeWarning,
 				eventer.EventReasonFailedToSync,
-				`Fail to be apply PodAlert: "%v". Reason: %v`,
-				new.Name,
-				err,
+				`failed to  apply to pod %s/%s. Reason: %s`,
+				pod.Namespace, pod.Name, err,
 			)
-			log.Errorln(err)
-			return
+			errlist = append(errlist, err)
 		}
-	}()
 
-	if old == nil {
-		err = op.podHost.Create(*new, *pod)
-	} else {
-		err = op.podHost.Update(*new, *pod)
+		newNames[i] = alert.Name
+		if oldAlerts.Has(alert.Name) {
+			oldAlerts.Delete(alert.Name)
+		}
 	}
-	return
-}
 
-func (op *Operator) EnsurePodDeleted(pod *core.Pod, alert *api.PodAlert) (err error) {
-	defer func() {
-		if err == nil {
-			op.recorder.Eventf(
-				alert.ObjectReference(),
-				core.EventTypeNormal,
-				eventer.EventReasonSuccessfulDelete,
-				`Deleted PodAlert: "%v"`,
-				alert.Name,
-			)
-			return
-		} else {
-			op.recorder.Eventf(
-				alert.ObjectReference(),
-				core.EventTypeWarning,
-				eventer.EventReasonFailedToDelete,
-				`Fail to be delete PodAlert: "%v". Reason: %v`,
-				alert.Name,
-				err,
-			)
-			log.Errorln(err)
-			return
+	for _, name := range oldAlerts.List() {
+		err = op.podHost.Delete(pod.Namespace, name, pod)
+		if err != nil {
+			if alert, e2 := op.paLister.PodAlerts(pod.Namespace).Get(name); e2 == nil {
+				op.recorder.Eventf(
+					alert.ObjectReference(),
+					core.EventTypeWarning,
+					eventer.EventReasonFailedToDelete,
+					`failed to  delete for pod %s/%s. Reason: %s`,
+					pod.Namespace, pod.Name, err,
+				)
+			}
+			errlist = append(errlist, err)
 		}
-	}()
-	err = op.podHost.Delete(*alert, *pod)
-	return
+	}
+
+	_, _, err = core_util.PatchPod(op.KubeClient, pod, func(in *core.Pod) *core.Pod {
+		if in.Annotations == nil {
+			in.Annotations = make(map[string]string, 0)
+		}
+		if len(newNames) > 0 {
+			in.Annotations[api.AnnotationKeyAlerts] = strings.Join(newNames, ",")
+		} else {
+			delete(in.Annotations, api.AnnotationKeyAlerts)
+		}
+		return in
+	})
+	if err != nil {
+		errlist = append(errlist, err)
+	}
+	return utilerrors.NewAggregate(errlist)
 }

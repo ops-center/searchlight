@@ -5,6 +5,7 @@ import (
 
 	"github.com/appscode/go/crypto/rand"
 	"github.com/appscode/go/types"
+	kutil_core "github.com/appscode/kutil/core/v1"
 	ext_util "github.com/appscode/kutil/extensions/v1beta1"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/client/clientset/versioned/typed/monitoring/v1alpha1/util"
@@ -241,7 +242,7 @@ var _ = Describe("PodAlert", func() {
 		Context("check_pod_status", func() {
 			BeforeEach(func() {
 				alert.Spec.Check = api.CheckPodStatus
-				alert.Spec.Selector = *(rs.Spec.Selector)
+				alert.Spec.Selector = rs.Spec.Selector
 			})
 
 			It("should manage icinga service for Alert.Spec.Selector", shouldManageIcingaServiceForLabelSelector)
@@ -251,8 +252,8 @@ var _ = Describe("PodAlert", func() {
 
 			Context("PodName", func() {
 				BeforeEach(func() {
-					alert.Spec.Selector = metav1.LabelSelector{}
-					alert.Spec.PodName = pod.Name
+					alert.Spec.PodName = &pod.Name
+					alert.Spec.Selector = nil
 				})
 
 				It("should manage icinga service for Alert.Spec.PodName", shouldManageIcingaServiceForPodName)
@@ -263,6 +264,65 @@ var _ = Describe("PodAlert", func() {
 					rs.Spec.Template.Spec.Containers[0].Image = "invalid-image"
 				})
 				It("should handle icinga service for Critical State", shouldHandleIcingaServiceForCriticalState)
+			})
+
+			Context("change labels", func() {
+				BeforeEach(func() {
+					alert.Spec.Selector = metav1.SetAsLabelSelector(pod.Labels)
+				})
+
+				It("should manage icinga service for Pod label changed", func() {
+					By("Create Pod: " + pod.Name)
+					pod, err = f.CreatePod(pod)
+					Expect(err).NotTo(HaveOccurred())
+
+					By("Wait for Running pods")
+					f.EventuallyPodRunning(pod.ObjectMeta).Should(HaveRunningPods(1))
+
+					By("Create matching podalert: " + alert.Name)
+					err = f.CreatePodAlert(alert)
+					Expect(err).NotTo(HaveOccurred())
+
+					By("Check icinga services")
+					f.EventuallyPodAlertIcingaService(alert.ObjectMeta, alert.Spec).
+						Should(HaveIcingaObject(IcingaServiceState{Ok: 1}))
+
+					newAlert := alert.DeepCopy()
+					newAlert.Name = newAlert.Name + "-new"
+					newAlert.Spec.Selector.MatchLabels["app"] = newAlert.Spec.Selector.MatchLabels["app"] + "-new"
+
+					By("Create podalert: " + newAlert.Name)
+					err = f.CreatePodAlert(newAlert)
+					Expect(err).NotTo(HaveOccurred())
+
+					By("Patch Pod: " + pod.Name)
+					_, _, err = kutil_core.PatchPod(f.KubeClient(), pod, func(in *core.Pod) *core.Pod {
+						in.Labels["app"] = newAlert.Spec.Selector.MatchLabels["app"]
+						return in
+					})
+					Expect(err).NotTo(HaveOccurred())
+
+					By("Check icinga services " + newAlert.Name)
+					f.EventuallyPodAlertIcingaService(newAlert.ObjectMeta, newAlert.Spec).
+						Should(HaveIcingaObject(IcingaServiceState{Ok: 1}))
+
+					By("Wait for icinga services to be deleted " + alert.Name)
+					f.EventuallyPodAlertIcingaService(alert.ObjectMeta, alert.Spec).
+						Should(HaveIcingaObject(IcingaServiceState{}))
+
+					By("Delete podalert " + alert.Name)
+					err = f.DeletePodAlert(newAlert.ObjectMeta)
+					Expect(err).NotTo(HaveOccurred())
+
+					By("Wait for icinga services to be deleted " + newAlert.Name)
+					f.EventuallyPodAlertIcingaService(newAlert.ObjectMeta, newAlert.Spec).
+						Should(HaveIcingaObject(IcingaServiceState{}))
+
+					By("Delete podalert " + alert.Name)
+					err = f.DeletePodAlert(alert.ObjectMeta)
+					Expect(err).NotTo(HaveOccurred())
+
+				})
 			})
 		})
 
@@ -282,7 +342,7 @@ var _ = Describe("PodAlert", func() {
 					"dd if=/dev/zero of=/source/data/data bs=1024 count=52500 && sleep 1d",
 				}
 				alert.Spec.Check = api.CheckPodVolume
-				alert.Spec.Selector = *(ss.Spec.Selector)
+				alert.Spec.Selector = ss.Spec.Selector
 				alert.Spec.Vars["volume_name"] = framework.TestSourceDataVolumeName
 			})
 
@@ -343,34 +403,6 @@ var _ = Describe("PodAlert", func() {
 				})
 
 				It("should manage icinga service for Critical State", forStatefulSet)
-			})
-
-		})
-
-		// Check "pod_exec"
-		Context("check_pod_exec", func() {
-			BeforeEach(func() {
-				alert.Spec.Check = api.CheckPodExec
-				alert.Spec.Selector = *(rs.Spec.Selector)
-				alert.Spec.Vars["container"] = "busybox"
-				alert.Spec.Vars["cmd"] = "/bin/sh"
-
-			})
-
-			Context("exit 0", func() {
-				BeforeEach(func() {
-					alert.Spec.Vars["argv"] = "exit 0"
-				})
-
-				It("should manage icinga service for Ok State", shouldManageIcingaServiceForLabelSelector)
-			})
-
-			Context("exit 2", func() {
-				BeforeEach(func() {
-					alert.Spec.Vars["argv"] = "exit 2"
-				})
-
-				It("should handle icinga service for Critical State", shouldHandleIcingaServiceForCriticalState)
 			})
 
 		})

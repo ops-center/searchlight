@@ -28,16 +28,16 @@ func (f *Invocation) ClusterAlert() *api.ClusterAlert {
 }
 
 func (f *Framework) CreateClusterAlert(obj *api.ClusterAlert) error {
-	_, err := f.extClient.ClusterAlerts(obj.Namespace).Create(obj)
+	_, err := f.extClient.MonitoringV1alpha1().ClusterAlerts(obj.Namespace).Create(obj)
 	return err
 }
 
 func (f *Framework) GetClusterAlert(meta metav1.ObjectMeta) (*api.ClusterAlert, error) {
-	return f.extClient.ClusterAlerts(meta.Namespace).Get(meta.Name, metav1.GetOptions{})
+	return f.extClient.MonitoringV1alpha1().ClusterAlerts(meta.Namespace).Get(meta.Name, metav1.GetOptions{})
 }
 
 func (f *Framework) DeleteClusterAlert(meta metav1.ObjectMeta) error {
-	return f.extClient.ClusterAlerts(meta.Namespace).Delete(meta.Name, &metav1.DeleteOptions{})
+	return f.extClient.MonitoringV1alpha1().ClusterAlerts(meta.Namespace).Delete(meta.Name, &metav1.DeleteOptions{})
 }
 
 func (f *Framework) getClusterAlertObjects(meta metav1.ObjectMeta, clusterAlertSpec api.ClusterAlertSpec) ([]icinga.IcingaHost, error) {
@@ -54,7 +54,7 @@ func (f *Framework) EventuallyClusterAlertIcingaService(meta metav1.ObjectMeta, 
 	objectList, err := f.getClusterAlertObjects(meta, nodeAlertSpec)
 	Expect(err).NotTo(HaveOccurred())
 
-	in := icinga.NewClusterHost(nil, nil, f.icingaClient).
+	in := icinga.NewClusterHost(f.icingaClient).
 		IcingaServiceSearchQuery(meta.Name, objectList...)
 
 	return Eventually(
@@ -86,4 +86,14 @@ func (f *Framework) EventuallyClusterAlertIcingaService(meta metav1.ObjectMeta, 
 		time.Minute*5,
 		time.Second*5,
 	)
+}
+
+func (f *Framework) CleanClusterAlert() {
+	caList, err := f.extClient.MonitoringV1alpha1().ClusterAlerts(f.namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return
+	}
+	for _, e := range caList.Items {
+		f.extClient.MonitoringV1alpha1().ClusterAlerts(f.namespace).Delete(e.Name, &metav1.DeleteOptions{})
+	}
 }

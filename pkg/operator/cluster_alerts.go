@@ -1,188 +1,73 @@
 package operator
 
 import (
-	"errors"
 	"reflect"
 
 	"github.com/appscode/go/log"
+	"github.com/appscode/kutil/tools/queue"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/eventer"
-	"github.com/appscode/searchlight/pkg/util"
+	"github.com/golang/glog"
 	core "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	rt "k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 )
 
-// Blocks caller. Intended to be called as a Go routine.
-func (op *Operator) WatchClusterAlerts() {
-	defer runtime.HandleCrash()
+func (op *Operator) initClusterAlertWatcher() {
+	op.caInformer = op.monInformerFactory.Monitoring().V1alpha1().ClusterAlerts().Informer()
+	op.caQueue = queue.New("ClusterAlert", op.options.MaxNumRequeues, op.options.NumThreads, op.reconcileClusterAlert)
+	op.caInformer.AddEventHandler(&cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			alert := obj.(*api.ClusterAlert)
+			if op.isValid(alert) {
+				queue.Enqueue(op.caQueue.GetQueue(), obj)
+			}
+		},
+		UpdateFunc: func(oldObj interface{}, newObj interface{}) {
+			old := oldObj.(*api.ClusterAlert)
+			nu := newObj.(*api.ClusterAlert)
 
-	lw := &cache.ListWatch{
-		ListFunc: func(opts metav1.ListOptions) (rt.Object, error) {
-			return op.ExtClient.ClusterAlerts(core.NamespaceAll).List(metav1.ListOptions{})
+			if reflect.DeepEqual(old.Spec, nu.Spec) {
+				return
+			}
+			if op.isValid(nu) {
+				queue.Enqueue(op.caQueue.GetQueue(), nu)
+			}
 		},
-		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-			return op.ExtClient.ClusterAlerts(core.NamespaceAll).Watch(metav1.ListOptions{})
+		DeleteFunc: func(obj interface{}) {
+			queue.Enqueue(op.caQueue.GetQueue(), obj)
 		},
-	}
-	_, ctrl := cache.NewInformer(lw,
-		&api.ClusterAlert{},
-		op.Opt.ResyncPeriod,
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				if alert, ok := obj.(*api.ClusterAlert); ok {
-					if ok, err := alert.IsValid(); !ok {
-						op.recorder.Eventf(
-							alert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonFailedToCreate,
-							`Fail to be create ClusterAlert: "%v". Reason: %v`,
-							alert.Name,
-							err,
-						)
-						return
-					}
-					if err := util.CheckNotifiers(op.KubeClient, alert); err != nil {
-						op.recorder.Eventf(
-							alert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonBadNotifier,
-							`Bad notifier config for ClusterAlert: "%v". Reason: %v`,
-							alert.Name,
-							err,
-						)
-					}
-					op.EnsureClusterAlert(nil, alert)
-				}
-			},
-			UpdateFunc: func(old, new interface{}) {
-				oldAlert, ok := old.(*api.ClusterAlert)
-				if !ok {
-					log.Errorln(errors.New("Invalid ClusterAlert object"))
-					return
-				}
-				newAlert, ok := new.(*api.ClusterAlert)
-				if !ok {
-					log.Errorln(errors.New("Invalid ClusterAlert object"))
-					return
-				}
-				if !reflect.DeepEqual(oldAlert.Spec, newAlert.Spec) {
-					if ok, err := newAlert.IsValid(); !ok {
-						op.recorder.Eventf(
-							newAlert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonFailedToDelete,
-							`Fail to be update ClusterAlert: "%v". Reason: %v`,
-							newAlert.Name,
-							err,
-						)
-						return
-					}
-					if err := util.CheckNotifiers(op.KubeClient, newAlert); err != nil {
-						op.recorder.Eventf(
-							newAlert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonBadNotifier,
-							`Bad notifier config for ClusterAlert: "%v". Reason: %v`,
-							newAlert.Name,
-							err,
-						)
-					}
-					op.EnsureClusterAlert(oldAlert, newAlert)
-				}
-			},
-			DeleteFunc: func(obj interface{}) {
-				if alert, ok := obj.(*api.ClusterAlert); ok {
-					if ok, err := alert.IsValid(); !ok {
-						op.recorder.Eventf(
-							alert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonFailedToDelete,
-							`Fail to be delete ClusterAlert: "%v". Reason: %v`,
-							alert.Name,
-							err,
-						)
-						return
-					}
-					if err := util.CheckNotifiers(op.KubeClient, alert); err != nil {
-						op.recorder.Eventf(
-							alert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonBadNotifier,
-							`Bad notifier config for ClusterAlert: "%v". Reason: %v`,
-							alert.Name,
-							err,
-						)
-					}
-					op.EnsureClusterAlertDeleted(alert)
-				}
-			},
-		},
-	)
-	ctrl.Run(wait.NeverStop)
+	})
+	op.caLister = op.monInformerFactory.Monitoring().V1alpha1().ClusterAlerts().Lister()
 }
 
-func (op *Operator) EnsureClusterAlert(old, new *api.ClusterAlert) (err error) {
-	defer func() {
-		if err == nil {
-			op.recorder.Eventf(
-				new.ObjectReference(),
-				core.EventTypeNormal,
-				eventer.EventReasonSuccessfulSync,
-				`Applied ClusterAlert: "%v"`,
-				new.Name,
-			)
-			return
-		} else {
-			op.recorder.Eventf(
-				new.ObjectReference(),
-				core.EventTypeWarning,
-				eventer.EventReasonFailedToSync,
-				`Fail to be apply ClusterAlert: "%v". Reason: %v`,
-				new.Name,
-				err,
-			)
-			log.Errorln(err)
-			return
-		}
-	}()
-
-	if old == nil {
-		err = op.clusterHost.Create(*new)
-	} else {
-		err = op.clusterHost.Update(*new)
+func (op *Operator) reconcileClusterAlert(key string) error {
+	obj, exists, err := op.caInformer.GetIndexer().GetByKey(key)
+	if err != nil {
+		glog.Errorf("Fetching object with key %s from store failed with %v", key, err)
+		return err
 	}
-	return
-}
+	if !exists {
+		log.Debugf("ClusterAlert %s does not exist anymore\n", key)
 
-func (op *Operator) EnsureClusterAlertDeleted(alert *api.ClusterAlert) (err error) {
-	defer func() {
-		if err == nil {
-			op.recorder.Eventf(
-				alert.ObjectReference(),
-				core.EventTypeNormal,
-				eventer.EventReasonSuccessfulDelete,
-				`Deleted ClusterAlert: "%v"`,
-				alert.Name,
-			)
-			return
-		} else {
-			op.recorder.Eventf(
-				alert.ObjectReference(),
-				core.EventTypeWarning,
-				eventer.EventReasonFailedToDelete,
-				`Fail to be delete ClusterAlert: "%v". Reason: %v`,
-				alert.Name,
-				err,
-			)
-			log.Errorln(err)
-			return
+		namespace, name, err := cache.SplitMetaNamespaceKey(key)
+		if err != nil {
+			return err
 		}
-	}()
-	err = op.clusterHost.Delete(*alert)
-	return
+		return op.clusterHost.Delete(namespace, name)
+	}
+
+	alert := obj.(*api.ClusterAlert).DeepCopy()
+	log.Infof("Sync/Add/Update for ClusterAlert %s\n", alert.GetName())
+
+	err = op.clusterHost.Apply(alert)
+	if err != nil {
+		op.recorder.Eventf(
+			alert.ObjectReference(),
+			core.EventTypeWarning,
+			eventer.EventReasonFailedToSync,
+			`Reason: %v`,
+			err,
+		)
+	}
+	return err
 }

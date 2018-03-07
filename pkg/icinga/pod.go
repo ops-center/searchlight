@@ -4,35 +4,28 @@ import (
 	"bytes"
 	"text/template"
 
-	"github.com/appscode/go/errors"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	cs "github.com/appscode/searchlight/client/clientset/versioned/typed/monitoring/v1alpha1"
+	"github.com/pkg/errors"
 	core "k8s.io/api/core/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 type PodHost struct {
 	commonHost
-
-	KubeClient kubernetes.Interface
-	ExtClient  cs.MonitoringV1alpha1Interface
 }
 
-func NewPodHost(kubeClient kubernetes.Interface, extClient cs.MonitoringV1alpha1Interface, IcingaClient *Client) *PodHost {
+func NewPodHost(IcingaClient *Client) *PodHost {
 	return &PodHost{
-		KubeClient: kubeClient,
-		ExtClient:  extClient,
 		commonHost: commonHost{
 			IcingaClient: IcingaClient,
 		},
 	}
 }
 
-func (h *PodHost) getHost(alert api.PodAlert, pod core.Pod) IcingaHost {
+func (h *PodHost) getHost(namespace string, pod *core.Pod) IcingaHost {
 	return IcingaHost{
 		ObjectName:     pod.Name,
 		Type:           TypePod,
-		AlertNamespace: alert.Namespace,
+		AlertNamespace: namespace,
 		IP:             pod.Status.PodIP,
 	}
 }
@@ -61,42 +54,24 @@ func (h *PodHost) expandVars(alertSpec api.PodAlertSpec, kh IcingaHost, attrs ma
 				attrs[IVar(key)] = val
 			}
 		} else {
-			return errors.Newf("variable %v not found", key).Err()
+			return errors.Errorf("variable %v not found", key)
 		}
 	}
 	return nil
 }
 
-func (h *PodHost) Create(alert api.PodAlert, pod core.Pod) error {
+func (h *PodHost) Apply(alert *api.PodAlert, pod *core.Pod) error {
 	alertSpec := alert.Spec
-	kh := h.getHost(alert, pod)
+	kh := h.getHost(alert.Namespace, pod)
 
-	if has, err := h.CheckIcingaService(alert.Name, kh); err != nil || has {
+	if err := h.EnsureIcingaHost(kh); err != nil {
 		return err
 	}
 
-	if err := h.CreateIcingaHost(kh); err != nil {
-		return errors.FromErr(err).Err()
-	}
-
-	attrs := make(map[string]interface{})
-	attrs["check_command"] = alertSpec.Check
-	if alertSpec.CheckInterval.Seconds() > 0 {
-		attrs["check_interval"] = alertSpec.CheckInterval.Seconds()
-	}
-	if err := h.expandVars(alertSpec, kh, attrs); err != nil {
+	has, err := h.CheckIcingaService(alert.Name, kh)
+	if err != nil {
 		return err
 	}
-	if err := h.CreateIcingaService(alert.Name, kh, attrs); err != nil {
-		return errors.FromErr(err).Err()
-	}
-
-	return h.CreateIcingaNotification(alert, kh)
-}
-
-func (h *PodHost) Update(alert api.PodAlert, pod core.Pod) error {
-	alertSpec := alert.Spec
-	kh := h.getHost(alert, pod)
 
 	attrs := make(map[string]interface{})
 	if alertSpec.CheckInterval.Seconds() > 0 {
@@ -105,18 +80,26 @@ func (h *PodHost) Update(alert api.PodAlert, pod core.Pod) error {
 	if err := h.expandVars(alertSpec, kh, attrs); err != nil {
 		return err
 	}
-	if err := h.UpdateIcingaService(alert.Name, kh, attrs); err != nil {
-		return errors.FromErr(err).Err()
+
+	if !has {
+		attrs["check_command"] = alertSpec.Check
+		if err := h.CreateIcingaService(alert.Name, kh, attrs); err != nil {
+			return err
+		}
+	} else {
+		if err := h.UpdateIcingaService(alert.Name, kh, attrs); err != nil {
+			return err
+		}
 	}
 
-	return h.UpdateIcingaNotification(alert, kh)
+	return h.ReconcileIcingaNotification(alert, kh)
 }
 
-func (h *PodHost) Delete(alert api.PodAlert, pod core.Pod) error {
-	kh := h.getHost(alert, pod)
+func (h *PodHost) Delete(alertNamespace, alertName string, pod *core.Pod) error {
+	kh := h.getHost(alertNamespace, pod)
 
-	if err := h.DeleteIcingaService(alert.Name, kh); err != nil {
-		return errors.FromErr(err).Err()
+	if err := h.DeleteIcingaService(alertName, kh); err != nil {
+		return err
 	}
 	return h.DeleteIcingaHost(kh)
 }

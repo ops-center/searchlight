@@ -5,11 +5,11 @@ import (
 	"time"
 
 	core "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
 	ResourceKindClusterAlert = "ClusterAlert"
-	ResourceNameClusterAlert = "cluster-alert"
 	ResourceTypeClusterAlert = "clusteralerts"
 )
 
@@ -35,14 +35,14 @@ func (a ClusterAlert) GetAlertInterval() time.Duration {
 	return a.Spec.AlertInterval.Duration
 }
 
-func (a ClusterAlert) IsValid() (bool, error) {
+func (a ClusterAlert) IsValid(kc kubernetes.Interface) error {
 	cmd, ok := ClusterCommands[a.Spec.Check]
 	if !ok {
-		return false, fmt.Errorf("'%s' is not a valid cluster check command", a.Spec.Check)
+		return fmt.Errorf("'%s' is not a valid cluster check command", a.Spec.Check)
 	}
 	for k := range a.Spec.Vars {
 		if _, ok := cmd.Vars[k]; !ok {
-			return false, fmt.Errorf("var '%s' is unsupported for check command %s", k, a.Spec.Check)
+			return fmt.Errorf("var '%s' is unsupported for check command %s", k, a.Spec.Check)
 		}
 	}
 	for _, rcv := range a.Spec.Receivers {
@@ -54,10 +54,11 @@ func (a ClusterAlert) IsValid() (bool, error) {
 			}
 		}
 		if !found {
-			return false, fmt.Errorf("state '%s' is unsupported for check command %s", rcv.State, a.Spec.Check)
+			return fmt.Errorf("state '%s' is unsupported for check command %s", rcv.State, a.Spec.Check)
 		}
 	}
-	return true, nil
+
+	return checkNotifiers(kc, a)
 }
 
 func (a ClusterAlert) GetNotifierSecretName() string {

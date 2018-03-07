@@ -21,36 +21,36 @@ func (f *Invocation) PodAlert() *api.PodAlert {
 			},
 		},
 		Spec: api.PodAlertSpec{
-			CheckInterval: metav1.Duration{time.Second * 5},
+			CheckInterval: metav1.Duration{Duration: time.Second * 5},
 			Vars:          make(map[string]string),
 		},
 	}
 }
 
 func (f *Framework) CreatePodAlert(obj *api.PodAlert) error {
-	_, err := f.extClient.PodAlerts(obj.Namespace).Create(obj)
+	_, err := f.extClient.MonitoringV1alpha1().PodAlerts(obj.Namespace).Create(obj)
 	return err
 }
 
 func (f *Framework) GetPodAlert(meta metav1.ObjectMeta) (*api.PodAlert, error) {
-	return f.extClient.PodAlerts(meta.Namespace).Get(meta.Name, metav1.GetOptions{})
+	return f.extClient.MonitoringV1alpha1().PodAlerts(meta.Namespace).Get(meta.Name, metav1.GetOptions{})
 }
 
 func (f *Framework) DeletePodAlert(meta metav1.ObjectMeta) error {
-	return f.extClient.PodAlerts(meta.Namespace).Delete(meta.Name, &metav1.DeleteOptions{})
+	return f.extClient.MonitoringV1alpha1().PodAlerts(meta.Namespace).Delete(meta.Name, &metav1.DeleteOptions{})
 }
 
 func (f *Framework) getPodAlertObjects(meta metav1.ObjectMeta, podAlertSpec api.PodAlertSpec) ([]icinga.IcingaHost, error) {
 	names := make([]string, 0)
 
-	if podAlertSpec.PodName != "" {
-		pod, err := f.kubeClient.CoreV1().Pods(meta.Namespace).Get(podAlertSpec.PodName, metav1.GetOptions{})
+	if podAlertSpec.PodName != nil {
+		pod, err := f.kubeClient.CoreV1().Pods(meta.Namespace).Get(*podAlertSpec.PodName, metav1.GetOptions{})
 		if err != nil {
 			return nil, err
 		}
 		names = append(names, pod.Name)
-	} else {
-		sel, err := metav1.LabelSelectorAsSelector(&podAlertSpec.Selector)
+	} else if podAlertSpec.Selector != nil {
+		sel, err := metav1.LabelSelectorAsSelector(podAlertSpec.Selector)
 		if err != nil {
 			return nil, err
 		}
@@ -86,7 +86,7 @@ func (f *Framework) EventuallyPodAlertIcingaService(meta metav1.ObjectMeta, podA
 	objectList, err := f.getPodAlertObjects(meta, podAlertSpec)
 	Expect(err).NotTo(HaveOccurred())
 
-	in := icinga.NewPodHost(nil, nil, f.icingaClient).
+	in := icinga.NewPodHost(f.icingaClient).
 		IcingaServiceSearchQuery(meta.Name, objectList...)
 
 	return Eventually(
@@ -118,4 +118,14 @@ func (f *Framework) EventuallyPodAlertIcingaService(meta metav1.ObjectMeta, podA
 		time.Minute*5,
 		time.Second*5,
 	)
+}
+
+func (f *Framework) CleanPodAlert() {
+	caList, err := f.extClient.MonitoringV1alpha1().PodAlerts(f.namespace).List(metav1.ListOptions{})
+	if err != nil {
+		return
+	}
+	for _, e := range caList.Items {
+		f.extClient.MonitoringV1alpha1().PodAlerts(f.namespace).Delete(e.Name, &metav1.DeleteOptions{})
+	}
 }

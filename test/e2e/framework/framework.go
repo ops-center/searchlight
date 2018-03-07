@@ -2,7 +2,8 @@ package framework
 
 import (
 	"github.com/appscode/go/crypto/rand"
-	cs "github.com/appscode/searchlight/client/clientset/versioned/typed/monitoring/v1alpha1"
+	cs "github.com/appscode/searchlight/client/clientset/versioned"
+	mon_cs "github.com/appscode/searchlight/client/clientset/versioned/typed/monitoring/v1alpha1"
 	"github.com/appscode/searchlight/pkg/icinga"
 	crd_cs "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1"
 	"k8s.io/client-go/kubernetes"
@@ -11,7 +12,7 @@ import (
 type Framework struct {
 	kubeClient       kubernetes.Interface
 	apiExtKubeClient crd_cs.ApiextensionsV1beta1Interface
-	extClient        cs.MonitoringV1alpha1Interface
+	extClient        cs.Interface
 	icingaClient     *icinga.Client
 	namespace        string
 	name             string
@@ -19,7 +20,7 @@ type Framework struct {
 	storageClass     string
 }
 
-func New(kubeClient kubernetes.Interface, apiExtKubeClient crd_cs.ApiextensionsV1beta1Interface, extClient cs.MonitoringV1alpha1Interface, icingaClient *icinga.Client, provider, storageClass string) *Framework {
+func New(kubeClient kubernetes.Interface, apiExtKubeClient crd_cs.ApiextensionsV1beta1Interface, extClient cs.Interface, icingaClient *icinga.Client, provider, storageClass string) *Framework {
 	return &Framework{
 		kubeClient:       kubeClient,
 		apiExtKubeClient: apiExtKubeClient,
@@ -48,8 +49,8 @@ func (f *Framework) KubeClient() kubernetes.Interface {
 	return f.kubeClient
 }
 
-func (f *Framework) MonitoringClient() cs.MonitoringV1alpha1Interface {
-	return f.extClient
+func (f *Framework) MonitoringClient() mon_cs.MonitoringV1alpha1Interface {
+	return f.extClient.MonitoringV1alpha1()
 }
 
 type Invocation struct {

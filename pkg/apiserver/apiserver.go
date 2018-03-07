@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/appscode/searchlight/pkg/registry/admissionreview"
+	admissionreview "github.com/appscode/kutil/registry/admissionreview/v1beta1"
 	admission "k8s.io/api/admission/v1beta1"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apimachinery"
@@ -97,7 +97,7 @@ func (c *Config) Complete() CompletedConfig {
 
 // New returns a new instance of AdmissionServer from the given config.
 func (c completedConfig) New() (*AdmissionServer, error) {
-	genericServer, err := c.GenericConfig.New("searchlight-apiserver", genericapiserver.EmptyDelegate) // completion is done in Complete, no need for a second time
+	genericServer, err := c.GenericConfig.New("apiserver", genericapiserver.EmptyDelegate) // completion is done in Complete, no need for a second time
 	if err != nil {
 		return nil, err
 	}

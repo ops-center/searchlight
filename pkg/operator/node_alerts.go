@@ -1,187 +1,126 @@
 package operator
 
 import (
-	"errors"
 	"reflect"
+	"strings"
 
 	"github.com/appscode/go/log"
+	"github.com/appscode/kutil/tools/queue"
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
-	"github.com/appscode/searchlight/pkg/eventer"
-	"github.com/appscode/searchlight/pkg/util"
-	core "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/golang/glog"
 	"k8s.io/apimachinery/pkg/labels"
-	rt "k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/util/runtime"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/tools/cache"
 )
 
-// Blocks caller. Intended to be called as a Go routine.
-func (op *Operator) WatchNodeAlerts() {
-	defer runtime.HandleCrash()
+func (op *Operator) initNodeAlertWatcher() {
+	op.naInformer = op.monInformerFactory.Monitoring().V1alpha1().NodeAlerts().Informer()
+	op.naQueue = queue.New("NodeAlert", op.options.MaxNumRequeues, op.options.NumThreads, op.reconcileNodeAlert)
+	op.naInformer.AddEventHandler(&cache.ResourceEventHandlerFuncs{
+		AddFunc: func(obj interface{}) {
+			alert := obj.(*api.NodeAlert)
+			if op.isValid(alert) {
+				queue.Enqueue(op.naQueue.GetQueue(), obj)
+			}
+		},
+		UpdateFunc: func(oldObj interface{}, newObj interface{}) {
+			old := oldObj.(*api.NodeAlert)
+			nu := newObj.(*api.NodeAlert)
 
-	lw := &cache.ListWatch{
-		ListFunc: func(opts metav1.ListOptions) (rt.Object, error) {
-			return op.ExtClient.NodeAlerts(core.NamespaceAll).List(metav1.ListOptions{})
+			if reflect.DeepEqual(old.Spec, nu.Spec) {
+				return
+			}
+			if op.isValid(nu) {
+				queue.Enqueue(op.naQueue.GetQueue(), nu)
+			}
 		},
-		WatchFunc: func(options metav1.ListOptions) (watch.Interface, error) {
-			return op.ExtClient.NodeAlerts(core.NamespaceAll).Watch(metav1.ListOptions{})
+		DeleteFunc: func(obj interface{}) {
+			queue.Enqueue(op.naQueue.GetQueue(), obj)
 		},
-	}
-	_, ctrl := cache.NewInformer(lw,
-		&api.NodeAlert{},
-		op.Opt.ResyncPeriod,
-		cache.ResourceEventHandlerFuncs{
-			AddFunc: func(obj interface{}) {
-				if alert, ok := obj.(*api.NodeAlert); ok {
-					if ok, err := alert.IsValid(); !ok {
-						op.recorder.Eventf(
-							alert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonFailedToCreate,
-							`Fail to be create NodeAlert: "%v". Reason: %v`,
-							alert.Name,
-							err,
-						)
-						return
-					}
-					if err := util.CheckNotifiers(op.KubeClient, alert); err != nil {
-						op.recorder.Eventf(
-							alert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonBadNotifier,
-							`Bad notifier config for NodeAlert: "%v". Reason: %v`,
-							alert.Name,
-							err,
-						)
-					}
-					op.EnsureNodeAlert(nil, alert)
-				}
-			},
-			UpdateFunc: func(old, new interface{}) {
-				oldAlert, ok := old.(*api.NodeAlert)
-				if !ok {
-					log.Errorln(errors.New("Invalid NodeAlert object"))
-					return
-				}
-				newAlert, ok := new.(*api.NodeAlert)
-				if !ok {
-					log.Errorln(errors.New("Invalid NodeAlert object"))
-					return
-				}
-				if !reflect.DeepEqual(oldAlert.Spec, newAlert.Spec) {
-					if ok, err := newAlert.IsValid(); !ok {
-						op.recorder.Eventf(
-							newAlert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonFailedToDelete,
-							`Fail to be update NodeAlert: "%v". Reason: %v`,
-							newAlert.Name,
-							err,
-						)
-						return
-					}
-					if err := util.CheckNotifiers(op.KubeClient, newAlert); err != nil {
-						op.recorder.Eventf(
-							newAlert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonBadNotifier,
-							`Bad notifier config for NodeAlert: "%v". Reason: %v`,
-							newAlert.Name,
-							err,
-						)
-					}
-					op.EnsureNodeAlert(oldAlert, newAlert)
-				}
-			},
-			DeleteFunc: func(obj interface{}) {
-				if alert, ok := obj.(*api.NodeAlert); ok {
-					if ok, err := alert.IsValid(); !ok {
-						op.recorder.Eventf(
-							alert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonFailedToDelete,
-							`Fail to be delete NodeAlert: "%v". Reason: %v`,
-							alert.Name,
-							err,
-						)
-						return
-					}
-					if err := util.CheckNotifiers(op.KubeClient, alert); err != nil {
-						op.recorder.Eventf(
-							alert.ObjectReference(),
-							core.EventTypeWarning,
-							eventer.EventReasonBadNotifier,
-							`Bad notifier config for NodeAlert: "%v". Reason: %v`,
-							alert.Name,
-							err,
-						)
-					}
-					op.EnsureNodeAlertDeleted(alert)
-				}
-			},
-		},
-	)
-	ctrl.Run(wait.NeverStop)
+	})
+	op.naLister = op.monInformerFactory.Monitoring().V1alpha1().NodeAlerts().Lister()
 }
 
-func (op *Operator) EnsureNodeAlert(old, new *api.NodeAlert) {
-	oldObjs := make(map[string]*core.Node)
-
-	if old != nil {
-		oldSel := labels.SelectorFromSet(old.Spec.Selector)
-		if old.Spec.NodeName != "" {
-			if resource, err := op.KubeClient.CoreV1().Nodes().Get(old.Spec.NodeName, metav1.GetOptions{}); err == nil {
-				if oldSel.Matches(labels.Set(resource.Labels)) {
-					oldObjs[resource.Name] = resource
-				}
-			}
-		} else {
-			if resources, err := op.KubeClient.CoreV1().Nodes().List(metav1.ListOptions{LabelSelector: oldSel.String()}); err == nil {
-				for i := range resources.Items {
-					oldObjs[resources.Items[i].Name] = &resources.Items[i]
-				}
-			}
-		}
+func (op *Operator) reconcileNodeAlert(key string) error {
+	obj, exists, err := op.naInformer.GetIndexer().GetByKey(key)
+	if err != nil {
+		glog.Errorf("Fetching object with key %s from store failed with %v", key, err)
+		return err
 	}
 
-	newSel := labels.SelectorFromSet(new.Spec.Selector)
-	if new.Spec.NodeName != "" {
-		if resource, err := op.KubeClient.CoreV1().Nodes().Get(new.Spec.NodeName, metav1.GetOptions{}); err == nil {
-			if newSel.Matches(labels.Set(resource.Labels)) {
-				delete(oldObjs, resource.Name)
-				go op.EnsureNode(resource, old, new)
-			}
+	if !exists {
+		log.Warningf("NodeAlert %s does not exist anymore\n", key)
+
+		namespace, name, err := cache.SplitMetaNamespaceKey(key)
+		if err != nil {
+			return err
 		}
-	} else {
-		if resources, err := op.KubeClient.CoreV1().Nodes().List(metav1.ListOptions{LabelSelector: newSel.String()}); err == nil {
-			for i := range resources.Items {
-				resource := resources.Items[i]
-				delete(oldObjs, resource.Name)
-				go op.EnsureNode(&resource, old, new)
-			}
-		}
+		return op.ensureNodeAlertDeleted(namespace, name)
 	}
-	for i := range oldObjs {
-		go op.EnsureNodeDeleted(oldObjs[i], old)
-	}
+
+	alert := obj.(*api.NodeAlert).DeepCopy()
+	log.Infof("Sync/Add/Update for NodeAlert %s\n", key)
+
+	op.ensureNodeAlert(alert)
+	op.ensureNodeAlertDeleted(alert.Namespace, alert.Name)
+	return nil
 }
 
-func (op *Operator) EnsureNodeAlertDeleted(alert *api.NodeAlert) {
+func (op *Operator) ensureNodeAlert(alert *api.NodeAlert) error {
+	if alert.Spec.NodeName != nil {
+		node, err := op.nodeLister.Get(*alert.Spec.NodeName)
+		if err != nil {
+			return err
+		}
+		key, err := cache.MetaNamespaceKeyFunc(node)
+		if err == nil {
+			op.nodeQueue.GetQueue().Add(key)
+		}
+		return nil
+	}
+
 	sel := labels.SelectorFromSet(alert.Spec.Selector)
-	if alert.Spec.NodeName != "" {
-		if resource, err := op.KubeClient.CoreV1().Nodes().Get(alert.Spec.NodeName, metav1.GetOptions{}); err == nil {
-			if sel.Matches(labels.Set(resource.Labels)) {
-				go op.EnsureNodeDeleted(resource, alert)
-			}
+	nodes, err := op.nodeLister.List(sel)
+	if err != nil {
+		return err
+	}
+	for i := range nodes {
+		node := nodes[i]
+		key, err := cache.MetaNamespaceKeyFunc(node)
+		if err == nil {
+			op.nodeQueue.GetQueue().Add(key)
 		}
-	} else {
-		if resources, err := op.KubeClient.CoreV1().Nodes().List(metav1.ListOptions{LabelSelector: sel.String()}); err == nil {
-			for i := range resources.Items {
-				go op.EnsureNodeDeleted(&resources.Items[i], alert)
+	}
+	return nil
+}
+
+func alertAppliedToNode(a map[string]string, key string) bool {
+	if a == nil {
+		return false
+	}
+	if val, ok := a[api.AnnotationKeyAlerts]; ok {
+		names := strings.Split(val, ",")
+		for _, name := range names {
+			if name == key {
+				return true
 			}
 		}
 	}
+	return false
+}
+
+func (op *Operator) ensureNodeAlertDeleted(alertNamespace, alertName string) error {
+	nodes, err := op.nodeLister.List(labels.Everything())
+	if err != nil {
+		return err
+	}
+	alertKey := alertNamespace + "/" + alertName
+	for _, node := range nodes {
+		if alertAppliedToNode(node.Annotations, alertKey) {
+			key, err := cache.MetaNamespaceKeyFunc(node)
+			if err == nil {
+				op.nodeQueue.GetQueue().Add(key)
+			}
+		}
+	}
+	return nil
 }
