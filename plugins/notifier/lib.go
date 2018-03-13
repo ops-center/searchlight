@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/appscode/envconfig"
@@ -94,7 +95,7 @@ func sendNotification(req *Request) {
 	receivers := alert.GetReceivers()
 
 	for _, receiver := range receivers {
-		if receiver.State != req.State || len(receiver.To) == 0 {
+		if !strings.EqualFold(receiver.State, req.State) || len(receiver.To) == 0 {
 			continue
 		}
 		notifyVia, err := unified.LoadVia(receiver.Notifier, loader)
@@ -158,6 +159,18 @@ func NewCmd() *cobra.Command {
 
 			}
 			req.Time = t
+			// sanitized state to preferred form
+			switch strings.ToUpper(req.State) {
+			case "OK":
+				req.State = "OK"
+			case "CRITICAL":
+				req.State = "Critical"
+			case "WARNING":
+				req.State = "Warning"
+			default:
+				req.State = "Unknown"
+			}
+
 			sendNotification(&req)
 		},
 	}
@@ -168,7 +181,7 @@ func NewCmd() *cobra.Command {
 	c.Flags().StringVarP(&req.HostName, "host", "H", "", "Icinga host name")
 	c.Flags().StringVarP(&req.AlertName, "alert", "A", "", "Kubernetes alert object name")
 	c.Flags().StringVar(&req.Type, "type", "", "Notification type (PROBLEM | ACKNOWLEDGEMENT | RECOVERY)")
-	c.Flags().StringVar(&req.State, "state", "", "Service state (OK | WARNING | CRITICAL)")
+	c.Flags().StringVar(&req.State, "state", "", "Service state (OK | Warning | Critical)")
 	c.Flags().StringVar(&req.Output, "output", "", "Service output")
 	c.Flags().StringVar(&eventTime, "time", "", "Event time")
 	c.Flags().StringVarP(&req.Author, "author", "a", "", "Event author name")
