@@ -2,25 +2,30 @@ package notifier
 
 import (
 	"fmt"
-	"strings"
 
 	api "github.com/appscode/searchlight/apis/monitoring/v1alpha1"
 )
 
-const (
-	EventTypeProblem         = "PROBLEM"
-	EventTypeAcknowledgement = "ACKNOWLEDGEMENT"
-	EventTypeRecovery        = "RECOVERY"
-)
-
 func RenderSMS(alert api.Alert, req *Request) string {
-	if strings.ToUpper(req.Type) == EventTypeAcknowledgement {
-		return fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.\nThis issue is acked.", alert.GetName(), req.HostName, req.State)
-	} else if strings.ToUpper(req.Type) == EventTypeRecovery {
-		return fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.\nThis issue is recovered.", alert.GetName(), req.HostName, req.State)
-	} else if strings.ToUpper(req.Type) == EventTypeProblem {
-		return fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.\nCheck this issue in Icingaweb.", alert.GetName(), req.HostName, req.State)
-	} else {
-		return fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.", alert.GetName(), req.HostName, req.State)
+	var msg string
+
+	switch api.AlertType(req.Type) {
+	case api.NotificationAcknowledgement:
+		msg = fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.\nThis issue is acked.", alert.GetName(), req.HostName, req.State)
+	case api.NotificationRecovery:
+		msg = fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.\nThis issue is recovered.", alert.GetName(), req.HostName, req.State)
+	case api.NotificationProblem:
+		msg = fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.\nCheck this issue in Icingaweb.", alert.GetName(), req.HostName, req.State)
+	default:
+		msg = fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.", alert.GetName(), req.HostName, req.State)
 	}
+	if req.Comment != "" {
+		if req.Author != "" {
+			msg = msg + " " + fmt.Sprintf(`%s says "%s".`, req.Author, req.Comment)
+		} else {
+			msg = msg + " " + fmt.Sprintf(`Comment: "%s".`, req.Comment)
+		}
+	}
+
+	return msg
 }

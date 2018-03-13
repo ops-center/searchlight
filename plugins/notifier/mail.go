@@ -11,13 +11,14 @@ import (
 )
 
 func RenderSubject(alert api.Alert, req *Request) string {
-	if strings.ToUpper(req.Type) == EventTypeAcknowledgement {
+	switch api.AlertType(req.Type) {
+	case api.NotificationAcknowledgement:
 		return fmt.Sprintf("Problem Acknowledged: Service [%s] for [%s] is in \"%s\" state", alert.GetName(), req.HostName, req.State)
-	} else if strings.ToUpper(req.Type) == EventTypeRecovery {
+	case api.NotificationRecovery:
 		return fmt.Sprintf("Problem Recovered: Service [%s] for [%s] is in \"%s\" state.", alert.GetName(), req.HostName, req.State)
-	} else if strings.ToUpper(req.Type) == EventTypeProblem {
+	case api.NotificationProblem:
 		return fmt.Sprintf("Problem Detected: Service [%s] for [%s] is in \"%s\" state.", alert.GetName(), req.HostName, req.State)
-	} else {
+	default:
 		return fmt.Sprintf("Service [%s] for [%s] is in \"%s\" state.", alert.GetName(), req.HostName, req.State)
 	}
 }
@@ -33,6 +34,8 @@ type TemplateData struct {
 	IcingaType         string
 	IcingaState        string
 	IcingaOutput       string
+	Author             string
+	Comment            string
 	IcingaTime         time.Time
 }
 
@@ -52,7 +55,9 @@ func RenderMail(alert api.Alert, req *Request) (string, error) {
 		IcingaType:         req.Type,
 		IcingaState:        strings.ToUpper(req.State),
 		IcingaOutput:       req.Output,
-		IcingaTime:         time.Unix(req.Time, 0),
+		Author:             req.Author,
+		Comment:            req.Comment,
+		IcingaTime:         req.Time,
 	}
 
 	var buf bytes.Buffer
