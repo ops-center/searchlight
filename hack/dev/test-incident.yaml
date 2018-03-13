@@ -1,5 +1,25 @@
 apiVersion: monitoring.appscode.com/v1alpha1
 kind: Incident
 metadata:
-  name: test.abc
+  labels:
+    monitoring.appscode.com/alert: pod-exists-demo-0
+    monitoring.appscode.com/alert-type: cluster
+    monitoring.appscode.com/object-name: ""
+    monitoring.appscode.com/recovered: "false"
+  name: cluster.pod-exists-demo-0.20060102-1504
   namespace: demo
+status:
+  lastNotificationType: Problem
+  notifications:
+  - checkOutput: test
+    firstTimestamp: 2006-01-02T15:04:05Z
+    lastTimestamp: 2006-01-02T15:04:05Z
+    state: CRITICAL
+    type: Acknowledgement
+  - checkOutput: |-
+      W0313 15:32:42.415236   10294 client_config.go:529] Neither --kubeconfig nor --master was specified.  Using the inClusterConfig.  This might not work.
+      CRITICAL : Found 0 pod(s) instead of 2
+    firstTimestamp: 2018-03-13T10:34:41Z
+    lastTimestamp: 2018-03-13T15:33:10Z
+    state: CRITICAL
+    type: Problem
