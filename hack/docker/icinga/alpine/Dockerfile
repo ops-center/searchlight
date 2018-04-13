@@ -111,5 +111,7 @@ COPY runit.sh /runit.sh
 ENV TZ     :/etc/localtime
 ENV LANG   en_US.utf8
 
+VOLUME ["$DATADIR"]
+
 ENTRYPOINT ["/runit.sh"]
 EXPOSE  60006 5665

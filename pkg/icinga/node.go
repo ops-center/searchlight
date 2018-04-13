@@ -41,7 +41,8 @@ func (h *NodeHost) getHost(namespace string, node *core.Node) IcingaHost {
 }
 
 func (h *NodeHost) expandVars(alertSpec api.NodeAlertSpec, kh IcingaHost, attrs map[string]interface{}) error {
-	commandVars := api.NodeCommands[alertSpec.Check].Vars
+	cmd, _ := api.NodeCommands.Get(alertSpec.Check)
+	commandVars := cmd.Vars
 	for key, val := range alertSpec.Vars {
 		if v, found := commandVars[key]; found {
 			if v.Parameterized {
@@ -121,4 +122,8 @@ func (h *NodeHost) Delete(alertNamespace, alertName string, node *core.Node) err
 		return err
 	}
 	return h.deleteIcingaHost(kh)
+}
+
+func (h *NodeHost) DeleteChecks(cmd string) error {
+	return h.deleteIcingaServiceForCheckCommand(cmd)
 }
