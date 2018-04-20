@@ -11,8 +11,11 @@ spec:
     host:
       v: vars.verbosity
     vars:
-    - selector
-    - componentName
+      Item:
+        componentName:
+          type: string
+        selector:
+          type: string
   command: hyperalert check_component_status
   state:
   - OK
@@ -32,10 +35,17 @@ spec:
       host: name
       v: vars.verbosity
     vars:
-    - url
-    - secretName
-    - warning
-    - critical
+      Item:
+        critical:
+          type: string
+        secretName:
+          type: string
+        url:
+          type: string
+        warning:
+          type: string
+      required:
+      - url
   command: hyperalert check_json_path
   state:
   - OK
@@ -55,9 +65,13 @@ spec:
     host:
       v: vars.verbosity
     vars:
-    - selector
-    - nodeName
-    - count
+      Item:
+        count:
+          type: integer
+        nodeName:
+          type: string
+        selector:
+          type: string
   command: hyperalert check_node_exists
   state:
   - OK
@@ -77,9 +91,13 @@ spec:
       host: name
       v: vars.verbosity
     vars:
-    - selector
-    - podName
-    - count
+      Item:
+        count:
+          type: integer
+        podName:
+          type: string
+        selector:
+          type: string
   command: hyperalert check_pod_exists
   state:
   - OK
@@ -99,11 +117,17 @@ spec:
       host: name
       v: vars.verbosity
     vars:
-    - clockSkew
-    - involvedObjectName
-    - involvedObjectNamespace
-    - involvedObjectKind
-    - involvedObjectUID
+      Item:
+        clockSkew:
+          type: duration
+        involvedObjectKind:
+          type: string
+        involvedObjectName:
+          type: string
+        involvedObjectNamespace:
+          type: string
+        involvedObjectUID:
+          type: string
   command: hyperalert check_event
   state:
   - OK
@@ -122,8 +146,11 @@ spec:
     host:
       v: vars.verbosity
     vars:
-    - warning
-    - critical
+      Item:
+        critical:
+          type: duration
+        warning:
+          type: duration
   command: hyperalert check_ca_cert
   state:
   - OK
@@ -144,11 +171,17 @@ spec:
       host: name
       v: vars.verbosity
     vars:
-    - selector
-    - secretName
-    - secretKey
-    - warning
-    - critical
+      Item:
+        critical:
+          type: duration
+        secretKey:
+          type: string
+        secretName:
+          type: string
+        selector:
+          type: string
+        warning:
+          type: duration
   command: hyperalert check_cert
   state:
   - OK
@@ -187,10 +220,17 @@ spec:
       host: name
       v: vars.verbosity
     vars:
-    - mountPoint
-    - secretName
-    - warning
-    - critical
+      Item:
+        critical:
+          type: number
+        mountPoint:
+          type: string
+        secretName:
+          type: string
+        warning:
+          type: number
+      required:
+      - mountPoint
   command: hyperalert check_volume
   state:
   - OK
@@ -228,10 +268,17 @@ spec:
       host: name
       v: vars.verbosity
     vars:
-    - volumeName
-    - secretName
-    - warning
-    - critical
+      Item:
+        critical:
+          type: number
+        secretName:
+          type: string
+        volumeName:
+          type: string
+        warning:
+          type: number
+      required:
+      - volumeName
   command: hyperalert check_volume
   state:
   - OK
@@ -251,9 +298,15 @@ spec:
       host: name
       v: vars.verbosity
     vars:
-    - container
-    - cmd
-    - argv
+      Item:
+        argv:
+          type: string
+        cmd:
+          type: string
+        container:
+          type: string
+      required:
+      - argv
   command: hyperalert check_pod_exec
   state:
   - OK

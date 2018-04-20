@@ -102,11 +102,11 @@ func (a ClusterAlert) IsValid(kc kubernetes.Interface) error {
 	if !ok {
 		return fmt.Errorf("'%s' is not a valid cluster check command", a.Spec.Check)
 	}
-	for k := range a.Spec.Vars {
-		if _, ok := cmd.Vars[k]; !ok {
-			return fmt.Errorf("var '%s' is unsupported for check command %s", k, a.Spec.Check)
-		}
+
+	if err := validateVariables(cmd.Vars, a.Spec.Vars); err != nil {
+		return err
 	}
+
 	for _, rcv := range a.Spec.Receivers {
 		found := false
 		for _, state := range cmd.States {

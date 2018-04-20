@@ -1782,9 +1782,15 @@ spec:
                 host:
                   type: object
                 vars:
-                  items:
-                    type: string
-                  type: array
+                  properties:
+                    Item:
+                      type: object
+                    required:
+                      items:
+                        type: string
+                      type: array
+                  required:
+                  - Item
             command:
               description: Check Command
               type: string

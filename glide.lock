@@ -1,5 +1,5 @@
 hash: e0b07167ef3650096c626670c46034935c0b8a6894a15e4fe2b9202e25ad6352
-updated: 2018-04-13T10:56:36.148148631+06:00
+updated: 2018-04-19T10:41:11.74704598+06:00
 imports:
 - name: bitbucket.org/ww/goautoneg
   version: 75cd24fc2f2c2a2088577d12123ddee5f54e0675
@@ -50,7 +50,7 @@ imports:
   - admission/v1beta1
   - registry/admissionreview/v1beta1
 - name: github.com/appscode/kutil
-  version: c299ac799e9bf6554ee91c5e2863c6f8392b7f83
+  version: c3aa54aedcceb925ba15c7bf4a6c2e456138755e
   subpackages:
   - apiextensions/v1beta1
   - core/v1
@@ -239,10 +239,6 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/influxdata/influxdb
   version: 6ac835404e7e64ea7299a6eebcce1ab1ef15fe3c
-  subpackages:
-  - client
-  - models
-  - pkg/escape
 - name: github.com/jaytaylor/html2text
   version: 64a82a6d140778896f13303121a49d8cb8007034
 - name: github.com/jpillora/go-ogle-analytics
@@ -276,7 +272,7 @@ imports:
 - name: github.com/NYTimes/gziphandler
   version: 56545f4a5d46df9a6648819d1664c3a03a13ffdb
 - name: github.com/olekukonko/tablewriter
-  version: b8a9be070da40449e501c3c4730a889e42d87a9e
+  version: d5dd8a50526aadb3d5f2c9b5233277bc2db90e88
 - name: github.com/onsi/gomega
   version: 003f63b7f4cff3fc95357005358af2de0f5fe152
   subpackages:
@@ -823,7 +819,7 @@ imports:
   - util/jsonpath
   - util/workqueue
 - name: k8s.io/kube-openapi
-  version: f442ecb314a3679150c272e2b9713d8deed5955d
+  version: 0f2f0396e266ad24afbd02375ba74c0dda1e3611
   subpackages:
   - pkg/builder
   - pkg/common
