@@ -17,9 +17,8 @@ aliases:
 
 # Change Log
 
-## [Unreleased](https://github.com/appscode/searchlight/tree/HEAD)
-
-[Full Changelog](https://github.com/appscode/searchlight/compare/7.0.0-rc.0...HEAD)
+## [7.0.0-rc.0](https://github.com/appscode/searchlight/tree/7.0.0-rc.0) (2018-05-18)
+[Full Changelog](https://github.com/appscode/searchlight/compare/5.1.1...7.0.0-rc.0)
 
 **Implemented enhancements:**
 
@@ -29,6 +28,7 @@ aliases:
 
 **Fixed bugs:**
 
+- Permission missing for /healthz request in Rbac roles [\#351](https://github.com/appscode/searchlight/issues/351)
 - Fix HTTP client with incluster config [\#166](https://github.com/appscode/searchlight/issues/166)
 
 **Closed issues:**
@@ -38,6 +38,7 @@ aliases:
 - Allow `pausing` alerts [\#295](https://github.com/appscode/searchlight/issues/295)
 - Support user provided plugin [\#293](https://github.com/appscode/searchlight/issues/293)
 - Record incidents and notifications via CRD/EAS [\#292](https://github.com/appscode/searchlight/issues/292)
+- Add test for plugins [\#289](https://github.com/appscode/searchlight/issues/289)
 - Replace cfssl with client-go cert utils [\#231](https://github.com/appscode/searchlight/issues/231)
 - Add e2e test for notification [\#205](https://github.com/appscode/searchlight/issues/205)
 - Handle Node conditions [\#198](https://github.com/appscode/searchlight/issues/198)
@@ -45,8 +46,19 @@ aliases:
 
 **Merged pull requests:**
 
+- Revendor go-notify [\#365](https://github.com/appscode/searchlight/pull/365) ([tamalsaha](https://github.com/tamalsaha))
+- sort arguments in CheckCommand [\#364](https://github.com/appscode/searchlight/pull/364) ([aerokite](https://github.com/aerokite))
+- Don't panic if admission options is nil [\#363](https://github.com/appscode/searchlight/pull/363) ([tamalsaha](https://github.com/tamalsaha))
+- Disable admission controllers for webhook server [\#362](https://github.com/appscode/searchlight/pull/362) ([tamalsaha](https://github.com/tamalsaha))
+- Add Update\*\*\*Status helpers [\#361](https://github.com/appscode/searchlight/pull/361) ([tamalsaha](https://github.com/tamalsaha))
+- Update to client-go 7.0.0 [\#360](https://github.com/appscode/searchlight/pull/360) ([tamalsaha](https://github.com/tamalsaha))
+- Improve installer [\#359](https://github.com/appscode/searchlight/pull/359) ([tamalsaha](https://github.com/tamalsaha))
+- Master to doc [\#358](https://github.com/appscode/searchlight/pull/358) ([aerokite](https://github.com/aerokite))
+- add command for webhook plugin [\#357](https://github.com/appscode/searchlight/pull/357) ([aerokite](https://github.com/aerokite))
+- Add documentation for custom plugin [\#356](https://github.com/appscode/searchlight/pull/356) ([aerokite](https://github.com/aerokite))
 - Generate non-namespaced client for plugins [\#355](https://github.com/appscode/searchlight/pull/355) ([aerokite](https://github.com/aerokite))
 - add patch permission [\#354](https://github.com/appscode/searchlight/pull/354) ([aerokite](https://github.com/aerokite))
+- Fix docs [\#353](https://github.com/appscode/searchlight/pull/353) ([aerokite](https://github.com/aerokite))
 - Various fixes to searchlight installer [\#352](https://github.com/appscode/searchlight/pull/352) ([tamalsaha](https://github.com/tamalsaha))
 - Remove jessie icinga [\#349](https://github.com/appscode/searchlight/pull/349) ([aerokite](https://github.com/aerokite))
 - Introduce properties for plugins vars [\#348](https://github.com/appscode/searchlight/pull/348) ([aerokite](https://github.com/aerokite))
@@ -75,6 +87,7 @@ aliases:
 - Fix installer script [\#323](https://github.com/appscode/searchlight/pull/323) ([tamalsaha](https://github.com/tamalsaha))
 - Use server cert for icinga [\#322](https://github.com/appscode/searchlight/pull/322) ([tamalsaha](https://github.com/tamalsaha))
 - Write auto-generated icinga certs to disk [\#321](https://github.com/appscode/searchlight/pull/321) ([tamalsaha](https://github.com/tamalsaha))
+- Prepare docs for 7.0.0-rc.0 [\#320](https://github.com/appscode/searchlight/pull/320) ([tamalsaha](https://github.com/tamalsaha))
 - Revendor kutil and jsonpatch library [\#319](https://github.com/appscode/searchlight/pull/319) ([tamalsaha](https://github.com/tamalsaha))
 - Add changelog [\#318](https://github.com/appscode/searchlight/pull/318) ([tamalsaha](https://github.com/tamalsaha))
 - Reorg objects deleted in uninstall command [\#317](https://github.com/appscode/searchlight/pull/317) ([tamalsaha](https://github.com/tamalsaha))
@@ -97,11 +110,11 @@ aliases:
 - Record incidents and notifications via CRD/EAS [\#296](https://github.com/appscode/searchlight/pull/296) ([tamalsaha](https://github.com/tamalsaha))
 - Merge admission webhook and operator into one binary [\#291](https://github.com/appscode/searchlight/pull/291) ([tamalsaha](https://github.com/tamalsaha))
 - Remove individual binaries for plugins [\#290](https://github.com/appscode/searchlight/pull/290) ([tamalsaha](https://github.com/tamalsaha))
-- Update readme to 7.0.0-rc.0 release [\#287](https://github.com/appscode/searchlight/pull/287) ([tamalsaha](https://github.com/tamalsaha))
+- Update readme to 5.1.1 release [\#287](https://github.com/appscode/searchlight/pull/287) ([tamalsaha](https://github.com/tamalsaha))
 - Use workqueue [\#230](https://github.com/appscode/searchlight/pull/230) ([tamalsaha](https://github.com/tamalsaha))
 
-## [7.0.0-rc.0](https://github.com/appscode/searchlight/tree/7.0.0-rc.0) (2018-03-06)
-[Full Changelog](https://github.com/appscode/searchlight/compare/5.1.0...7.0.0-rc.0)
+## [5.1.1](https://github.com/appscode/searchlight/tree/5.1.1) (2018-03-06)
+[Full Changelog](https://github.com/appscode/searchlight/compare/5.1.0...5.1.1)
 
 **Fixed bugs:**
 
@@ -118,7 +131,7 @@ aliases:
 
 **Merged pull requests:**
 
-- Prepare docs for 7.0.0-rc.0 release [\#286](https://github.com/appscode/searchlight/pull/286) ([tamalsaha](https://github.com/tamalsaha))
+- Prepare docs for 5.1.1 release [\#286](https://github.com/appscode/searchlight/pull/286) ([tamalsaha](https://github.com/tamalsaha))
 - Make it clear that installer is a single command [\#284](https://github.com/appscode/searchlight/pull/284) ([tamalsaha](https://github.com/tamalsaha))
 - Fix installer [\#283](https://github.com/appscode/searchlight/pull/283) ([tamalsaha](https://github.com/tamalsaha))
 - Update chart to match RBAC best practices for charts [\#281](https://github.com/appscode/searchlight/pull/281) ([tamalsaha](https://github.com/tamalsaha))
@@ -134,7 +147,7 @@ aliases:
 - Use ${} form for onessl envsubst [\#269](https://github.com/appscode/searchlight/pull/269) ([tamalsaha](https://github.com/tamalsaha))
 - Merge uninstall script into installer [\#268](https://github.com/appscode/searchlight/pull/268) ([tamalsaha](https://github.com/tamalsaha))
 - Copy generic-admission-server into pkg [\#267](https://github.com/appscode/searchlight/pull/267) ([tamalsaha](https://github.com/tamalsaha))
-- Cut 7.0.0-rc.0 [\#265](https://github.com/appscode/searchlight/pull/265) ([tamalsaha](https://github.com/tamalsaha))
+- Cut 6.0.0-alpha.0 [\#265](https://github.com/appscode/searchlight/pull/265) ([tamalsaha](https://github.com/tamalsaha))
 - Add ValidatingAdmissionWebhook for CRDs [\#264](https://github.com/appscode/searchlight/pull/264) ([tamalsaha](https://github.com/tamalsaha))
 - Fix instructions for using private docker registry [\#263](https://github.com/appscode/searchlight/pull/263) ([tamalsaha](https://github.com/tamalsaha))
 - Use installer script [\#262](https://github.com/appscode/searchlight/pull/262) ([tamalsaha](https://github.com/tamalsaha))
