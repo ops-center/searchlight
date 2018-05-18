@@ -54,6 +54,7 @@ demo          Active    4m
 
 ### Check status of all components
 In this tutorial, we are going to create a ClusterAlert to check status of all components.
+
 ```yaml
 $ cat ./docs/examples/cluster-alerts/component-status/demo-0.yaml
 
@@ -133,6 +134,7 @@ Events:
 
 ### Cleaning up
 To cleanup the Kubernetes resources created by this tutorial, run:
+
 ```console
 $ kubectl delete ns demo
 ```

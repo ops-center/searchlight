@@ -54,6 +54,7 @@ demo          Active    4m
 
 ### Create Alert
 In this tutorial, we are going to create an alert to check `ca-cert`.
+
 ```yaml
 $ cat ./docs/examples/cluster-alerts/ca-cert/demo-0.yaml
 
@@ -75,8 +76,9 @@ spec:
     state: Critical
     to: ["ops@example.com"]
 ```
+
 ```console
-$ kubectl apply -f ./docs/examples/cluster-alerts/ca-cert/demo-0.yaml 
+$ kubectl apply -f ./docs/examples/cluster-alerts/ca-cert/demo-0.yaml
 clusteralert "ca-cert-demo-0" created
 
 $ kubectl describe clusteralert ca-cert-demo-0 -n demo
@@ -95,6 +97,7 @@ Voila! `ca-cert` command has been synced to Icinga2. Please visit [here](/docs/g
 
 ### Cleaning up
 To cleanup the Kubernetes resources created by this tutorial, run:
+
 ```console
 $ kubectl delete ns demo
 ```

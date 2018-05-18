@@ -48,6 +48,7 @@ demo          Active    4m
 
 ### Check status of all nodes
 In this tutorial, we are going to create a NodeAlert to check status of all nodes.
+
 ```yaml
 $ cat ./docs/examples/node-alerts/node-status/demo-0.yaml
 
@@ -66,6 +67,7 @@ spec:
     state: Critical
     to: ["ops@example.com"]
 ```
+
 ```console
 $ kubectl apply -f ./docs/examples/node-alerts/node-status/demo-0.yaml
 nodealert "node-status-demo-0" created
@@ -108,6 +110,7 @@ spec:
     state: Critical
     to: ["ops@example.com"]
 ```
+
 ```console
 $ kubectl apply -f ./docs/examples/node-alerts/node-status/demo-1.yaml
 nodealert "node-status-demo-1" created
@@ -165,6 +168,7 @@ Events:
 
 ### Cleaning up
 To cleanup the Kubernetes resources created by this tutorial, run:
+
 ```console
 $ kubectl delete ns demo
 ```
