@@ -1783,14 +1783,14 @@ spec:
                   type: object
                 vars:
                   properties:
-                    items:
+                    fields:
                       type: object
                     required:
                       items:
                         type: string
                       type: array
                   required:
-                  - items
+                  - fields
             command:
               description: Check Command
               type: string

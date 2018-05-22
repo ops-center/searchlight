@@ -10,11 +10,11 @@ spec:
   - ClusterAlert
   arguments:
     vars:
-      items:
+      fields:
         warning:
-          type: interger
+          type: integer
         critical:
-          type: interger
+          type: integer
   states:
   - OK
   - Critical
