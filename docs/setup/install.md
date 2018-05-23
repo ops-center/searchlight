@@ -100,8 +100,8 @@ Searchlight can be installed via [Helm](https://helm.sh/) using the [chart](http
 $ helm repo add appscode https://charts.appscode.com/stable/
 $ helm repo update
 $ helm search appscode/searchlight
-NAME            CHART VERSION APP VERSION DESCRIPTION
-appscode/searchlight  7.0.0-rc.0    7.0.0-rc.0  Stash by AppsCode - Backup your Kubernetes Volumes
+NAME            CHART VERSION       APP VERSION DESCRIPTION
+appscode/searchlight  7.0.0-rc.0    7.0.0-rc.0  Searchlight by AppsCode - Alerts for Kubernetes
 
 # Kubernetes 1.8.x
 $ helm install appscode/searchlight --name searchlight-operator --version 7.0.0-rc.0
