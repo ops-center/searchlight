@@ -32,6 +32,10 @@ var _ = Describe("notification", func() {
 	)
 
 	BeforeEach(func() {
+		if root.Provider != "minikube" {
+			Skip("notification test is only allowed in minikube")
+		}
+
 		f = root.Invoke()
 		rs = f.ReplicaSet()
 		clusterAlert = f.ClusterAlert()
@@ -75,7 +79,6 @@ var _ = Describe("notification", func() {
 				server.Close()
 			})
 			It("with webhook receiver", func() {
-
 				By("Create notifier secret: " + secret.Name)
 				err := f.CreateWebHookSecret(secret)
 				Expect(err).NotTo(HaveOccurred())
@@ -117,16 +120,18 @@ var _ = Describe("notification", func() {
 
 				sms.NotificationType = string(api.NotificationCustom)
 				sms.Comment = "test"
-				sms.Author = "e2e"
+				// Used in regular expression to match any author
+				sms.Author = "(.*)"
+
 				By("Check received notification message")
-				f.EventuallyHTTPServerResponse(serverURL).Should(BeIdenticalTo(sms.Render()))
+				f.EventuallyHTTPServerResponse(serverURL).Should(ReceiveNotificationWithExp(sms.Render()))
 
 				By("Acknowledge notification")
 				f.AcknowledgeClusterAlertNotification(clusterAlert.ObjectMeta, hostname)
 
 				sms.NotificationType = string(api.NotificationAcknowledgement)
 				By("Check received notification message")
-				f.EventuallyHTTPServerResponse(serverURL).Should(BeIdenticalTo(sms.Render()))
+				f.EventuallyHTTPServerResponse(serverURL).Should(ReceiveNotificationWithExp(sms.Render()))
 
 				By("Patch ReplicaSet to increate replicas")
 				rs, _, err = kutil_ext.PatchReplicaSet(f.KubeClient(), rs, func(set *extensions.ReplicaSet) *extensions.ReplicaSet {
