@@ -12,7 +12,11 @@ echo ""
 function cleanup {
     rm -rf $ONESSL ca.crt ca.key server.crt server.key
 }
-trap cleanup EXIT
+
+export APPSCODE_ENV=${APPSCODE_ENV:-prod}
+if [ "$APPSCODE_ENV" != "test-concourse" ]; then
+    trap cleanup EXIT
+fi
 
 # ref: https://github.com/appscodelabs/libbuild/blob/master/common/lib.sh#L55
 inside_git_repo() {
@@ -93,7 +97,7 @@ export SEARCHLIGHT_ENABLE_RBAC=true
 export SEARCHLIGHT_RUN_ON_MASTER=0
 export SEARCHLIGHT_ICINGA_API_PASSWORD=
 export SEARCHLIGHT_ENABLE_VALIDATING_WEBHOOK=false
-export SEARCHLIGHT_DOCKER_REGISTRY=appscode
+export SEARCHLIGHT_DOCKER_REGISTRY=${DOCKER_REGISTRY:-appscode}
 export SEARCHLIGHT_OPERATOR_TAG=7.0.0-rc.0
 export SEARCHLIGHT_ICINGA_TAG=7.0.0-rc.0-k8s
 export SEARCHLIGHT_IMAGE_PULL_SECRET=
@@ -102,9 +106,8 @@ export SEARCHLIGHT_ENABLE_ANALYTICS=true
 export SEARCHLIGHT_UNINSTALL=0
 export SEARCHLIGHT_PURGE=0
 
-export APPSCODE_ENV=${APPSCODE_ENV:-prod}
 export SCRIPT_LOCATION="curl -fsSL https://raw.githubusercontent.com/appscode/searchlight/7.0.0-rc.0/"
-if [ "$APPSCODE_ENV" = "dev" ]; then
+if [[ "$APPSCODE_ENV" = "dev" || "$APPSCODE_ENV" = "test-concourse" ]]; then
     detect_tag
     export SCRIPT_LOCATION="cat "
     export SEARCHLIGHT_OPERATOR_TAG=$TAG
@@ -311,7 +314,7 @@ fi
 
 echo
 echo "waiting until searchlight operator deployment is ready"
-$ONESSL wait-until-ready deployment searchlight-operator --namespace $SEARCHLIGHT_NAMESPACE || { echo "Searchlight operator deployment failed to be ready"; exit 1; }
+$ONESSL wait-until-ready deployment searchlight-operator --timeout=10m --namespace $SEARCHLIGHT_NAMESPACE || { echo "Searchlight operator deployment failed to be ready"; exit 1; }
 
 echo "waiting until searchlight apiservice is available"
 for gv in "${apiversions[@]}"; do
