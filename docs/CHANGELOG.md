@@ -17,12 +17,12 @@ aliases:
 
 # Change Log
 
-## [Unreleased](https://github.com/appscode/searchlight/tree/HEAD)
-
-[Full Changelog](https://github.com/appscode/searchlight/compare/7.0.0-rc.0...HEAD)
+## [7.0.0](https://github.com/appscode/searchlight/tree/7.0.0) (2018-06-02)
+[Full Changelog](https://github.com/appscode/searchlight/compare/7.0.0-rc.0...7.0.0)
 
 **Merged pull requests:**
 
+- Prepare docs for 7.0.0 release [\#383](https://github.com/appscode/searchlight/pull/383) ([tamalsaha](https://github.com/tamalsaha))
 - Revendor [\#382](https://github.com/appscode/searchlight/pull/382) ([tamalsaha](https://github.com/tamalsaha))
 - Improve installer [\#381](https://github.com/appscode/searchlight/pull/381) ([tamalsaha](https://github.com/tamalsaha))
 - concourse [\#379](https://github.com/appscode/searchlight/pull/379) ([tahsinrahman](https://github.com/tahsinrahman))
