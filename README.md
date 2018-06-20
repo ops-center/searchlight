@@ -32,6 +32,12 @@ To install Searchlight, please follow the guide [here](https://appscode.com/prod
 ## Using Searchlight
 Want to learn how to use Searchlight? Please start [here](https://appscode.com/products/searchlight/5.1.1).
 
+## Searchlight API Clients
+You can use Searchlight api clients to programmatically access its CRD objects. Here are the supported clients:
+
+- Go: [https://github.com/appscode/searchlight](/client/clientset/versioned)
+- Java: https://github.com/searchlight-client/java
+
 ## Contribution guidelines
 Want to help improve Searchlight? Please start [here](https://appscode.com/products/searchlight/5.1.1/welcome/contributing).
 
