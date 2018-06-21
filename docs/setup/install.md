@@ -119,10 +119,11 @@ NAME            CHART VERSION       APP VERSION DESCRIPTION
 appscode/searchlight  7.0.0    7.0.0  Searchlight by AppsCode - Alerts for Kubernetes
 
 # Kubernetes 1.8.x
-$ helm install appscode/searchlight --name searchlight-operator --version 7.0.0
+$ helm install appscode/searchlight --name searchlight-operator --version 7.0.0 --namespace kube-system
 
 # Kubernetes 1.9.0 or later
 $ helm install appscode/searchlight --name searchlight-operator  --version 7.0.0 \
+  --namespace kube-system \
   --set apiserver.ca="$(onessl get kube-ca)" \
   --set apiserver.enableValidatingWebhook=true
 ```
