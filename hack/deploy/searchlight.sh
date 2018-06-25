@@ -231,7 +231,7 @@ if [ "$SEARCHLIGHT_UNINSTALL" -eq 1 ]; then
 
     echo "waiting for searchlight operator pod to stop running"
     for (( ; ; )); do
-       pods=($(kubectl get pods --all-namespaces -l app=searchlight -o jsonpath='{range .items[*]}{.metadata.name} {end}'))
+       pods=($(kubectl get pods -n $SEARCHLIGHT_NAMESPACE -l app=searchlight -o jsonpath='{range .items[*]}{.metadata.name} {end}'))
        total=${#pods[*]}
         if [ $total -eq 0 ] ; then
             break
