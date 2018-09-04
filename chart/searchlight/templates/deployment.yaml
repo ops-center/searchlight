@@ -17,6 +17,7 @@ spec:
   selector:
     matchLabels:
       app: "{{ template "searchlight.name" . }}"
+      release: "{{ .Release.Name }}"
   template:
     metadata:
       labels:
