@@ -7,10 +7,7 @@ metadata:
   name: {{ template "searchlight.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
-    app: "{{ template "searchlight.name" . }}"
-    heritage: "{{ .Release.Service }}"
-    release: "{{ .Release.Name }}"
+    {{- include "searchlight.labels" . | nindent 4 }}
 {{- if .Values.annotations }}
   annotations:
 {{ toYaml .Values.annotations | indent 4 }}
@@ -24,11 +21,15 @@ spec:
   template:
     metadata:
       labels:
-        app: "{{ template "searchlight.name" . }}"
-        release: "{{ .Release.Name }}"
-{{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
+        {{- include "searchlight.labels" . | nindent 8 }}
+{{- if or .Values.annotations (and .Values.criticalAddon (eq .Release.Namespace "kube-system")) }}
       annotations:
+{{- if and .Values.criticalAddon (eq .Release.Namespace "kube-system") }}
         scheduler.alpha.kubernetes.io/critical-pod: ''
+{{- end }}
+{{- if .Values.annotations }}
+{{ toYaml .Values.annotations | indent 8 }}
+{{- end }}
 {{- end }}
     spec:
       serviceAccountName: {{ template "searchlight.serviceAccountName" . }}
