@@ -7,10 +7,6 @@
 
 # Searchlight
 
-```
-This project is retired. We recommend you use Prometheus or other monitoring solutions for Kubernetes.
-```
-
 <img src="/docs/images/cover.jpg">
 
 
