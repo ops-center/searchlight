@@ -3,6 +3,8 @@ go:
  - 1.x
  - tip
 
+go_import_path: github.com/appscode/searchlight
+
 install: true
 
 script:
