@@ -55,8 +55,6 @@ icinga2:
   password:
 
 notifier:
-  hipchat:
-    authToken: ''
   mailgun:
     domain: ''
     apiKey: ''
