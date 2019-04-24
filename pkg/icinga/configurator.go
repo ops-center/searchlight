@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/appscode/envconfig"
 	"github.com/appscode/go/crypto/rand"
 	"github.com/pkg/errors"
 	"github.com/spf13/afero"
+	"gomodules.xyz/envconfig"
 	ini "gopkg.in/ini.v1"
 	"k8s.io/client-go/util/cert"
 	"kmodules.xyz/client-go/tools/certstore"

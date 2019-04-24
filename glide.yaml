@@ -2,11 +2,11 @@ package: github.com/appscode/searchlight
 import:
 - package: github.com/Knetic/govaluate
   version: v3.0.0
-- package: github.com/appscode/envconfig
+- package: gomodules.xyz/envconfig
   version: master
 - package: github.com/appscode/go
   version: master
-- package: github.com/appscode/go-notify
+- package: gomodules.xyz/notify
   version: master
 - package: github.com/codeskyblue/go-sh
   version: master
@@ -40,13 +40,13 @@ import:
 - package: github.com/json-iterator/go
   version: 1.1.5
 - package: github.com/mailgun/mailgun-go
-  version: v1.1.1
+  version: v2.0.0
 - package: github.com/mailru/easyjson
   version: 2f5df55504ebc322e4d52d34df6a1f5b503bf26d
 - package: github.com/mitchellh/mapstructure
   version: v1.1.2
 - package: github.com/nlopes/slack
-  version: v0.2.0
+  version: v0.5.0
 - package: github.com/onsi/gomega
   version: v1.3.0
 - package: github.com/pkg/errors
@@ -106,6 +106,8 @@ import:
   version: release-10.0
 - package: sigs.k8s.io/yaml
   version: v1.1.0
+- package: gopkg.in/gomail.v2
+  version: v2.0.0
 testImport:
 - package: github.com/onsi/ginkgo
   version: v1.4.0
