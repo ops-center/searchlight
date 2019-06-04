@@ -4,6 +4,16 @@ package icinga
 
 import "strconv"
 
+func _() {
+	// An "invalid array index" compiler error signifies that the constant values have changed.
+	// Re-run the stringer command to generate them again.
+	var x [1]struct{}
+	_ = x[OK-0]
+	_ = x[Warning-1]
+	_ = x[Critical-2]
+	_ = x[Unknown-3]
+}
+
 const _State_name = "OKWarningCriticalUnknown"
 
 var _State_index = [...]uint8{0, 2, 9, 17, 24}

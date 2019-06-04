@@ -127,6 +127,7 @@ $ helm install appscode/searchlight --name searchlight-operator --version 8.0.0 
 To see the detailed configuration options, visit [here](https://github.com/appscode/searchlight/tree/master/chart/searchlight).
 
 </div>
+</div>
 
 ### Installing in GKE Cluster
 
